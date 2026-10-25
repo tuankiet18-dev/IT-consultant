@@ -21,34 +21,42 @@ subtitle: "Chỉnh sửa theo từng slide, bằng chứng, mô hình tác độ
 |---|---|---|
 | 1 | Tiêu đề và khuyến nghị | Thêm một dòng giá trị: "Break-even at ~3% lower relevant logistics cost [assumption]". Đây là con số quyết định Hội đồng cần nhớ |
 | 2 | Bảng 4 lựa chọn | Thêm cột tiêu chí (tác động, độ phủ 3 nước, tốc độ, độ sẵn sàng dữ liệu) và điểm 1–5; ghi "team judgement". Giữ câu "pilot only if Week 1 confirms a cost gap" |
-| 3 | Dữ kiện đề bài và giả thuyết | Thêm 2 dòng bằng chứng nhãn [cited] hoặc [unverified] từ mục 3. Gắn nhãn rõ đâu là fact, đâu là hypothesis |
+| 3 | Dữ kiện đề bài và giả thuyết | Sửa trích dẫn Byggmax thành **trang 6**. Thêm USG 4,8% [cited, modelled] và DeHoratius 65% [cited]. Gắn nhãn rõ fact và hypothesis |
 | 4 | Phạm vi pilot | Giữ. Thêm dòng "Why these numbers: smallest network that still contains a real routing choice (≥2 sources, ≥3 warehouses)" |
 | 5 | Planner stays in control | Giữ. Đây là điểm mạnh về human-in-the-loop |
 | 6 | Dịch vụ tối ưu | Thêm hộp "AI where it helps" (mục 5) |
 | 7 | Ví dụ 700→500 | Giữ. Thêm câu: "Value comes from the gap between nearest-warehouse habit and total cost" |
 | 8 | Tiêu chí pilot | Giữ 5%, 30%, 0 vi phạm. Thêm "Break-even check" liên kết slide 1 |
 | 9 | Mở rộng theo nước | Giữ. Thêm cột "Evidence to collect first" |
-| 10 | Lộ trình 8 tuần và rủi ro | Thêm rủi ro dữ liệu tồn kho sai và cách xử lý (mục 3) |
+| 10 | Lộ trình 8 tuần và rủi ro | Thêm hai rủi ro: dữ liệu tồn kho sai (chặn dòng không hợp lệ, planner duyệt) và cước chặng đầu vào do nhà cung cấp trả (tuần 1 xác nhận; nếu đúng, tối ưu chỉ chặng kho-khách và xử lý kho) |
 
-# 3. Bằng chứng có thể dùng (và trạng thái)
+# 3. Bằng chứng đã kiểm chứng (Antigravity mở nguồn gốc, 25/10)
 
-**Quan trọng:** đợt nghiên cứu này không mở được trang nguồn nào. Mọi dòng dưới đây đến từ tóm tắt tìm kiếm. **Chỉ đưa lên slide sau khi ai đó mở được nguồn.** Nếu không kịp, ghi [assumption] hoặc bỏ.
-
-| Luận điểm | Con số | Nguồn | Trạng thái |
+| Luận điểm dùng trên slide | Con số đã xác minh | Nguồn | Trạng thái |
 |---|---|---|---|
-| Tối ưu mạng phân phối nhiều kho giảm chi phí logistics | Nhà phân phối lốp Bắc Mỹ, 150+ kho: tiết kiệm 10–15% chi phí logistics | McKinsey (trang công ty) | Chưa mở; nguồn tư vấn tự công bố, chưa rõ phương pháp |
-| Tương tự | Công ty hóa chất, 41+29 địa điểm: dự báo tiết kiệm 12%/năm | Miebach Consulting (case study) | Chưa mở; số **dự báo**, nguồn tư vấn |
-| Chi phí vận chuyển đang tăng trong tổng hóa đơn | Nhà phân phối giấy/văn phòng phẩm: từ 9,3% lên 13% hóa đơn (2021), 17 kho | Kaizen | Chưa mở; một case, ngành khác |
-| Dữ liệu tồn kho thường sai, ảnh hưởng quyết định phân bổ | Khoảng 65% bản ghi sai; lợi nhuận giảm hơn 10% (một nhà bán lẻ Mỹ, 37 cửa hàng) | DeHoratius & Raman, Management Science 2008; Chicago Booth | Chưa mở; học thuật nhưng khác ngành |
-| Quy mô bối cảnh Byggmax | Doanh thu SEK 6.133M, EBITA 5,9% năm 2025 | Báo cáo cuối năm 2025 (Cision) | Chưa mở; không có dữ liệu chi phí vận chuyển |
+| Nhà bán vật liệu Bắc Âu đang tái cấu trúc logistics để kiểm soát dòng hàng (slide 3) | Câu gốc: "restructured our logistics operations... increase control over flows". Doanh thu SEK 6.133M, EBITA 5,9% (3,9% năm trước). **Câu này nằm ở trang 6, không phải trang 7** | Byggmax AR 2025, tr. 6 và 75 | VERIFIED |
+| Tối ưu phân bổ nhiều cơ sở giảm chi phí giao hàng, ngành vật liệu xây | **4,8% giảm tổng chi phí giao hàng (lý thuyết, mô hình hóa)**, USG, sản phẩm xây dựng Durock | David et al., *Interfaces* 45(3):216-227, 2015 (độc lập, bình duyệt) | VERIFIED |
+| Tối ưu mạng phân phối trong thực tế | 10-15% tiết kiệm **đã đạt** (nhà phân phối lốp Bắc Mỹ, 150+ kho) | McKinsey (tư vấn tự công bố) | VERIFIED, không độc lập |
+| Tương tự | 12% tiết kiệm **dự báo** (không phải kết quả đã đo); phần lớn đến từ giảm điểm EMEA từ 41 xuống 30 | Miebach 2024 | VERIFIED, không độc lập |
+| Dữ liệu tồn kho thường sai | 65% bản ghi sai, 37 cửa hàng, ~370.000 bản ghi; sai tồn kho làm giảm lợi nhuận hơn 10% (một nhà bán lẻ Mỹ) | DeHoratius & Raman, *Management Science* 54(4), 2008 | VERIFIED |
+| Mức số hóa đơn hàng khác nhau giữa nước | Bán buôn (G46) dùng EDI: DK 39%, SE 36%, NO 27% (2024). Bán lẻ (G47) rất thấp (khoảng 6-7%). Hóa đơn điện tử B2B: Na Uy 89% EHF, Đan Mạch chỉ 5-10% có cấu trúc | Eurostat isoc_ec_eseln2; Digdir; Erhvervsstyrelsen | VERIFIED |
+| Giao thẳng đến công trường | Anh: 18,4% thị trường (£14,0 tỷ trên £76,0 tỷ) | Lords Group AR 2022, tr. 14 | VERIFIED, số của Anh, cũ |
+| Thụy Điển là thị trường pilot hợp lý | Byggföretagen tháng 3/2026: +4%/năm 2026-27. **Bản cập nhật mùa thu 2026 hạ xuống +6% tổng, "phục hồi mong manh"** | Byggföretagen / TT | VERIFIED, dùng số mới nhất |
+| AI Act | Phân bổ hàng B2B không thuộc Annex III "rủi ro cao" | Reg. (EU) 2024/1689 | VERIFIED |
+| OR-Tools | Apache 2.0; hỗ trợ LP, MILP, min-cost flow | GitHub google/or-tools | VERIFIED |
 
-**Cách dùng đúng, trung thực:**
+**Phải bỏ hoặc sửa (theo kết quả kiểm chứng):**
 
-- Dùng các con số 10–15% và 12% **chỉ** như "mức tham chiếu của tư vấn trong ngành khác", không bao giờ như dự báo cho Company A. Mục tiêu 5% của ta thấp hơn một cách có chủ ý.
-- Không có bằng chứng độc lập nào cho riêng ngành vật liệu xây. Nói thẳng điều đó, rồi biến thành nhiệm vụ của tuần 1.
-- **Đừng trích:** "logistics khoảng 10% doanh thu Byggmax" (nguồn là trang bán mẫu biểu, không đáng tin).
+- **Không có báo cáo kiểm toán nào công bố "chi phí logistics % doanh thu".** Byggmax, STARK, Bauhaus chỉ báo cáo chi phí theo bản chất (hàng bán 64,1% doanh thu, chi phí ngoài khác 7,4% ở Byggmax). **Đừng viết "logistics X% doanh thu theo báo cáo thường niên".** Chi phí logistics liên quan trong mô hình hòa vốn vẫn là [assumption], thay bằng dữ liệu Company A ở tuần 1.
+- **Đừng gọi 12% của Miebach là kết quả đã đạt.** Đó là dự báo. Chỉ McKinsey (10-15%) là kết quả đã đạt, và cả hai đều là nguồn tư vấn.
+- **Đừng gọi số 4,8% của USG là tiết kiệm thực tế.** Nó là mức giảm lý thuyết của mô hình. Nói: "an independent peer-reviewed model for a building-products manufacturer estimated ~4.8% lower delivered cost". Cổng 5% của ta nằm cùng cỡ, nên hợp lý nhưng không phải bảo đảm.
+- **Đừng dùng số 26% (GM) hay các số Amazon:** khác ngành, ngoại lai.
+- **Đừng dùng "+4%/năm" của Thụy Điển** nếu bản cập nhật mới hơn nói +6% tổng. Dùng số mới nhất và ghi ngày.
+- **Đừng nói Đan Mạch số hóa hóa đơn B2B cao.** Đan Mạch chỉ 5-10%, Na Uy 89%.
 
-**Rủi ro dữ liệu tồn kho** (slide 10): tối ưu hóa dựa trên tồn kho sai sẽ gửi hàng đến kho không có hàng. Cách xử lý: bước kiểm tra dữ liệu bắt buộc trước khi chạy, chặn các dòng không hợp lệ, planner duyệt trước khi thực thi (đã có trong thiết kế).
+**Phát hiện mới có ảnh hưởng thiết kế (xem slide 4 và 10):** Byggmax báo cáo vận chuyển hàng đến kho và cửa hàng **do nhà cung cấp thực hiện** (100% năm 2025, hai phần ba năm 2024). Byggmax là chuỗi giảm giá thiên về B2C, không phải Company A, nhưng nó cho thấy một rủi ro thật: nếu cước vận chuyển đầu vào do nhà cung cấp tính và gói vào giá hàng, đòn bẩy phân bổ ở chặng đầu vào sẽ nhỏ. Cách xử lý: tuần 1 hỏi rõ ai trả cước chặng nguồn-kho; nếu nhà cung cấp trả, mục tiêu tối ưu chỉ gồm chặng kho-khách và phí xử lý kho, phần tiết kiệm có thể nhỏ hơn. Ghi rõ vào slide 10 (rủi ro) và slide 4 (phạm vi).
+
+**Cách dùng trên slide:** USG 4,8% (độc lập) và McKinsey 10-15% (đã đạt, tư vấn) làm bằng chứng "mức tiết kiệm có thể có trong ngành khác"; DeHoratius làm lý do cần bước kiểm tra dữ liệu; Byggmax làm tín hiệu ngành. Mọi chỗ khác vẫn là giả thuyết cho tuần 1.
 
 # 4. Mô hình điểm hòa vốn (minh bạch, không hứa ROI)
 
@@ -95,7 +103,7 @@ Lõi là tối ưu hóa toán học (LP/MILP), không phải học máy. Nói r�
 # 7. Việc phải làm (theo thứ tự)
 
 - [ ] Cả đội đồng ý danh sách sửa ở mục 2.
-- [ ] Người có mạng thường mở các nguồn ở mục 3, ghi lại con số và trang đúng.
+- [x] Nguồn mục 3 đã được Antigravity mở và xác minh (25/10). Việc còn lại: ai đó mở nhanh 2 nguồn quan trọng nhất (USG, Byggmax tr. 6) để chắc chắn trước khi lên slide.
 - [ ] bach cập nhật slide theo mục 2 (PPTX gốc ở `bach/New-aura.pptx`; bản PDF cuối do nhatanh hoặc Kiệt chỉnh bố cục).
 - [ ] Mỗi người đọc nhẩm phần phản biện ở mục 6.
 - [ ] Xuất PDF, kiểm tra 10 slide, tên file **NEW AURA**, nộp trước 21:00 để còn dư giờ.
