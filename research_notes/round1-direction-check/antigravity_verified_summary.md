@@ -8,3 +8,4 @@ Opened by the user's local agent. Full table was pasted in chat; key verified it
 - Lords Group AR 2022 p.14: direct-to-site 18.4% of UK merchant market.
 - Byggforetagen: +4%/yr 2026-27 (Mar 2026); autumn 2026 update revised to +6% total.
 - EU AI Act Annex III: goods allocation not high-risk. OR-Tools Apache 2.0.
+- Byggforetagen Byggkonjunkturen #2 2026 (20 Oct 2026), p.3 and p.33: +4% 2026, +2% 2027, 646.9 -> 690.2 bn SEK (2025 prices); press release says six percent. VERIFIED by user.

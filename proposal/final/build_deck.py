@@ -172,7 +172,7 @@ L(s,8.75,1.75,8.75,6.3,RULE)
 
 # ================= 4 MVP scope
 s=frame(4,'A focused pilot: one Swedish region, three warehouses, 20 SKUs, one weekly planning run',None,
-        'Sizes are [assumption]: the smallest network that still contains a real routing choice. Byggföretagen forecast: building investment +6% in total 2026–27, a fragile recovery [cited, autumn 2026 update]. Case p. 10 names delivery and fulfilment as Sweden\'s priority.',track='SOLVE')
+        'Sizes are [assumption]: the smallest network that still contains a real routing choice. Byggföretagen (Byggkonjunkturen #2, 20 Oct 2026): building investment +4% in 2026 and +2% in 2027, about +6% in total [cited]. Case p. 10 names delivery and fulfilment as Sweden\'s priority.',track='SOLVE')
 # network diagram
 bx,by,bw,bh=0.7,1.85,6.9,3.75
 R(s,bx,by,bw,bh,line=MUTE,lw=1,dash=True)
