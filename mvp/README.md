@@ -1,53 +1,83 @@
-# Nordic Flow MVP: solver core
+# Nordic Flow MVP
 
-Goods allocation across existing warehouses at lowest total cost (supplier -> warehouse -> customer zone).
-This folder holds the optimisation core and its tests. The API, web UI, audit log and AI explainer are built on top (see `../docs/MVP-SPEC-v0.1.md` and `../docs/MVP-plan-7-days.md`).
+Goods allocation across existing warehouses at lowest total cost (supplier -> warehouse -> customer zone), with the planner in control.
+A local web app: FastAPI + SQLite + OR-Tools, with a plain HTML/JS front end (no build step). Specification: `../docs/MVP-SPEC-v0.1.md`; what is actually built: `../docs/round2/AS_BUILT.md`.
 
-## Run
+## Run it
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
+cd mvp
+python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-pytest -q                                              # 14 tests
-python -m nordic_flow run data/golden                  # Round 1 slide-7 example: 700 -> 500
-python -m nordic_flow synth data/demo                  # regenerate the synthetic demo data
-python -m nordic_flow run data/demo --out out/demo     # baseline vs optimised, writes CSV and comparison.json
-python -m nordic_flow run data/demo --mode lp          # continuous relaxation (lower bound)
+pytest -q                                              # 52 tests
+uvicorn api.main:app --port 8000                       # open http://localhost:8000
 ```
 
-## Model
+The app works offline. For the optional AI explanation (Groq, free tier), set a key before starting:
 
-- `x[s,w,p]`: pallets of SKU p, supplier s -> warehouse w. `y[w,z,p]`: warehouse w -> zone z.
-- Minimise `(inbound + handling_in) * x + (outbound + handling_out) * y`.
-- Subject to: supply per supplier and SKU; demand met exactly; flow balance at each warehouse (no stock carry-over);
-  warehouse capacity in pallet-equivalents; allowed lanes and SKU eligibility.
-- LP uses GLOP. MILP (whole pallets) uses SCIP. Both come with Google OR-Tools. Solver status is always returned
-  (`OPTIMAL`, `FEASIBLE` when the time limit hits, `INFEASIBLE`).
-- Fixed costs that do not change with the plan are not part of the objective, so they never appear as savings.
+```bash
+export GROQ_API_KEY=...        # Windows PowerShell: $env:GROQ_API_KEY="..."   (see .env.example; never commit a key)
+```
 
-## Modules
+Without a key, explanations are deterministic summaries built only from the calculated numbers.
 
-| File | Role |
+## The journey in the UI
+
+1. **Data:** load the synthetic demo or the 700 -> 500 worked example, or upload the 8 CSV files (or a ZIP of them). Errors are shown by file and row and block the run.
+2. **Results:** preferred-warehouse baseline vs optimised plan, cost by type, warehouse load, independent check.
+3. **Plan:** which warehouse serves each zone and SKU; changed rows highlighted.
+4. **Review & adjust:** explanation (deterministic, or AI draft that the planner approves), and exact-pallet planner decisions with a reason; the plan is re-optimised around them.
+5. **Approve & audit:** approve or reject a run; export is only possible for approved runs; audit log with hash chain.
+6. **What-if:** close a warehouse, change capacity, scale a zone's demand; infeasible cases come with diagnostic hints.
+
+## Rules the code enforces
+
+- A saving is reported only when the baseline serves 100% of demand and passes the independent check; otherwise it is `null`.
+- The independent verifier (`nordic_flow/verify.py`) does not use the solver and is strict about unmet demand.
+- Solver `FEASIBLE` (time limit) is never shown as `OPTIMAL`.
+- The LLM never calculates. It only phrases facts computed in code, is opt-in per request, is checked for invented numbers, and stays a draft until a planner approves it.
+- Approved runs are immutable. A planner decision creates a new run.
+- Costs are synthetic cost units per pallet. The baseline is a synthetic preferred-warehouse rule, not Company A's actual plan.
+
+## Layout
+
+```
+nordic_flow/   Core (no web or database code): io, validation, baseline, optimiser, verify, report, diagnosis,
+               whatif, explain, llm, mapping, synth, cli
+api/           FastAPI app, SQLite storage, use cases (service.py), hash-chained audit log
+web/           index.html, app.js, style.css
+data/          golden (700 -> 500 example), demo (synthetic, regenerate with `python -m nordic_flow synth data/demo`)
+tests/         pytest suite; e2e_ui.js is a Playwright walk-through of the whole journey
+```
+
+## CLI (core only)
+
+```bash
+python -m nordic_flow run data/golden               # 700 -> 500
+python -m nordic_flow run data/demo --out out/demo
+```
+
+## API (all under /api; errors are JSON {code, message, details})
+
+| Method and path | Purpose |
 |---|---|
-| `schema.py` | Dataset, Plan and Issue types |
-| `io.py` | CSV loading with file/row-level errors |
-| `validation.py` | Semantic checks; errors block a run |
-| `baseline.py` | "Habit" rule: preferred warehouse, cheapest supplier first, spill when full |
-| `optimiser.py` | LP/MILP with OR-Tools |
-| `verify.py` | Independent constraint checker (does not use the solver) |
-| `report.py` | Cost breakdown, utilisation, baseline-vs-optimised comparison |
-| `diagnosis.py` | Why there is no plan: supply, capacity or lanes |
-| `synth.py` | Synthetic demo data generator |
-| `cli.py` | Command line |
-
-## Input CSV files (one folder per scenario)
-
-`suppliers`, `warehouses` (capacity_pallets, handling_in, handling_out), `zones` (preferred_warehouse), `skus` (pallet_factor),
-`inbound_rates`, `outbound_rates`, `supply`, `demand`, optional `warehouse_skus` (SKU eligibility). Column names are checked on load.
+| `GET /config`, `GET /health` | Feature flags (LLM on/off), liveness |
+| `POST /scenarios/sample` `{name}` | Load `demo` or `golden` |
+| `POST /scenarios` (multipart `files`, one ZIP or several CSVs) | Upload and validate |
+| `GET /scenarios/{id}`, `GET /scenarios` | Details, list |
+| `POST /scenarios/{id}/runs` `{mode, time_limit}` | Baseline + optimise + verify |
+| `GET /runs/{id}` | Full run (comparison, plans, checks) |
+| `POST /runs/{id}/overrides` | Exact-pallet planner decision, re-optimise as a new run |
+| `POST /runs/{id}/explanation` `{use_llm}`; `GET`; `POST .../approve` | Explanation draft and approval |
+| `POST /runs/{id}/decision` `{decision, comment}` | Approve or reject (locks the run) |
+| `GET /runs/{id}/export` | ZIP of the approved plan (409 until approved) |
+| `POST /scenarios/{id}/whatif` | Try changes on a copy of the data |
+| `GET /audit`, `GET /audit/verify` | Audit events, chain check |
+| `POST /mapping/suggest`, `POST /mapping/confirm` | SKU mapping helper (suggest, then confirm) |
 
 ## Honest limits
 
-- Demo data is synthetic. The 4.2% saving on `data/demo` comes from how that data was built (the habit rule pays high
-  inbound freight at the warehouse nearest the zones). It is not a forecast for Company A.
-- One planning period, no inventory carry-over, linear costs, no vehicle routing.
-- The Round 1 gate (at least 5% below a validated baseline) is for Company A's real data in Week 1.
+- Demo data is synthetic. The ~4% saving on `data/demo` comes from how that data was built; it is not a forecast for Company A.
+- One planning period, no inventory carry-over, linear costs, no vehicle routing, no ERP/WMS/TMS connection (CSV in, CSV out).
+- Single simulated planner; no login.
+- The Groq call has not been tested against the live service in the development environment (no key, restricted network); it is covered by tests with a fake client.

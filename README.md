@@ -9,10 +9,11 @@ which supplier and which existing warehouse should serve each order, at the lowe
 ## Repository layout
 
 ```
-mvp/             The application: optimisation core (nordic_flow/), tests, sample data. See mvp/README.md
+mvp/             The application: core (nordic_flow/), API (api/), web UI (web/), tests, sample data. See mvp/README.md
 docs/            Specification, plan and background
   MVP-SPEC-v0.1.md   (also .pdf, .docx)   What we build and how: read this first
   MVP-plan-7-days.md                       Day-by-day plan to 9 Nov
+  round2/                                  Team decision drafts, contracts, and AS_BUILT.md (what the code does today)
   ai-usage-log.md                          Log of significant AI use (feeds the AI Journal)
   round1/                                  Submitted Round 1 proposal and verified evidence
   reference/                               Organiser material: Round 1 case, Round 2 brief, AI Journal template (confidential)
@@ -26,8 +27,8 @@ cd mvp
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 pytest -q
-python -m nordic_flow run data/golden      # Round 1 worked example: 700 -> 500
-python -m nordic_flow run data/demo        # synthetic demo data
+uvicorn api.main:app --port 8000           # web app at http://localhost:8000
+python -m nordic_flow run data/golden      # command line: Round 1 worked example 700 -> 500
 ```
 
 ## Rules for this repo
