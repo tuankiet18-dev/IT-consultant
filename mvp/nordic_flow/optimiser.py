@@ -22,8 +22,13 @@ _STATUS = {
 SHORTFALL_PENALTY = 1e6
 
 
-def solve(ds: Dataset, mode: str = "milp", time_limit_s: float = 30.0, allow_shortfall: bool = False) -> Plan:
-    """allow_shortfall adds a penalised slack on demand; used only for diagnosis."""
+def solve(ds: Dataset, mode: str = "milp", time_limit_s: float = 30.0, allow_shortfall: bool = False,
+          pins: dict[tuple[str, str, str], float] | None = None) -> Plan:
+    """allow_shortfall adds a penalised slack on demand; used only for diagnosis.
+
+    pins fixes planner decisions: {(warehouse, zone, sku): pallets}. The rest of the plan is re-optimised
+    around them. A pin on a lane or SKU that is not allowed makes the problem infeasible by design.
+    """
     if mode not in ("lp", "milp"):
         raise ValueError("mode must be 'lp' or 'milp'")
     solver = pywraplp.Solver.CreateSolver("SCIP" if mode == "milp" else "GLOP")
@@ -42,12 +47,18 @@ def solve(ds: Dataset, mode: str = "milp", time_limit_s: float = 30.0, allow_sho
         for p in ds.skus:
             if ds.sku_allowed(w, p) and ds.demand.get((z, p), 0) > 0:
                 y[w, z, p] = var(0, inf, f"y|{w}|{z}|{p}")
+    pins = pins or {}
+    for key, q in pins.items():
+        if key not in y:
+            return Plan(status="INFEASIBLE", mode=mode)     # pinned lane/SKU is not allowed or has no demand
     slack = {}
     if allow_shortfall:
         for (z, p), q in ds.demand.items():
             if q > 0:
                 slack[z, p] = solver.NumVar(0, inf, f"u|{z}|{p}")
 
+    for key, q in pins.items():
+        solver.Add(y[key] == (round(q) if mode == "milp" else q))
     for (s, p), q in ds.supply.items():
         terms = [v for (s2, w, p2), v in x.items() if s2 == s and p2 == p]
         if terms:
