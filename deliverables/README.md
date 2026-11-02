@@ -9,4 +9,6 @@ Send by email to EB.VN@netcompany.com, subject "Round 2 – NEW AURA", **before 
 | `System Context Diagram.pdf` | Max 2 pages, all external entities and interactions labelled, matches the real MVP | | Not started |
 | `AI Journal.pdf` | Organiser's template, saved as PDF (max 5 tasks, 150-word strategy) | | Not started |
 
+The AI Journal template is `docs/reference/AI Journal template.docx`; the Round 2 requirements are in `docs/reference/IT Consultant Challenge 2026 - Round 2 (brief).pdf`.
+
 Before sending: files open correctly, short clear names, no passwords or API keys in any file.

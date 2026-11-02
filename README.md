@@ -15,7 +15,7 @@ docs/            Specification, plan and background
   MVP-plan-7-days.md                       Day-by-day plan to 9 Nov
   ai-usage-log.md                          Log of significant AI use (feeds the AI Journal)
   round1/                                  Submitted Round 1 proposal and verified evidence
-  reference/                               Organiser's Round 1 case brief (confidential, do not share)
+  reference/                               Organiser material: Round 1 case, Round 2 brief, AI Journal template (confidential)
 deliverables/    The five files we must send to the organiser (status in deliverables/README.md)
 ```
 
