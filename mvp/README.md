@@ -1,7 +1,7 @@
 # Nordic Flow MVP: solver core
 
 Goods allocation across existing warehouses at lowest total cost (supplier -> warehouse -> customer zone).
-This folder holds the optimisation core and its tests. The API, web UI, audit log and AI explainer are built on top (see `../proposal/round2-mvp-plan-vi.md`).
+This folder holds the optimisation core and its tests. The API, web UI, audit log and AI explainer are built on top (see `../docs/MVP-SPEC-v0.1.md` and `../docs/MVP-plan-7-days.md`).
 
 ## Run
 

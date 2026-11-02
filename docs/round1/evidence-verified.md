@@ -1,5 +1,5 @@
-# Antigravity verification (25 Oct 2026), condensed
-Opened by the user's local agent. Full table was pasted in chat; key verified items:
+# Round 1 evidence that was verified against primary sources (25 Oct 2026)
+Checked by the team against the original documents; used in the Round 1 proposal.
 - Byggmax AR 2025 (om.byggmax.se/sites/byggmax/files/pr/202603302514-1.pdf): quote on logistics restructuring is on p.6; net sales SEK 6,133M; EBITA 5.9% (3.9%); goods for resale 64.1% of sales; other external costs 7.4%; inbound transport carried 100% by suppliers (2025), two-thirds (2024 AR p.22). No logistics cost % disclosed.
 - USG, David et al., Interfaces 45(3):216-227 (2015): ~4.8% lower theoretical total delivered cost.
 - McKinsey tire distributor: 10-15% realised, 150+ warehouses. Miebach EMEA case: 12% projected (not achieved).
