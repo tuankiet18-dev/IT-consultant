@@ -36,6 +36,38 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+MAX_ZIP_BYTES, MAX_ZIP_FILES, MAX_FILE_BYTES = 5_000_000, 12, 2_000_000
+
+
+def read_zip(raw: bytes) -> dict[str, str]:
+    """Safely expand an uploaded ZIP: flat allow-listed CSV names only, bounded size, no paths or links."""
+    try:
+        z = zipfile.ZipFile(io.BytesIO(raw))
+    except zipfile.BadZipFile:
+        raise ApiError(422, "bad_zip", "The uploaded file is not a valid ZIP archive.")
+    infos = [i for i in z.infolist() if not i.is_dir()]
+    if len(infos) > MAX_ZIP_FILES or sum(i.file_size for i in infos) > MAX_ZIP_BYTES:
+        raise ApiError(422, "zip_too_large", "The ZIP has too many files or is too large.")
+    out: dict[str, str] = {}
+    for i in infos:
+        name = i.filename
+        if "/" in name or "\\" in name or ".." in name or name.startswith("."):
+            raise ApiError(422, "unsafe_zip", f"Unsafe path in ZIP: {name!r}. Put the CSV files at the top level.")
+        if (i.external_attr >> 16) & 0o170000 == 0o120000:
+            raise ApiError(422, "unsafe_zip", f"Links are not allowed in the ZIP: {name!r}.")
+        if name not in ALLOWED_FILES:
+            raise ApiError(422, "unexpected_file", f"Unexpected file {name!r}; allowed: {sorted(ALLOWED_FILES)}")
+        if name in out:
+            raise ApiError(422, "duplicate_file", f"Duplicate file {name!r}")
+        if i.file_size > MAX_FILE_BYTES:
+            raise ApiError(422, "zip_too_large", f"{name} is too large")
+        try:
+            out[name] = z.read(i).decode("utf-8-sig")
+        except UnicodeDecodeError:
+            raise ApiError(422, "bad_encoding", f"{name} is not UTF-8 text")
+    return out
+
+
 # ---------- scenarios ----------
 def _load(files: dict[str, str]) -> tuple[Dataset, list]:
     with tempfile.TemporaryDirectory() as d:
@@ -147,12 +179,13 @@ def _execute(db: Database, sid: int, ds: Dataset, mode: str, time_limit: float, 
                            "This combination of planner decisions cannot be served within supply, capacity and lane limits.")
         raise ApiError(409, "no_feasible_plan", "No feasible plan exists for this data.", _diag(ds))
     vb, vo = verify_plan(ds, base), verify_plan(ds, opt)
-    if vo or (not base.shortfall and vb):
-        raise ApiError(500, "verification_failed", "The plan failed the independent constraint check.", vo + vb)
+    if vo:
+        raise ApiError(500, "verification_failed", "The plan failed the independent constraint check.", vo)
     cmp = compare(ds, base, opt)
-    cmp["baseline_valid"] = base.status == "BASELINE"
+    cmp["baseline_valid"] = base.status == "BASELINE" and not vb
+    cmp["baseline_issues"] = [] if cmp["baseline_valid"] else (vb or ["the baseline rule could not serve all demand"])
     if not cmp["baseline_valid"]:
-        cmp["saving"] = cmp["saving_pct"] = None
+        cmp["saving"] = cmp["saving_pct"] = None       # never report a saving against an unusable baseline
     total = cost_breakdown(ds, opt)["total"]
     if optimum_total is None:
         optimum_total = total          # first (unpinned) optimum of this scenario version
@@ -214,6 +247,8 @@ def apply_override(db: Database, rid: int, zone: str, sku: str, warehouse: str, 
     parent = _editable(db, rid)
     if len((reason or "").strip()) < 3:
         raise ApiError(422, "reason_required", "A reason is required for every manual change.")
+    if parent["mode"] == "milp" and float(pallets) != int(pallets):
+        raise ApiError(422, "whole_pallets", "In MILP mode a decision must be a whole number of pallets.")
     sid = parent["scenario_id"]
     ds = apply_changes(scenario_dataset(db, sid), json.loads(parent["changes_json"]))
     if zone not in ds.zones or sku not in ds.skus or warehouse not in ds.warehouses:
@@ -265,12 +300,12 @@ def _facts_for(db: Database, rid: int) -> dict:
     return build_facts(ds, base, opt, json.loads(r["comparison_json"]), pins, r["optimum_total"])
 
 
-def generate_explanation(db: Database, rid: int, client, actor: str = "planner") -> dict:
+def generate_explanation(db: Database, rid: int, client, use_llm: bool = False, actor: str = "planner") -> dict:
     r = db.one("SELECT * FROM runs WHERE id=?", (rid,))
     if r is None:
         raise ApiError(404, "run_not_found", f"run {rid} does not exist")
     facts = _facts_for(db, rid)
-    res = explain(facts, client)
+    res = explain(facts, client, use_llm=use_llm)
     eid = db.execute("INSERT INTO explanations(created_at,run_id,text,source,reason,facts_json,status) VALUES(?,?,?,?,?,?,?)",
                      (now(), rid, res["text"], res["source"], res["reason"], dumps(facts), "draft"))
     audit.record(db, "EXPLANATION_GENERATED", actor, r["scenario_id"], rid,
@@ -325,11 +360,15 @@ def _csv(rows: list[dict], cols: list[str]) -> str:
 
 def export_zip(db: Database, rid: int, actor: str = "planner") -> bytes:
     d = run_detail(db, rid)
+    if d["state"] != "approved":
+        raise ApiError(409, "export_not_approved", "Only an approved plan can be exported. Approve the run first.")
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-        z.writestr("STATUS.txt", f"run {rid}: {d['state'].upper()}" +
-                   ("" if d["state"] == "approved" else " (not approved; do not execute)") + "\n")
+        z.writestr("STATUS.txt", f"run {rid}: APPROVED. This is a proposed plan for the existing ERP/WMS/TMS to execute; "
+                   "Nordic Flow does not execute it. Synthetic data unless the scenario source says otherwise.\n")
         for name in ("baseline", "optimised"):
+            if name == "baseline" and not d["comparison"].get("baseline_valid", True):
+                continue
             z.writestr(f"{name}_outbound.csv", _csv(d[name]["outbound"], ["warehouse", "zone", "sku", "pallets"]))
             z.writestr(f"{name}_inbound.csv", _csv(d[name]["inbound"], ["supplier", "warehouse", "sku", "pallets"]))
         z.writestr("comparison.json", json.dumps(d["comparison"], indent=2))

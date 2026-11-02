@@ -54,6 +54,10 @@ class Decision(BaseModel):
     actor: str = "planner"
 
 
+class ExplainRequest(BaseModel):
+    use_llm: bool = False        # default: deterministic summary; the LLM is opt-in per request
+
+
 class MappingConfirm(BaseModel):
     scenario_id: int
     external: dict
@@ -93,6 +97,8 @@ def create_app(db_path: str | Path | None = None, llm_factory=None) -> FastAPI:
     @app.post("/api/scenarios")
     async def upload(files: list[UploadFile] = File(...), name: str = Form("Uploaded scenario")):
         content = {}
+        if len(files) == 1 and (files[0].filename or "").lower().endswith(".zip"):
+            return service.create_scenario(db, name, service.read_zip(await files[0].read()), "upload:zip")
         for f in files:
             raw = await f.read()
             try:
@@ -140,8 +146,8 @@ def create_app(db_path: str | Path | None = None, llm_factory=None) -> FastAPI:
         return service.apply_override(db, rid, req.zone, req.sku, req.warehouse, req.pallets, req.reason, req.actor)
 
     @app.post("/api/runs/{rid}/explanation")
-    def make_explanation(rid: int):
-        return service.generate_explanation(db, rid, get_llm())
+    def make_explanation(rid: int, req: ExplainRequest | None = None):
+        return service.generate_explanation(db, rid, get_llm(), use_llm=bool(req and req.use_llm))
 
     @app.get("/api/runs/{rid}/explanation")
     def get_explanation(rid: int):

@@ -48,6 +48,10 @@ def main(argv=None) -> int:
     bad = verify_plan(ds, opt)
     if bad:
         print("Plan failed independent check:", *bad, sep="\n  "); return 4
+    if base.status != "BASELINE" or verify_plan(ds, base):
+        print(f"optimised {compare(ds, base, opt)['optimised']['total']:.2f} ({opt.status}). The preferred-warehouse baseline "
+              "could not serve all demand, so no saving is reported.")
+        return 0
     c = compare(ds, base, opt)
     print(f"baseline {c['baseline']['total']:.2f} ({base.status}) -> optimised {c['optimised']['total']:.2f} "
           f"({opt.status}, {opt.solve_seconds:.2f}s)  saving {c['saving']:.2f} = {c['saving_pct']:.2f}%")

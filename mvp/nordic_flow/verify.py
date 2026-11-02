@@ -4,8 +4,11 @@ from collections import defaultdict
 from .schema import Dataset, Plan
 
 
-def verify_plan(ds: Dataset, plan: Plan, tol: float = 1e-6) -> list[str]:
+def verify_plan(ds: Dataset, plan: Plan, tol: float = 1e-6, allow_shortfall: bool = False) -> list[str]:
+    """Strict by default: a plan that leaves demand unmet is not a valid plan (shortfall is for diagnosis only)."""
     bad: list[str] = []
+    if plan.shortfall and not allow_shortfall:
+        bad.append(f"plan leaves demand unmet for {len(plan.shortfall)} zone-and-SKU pair(s)")
     sup, dem = defaultdict(float), defaultdict(float)
     cap = defaultdict(float)
     ins, outs = defaultdict(float), defaultdict(float)

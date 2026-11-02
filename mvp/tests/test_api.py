@@ -84,12 +84,14 @@ def test_explanation_template_then_llm_with_number_guard_and_approval(client):
     s = golden(client)
     run = client.post(f"/api/scenarios/{s['id']}/runs", json={}).json()
     e = client.post(f"/api/runs/{run['id']}/explanation").json()
-    assert e["source"] == "template" and "200" in e["text"] and e["status"] == "draft"
+    assert e["source"] == "deterministic" and "200" in e["text"] and e["status"] == "draft"
     client.holder["llm"] = FakeLLM("Savings reach 99% here.")
-    e = client.post(f"/api/runs/{run['id']}/explanation").json()
-    assert e["source"] == "template" and "not in facts" in e["reason"]
+    e = client.post(f"/api/runs/{run['id']}/explanation").json()          # LLM is opt-in: still deterministic
+    assert e["source"] == "deterministic" and e["reason"] is None
+    e = client.post(f"/api/runs/{run['id']}/explanation", json={"use_llm": True}).json()
+    assert e["source"] == "deterministic" and "not in facts" in e["reason"]
     client.holder["llm"] = FakeLLM("Cost falls from 700 to 500, saving 200 (28.6%). The planner should review before approving.")
-    e = client.post(f"/api/runs/{run['id']}/explanation").json()
+    e = client.post(f"/api/runs/{run['id']}/explanation", json={"use_llm": True}).json()
     assert e["source"] == "groq:fake"
     a = client.post(f"/api/runs/{run['id']}/explanation/approve", json={"text": e["text"] + " Edited.", "actor": "Kiet"}).json()
     assert a["status"] == "approved" and a["edited"] and a["approved_by"] == "Kiet"
@@ -121,10 +123,13 @@ def test_audit_chain_detects_tampering(client):
 def test_export_zip_contents_and_status(client):
     s = golden(client)
     run = client.post(f"/api/scenarios/{s['id']}/runs", json={}).json()
+    blocked = client.get(f"/api/runs/{run['id']}/export")
+    assert blocked.status_code == 409 and blocked.json()["code"] == "export_not_approved"
+    client.post(f"/api/runs/{run['id']}/decision", json={"decision": "approve", "comment": "ok"})
     z = zipfile.ZipFile(io.BytesIO(client.get(f"/api/runs/{run['id']}/export").content))
     names = set(z.namelist())
     assert {"STATUS.txt", "optimised_outbound.csv", "baseline_outbound.csv", "comparison.json", "audit_log.json"} <= names
-    assert "not approved" in z.read("STATUS.txt").decode()
+    assert "APPROVED" in z.read("STATUS.txt").decode()
 
 
 def test_mapping_endpoint_and_errors_are_json(client):

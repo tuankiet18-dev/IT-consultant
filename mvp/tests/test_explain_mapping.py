@@ -61,12 +61,12 @@ def test_llm_text_is_used_when_numbers_match(ctx):
 def test_llm_text_with_invented_number_falls_back_to_template(ctx):
     _, f = ctx
     r = explain(f, FakeClient("Cost falls by 41% thanks to routing."))
-    assert r["source"] == "template" and r["unsupported_numbers"] == ["41"]
+    assert r["source"] == "deterministic" and r["unsupported_numbers"] == ["41"]
 
 
 def test_llm_error_and_missing_key_fall_back(ctx):
     _, f = ctx
-    assert explain(f, FakeClient(error="boom"))["source"] == "template"
+    assert explain(f, FakeClient(error="boom"))["source"] == "deterministic"
     assert explain(f, GroqClient(api_key=""))["reason"] == "no LLM key configured"
 
 

@@ -4,7 +4,7 @@ Guardrails (see MVP-SPEC section 9):
 1. Facts are computed here from the solver output; the LLM never calculates.
 2. Every number in the LLM text must match a number in the facts (rounding allowed), otherwise the text is
    rejected and a deterministic template is used instead.
-3. With no API key, or on any LLM error, the template is used, so the demo never depends on the network.
+3. By default, and with no API key or on any LLM error, the deterministic summary is used, so the demo never depends on the network.
 4. The text is a draft until a planner approves it (handled by the API layer).
 """
 from __future__ import annotations
@@ -59,9 +59,9 @@ def build_facts(ds: Dataset, base: Plan, opt: Plan, cmp: dict, pins: list[dict] 
 def template_text(f: dict) -> str:
     if f.get("baseline_valid", True):
         parts = [f"The optimised plan costs {f['optimised_total']:,} {f['currency']} against {f['baseline_total']:,} for the "
-                 f"habit baseline, a saving of {f['saving']:,} ({f['saving_percent']}%). Solver status: {f['solver_status']}."]
+                 f"preferred-warehouse baseline (a synthetic rule, not Company A's actual plan), a saving of {f['saving']:,} ({f['saving_percent']}%). Solver status: {f['solver_status']}."]
     else:
-        parts = [f"The optimised plan costs {f['optimised_total']:,} {f['currency']}. The habit baseline could not serve all "
+        parts = [f"The optimised plan costs {f['optimised_total']:,} {f['currency']}. The preferred-warehouse baseline could not serve all "
                  f"demand, so no saving is reported. Solver status: {f['solver_status']}."]
     drivers = sorted(f["cost_change_by_type"].items(), key=lambda kv: kv[1])
     cuts = [(k, v) for k, v in drivers if v < 0] if f.get("baseline_valid", True) else []
@@ -128,18 +128,20 @@ SYSTEM = ("You explain warehouse allocation plans to a logistics planner in plai
           "Finish with one sentence saying the planner should review before approving.")
 
 
-def explain(facts: dict, client: GroqClient | None = None) -> dict:
+def explain(facts: dict, client: GroqClient | None = None, use_llm: bool = True) -> dict:
     tmpl = template_text(facts)
+    if not use_llm:
+        return {"text": tmpl, "source": "deterministic", "reason": None, "unsupported_numbers": []}
     client = client or GroqClient()
     if not client.enabled:
-        return {"text": tmpl, "source": "template", "reason": "no LLM key configured", "unsupported_numbers": []}
+        return {"text": tmpl, "source": "deterministic", "reason": "no LLM key configured", "unsupported_numbers": []}
     try:
         text = client.chat([{"role": "system", "content": SYSTEM},
                             {"role": "user", "content": "Facts (JSON):\n" + json.dumps(facts, indent=1)}])
     except LLMError as e:
-        return {"text": tmpl, "source": "template", "reason": str(e), "unsupported_numbers": []}
+        return {"text": tmpl, "source": "deterministic", "reason": str(e), "unsupported_numbers": []}
     bad = check_numbers(text, facts)
     if bad:
-        return {"text": tmpl, "source": "template", "reason": "LLM text rejected: numbers not in facts " + ", ".join(bad),
+        return {"text": tmpl, "source": "deterministic", "reason": "LLM text rejected: numbers not in facts " + ", ".join(bad),
                 "unsupported_numbers": bad}
     return {"text": text, "source": f"groq:{client.model}", "reason": None, "unsupported_numbers": []}
