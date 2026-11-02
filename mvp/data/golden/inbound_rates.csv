@@ -1,0 +1,5 @@
+supplier_id,warehouse_id,cost_per_pallet
+S1,A,2
+S1,B,4
+S2,A,3
+S2,B,1

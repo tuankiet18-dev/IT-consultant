@@ -1,0 +1,7 @@
+zone_id,name,preferred_warehouse
+Z1,Zone 1,WA
+Z2,Zone 2,WA
+Z3,Zone 3,WA
+Z4,Zone 4,WB
+Z5,Zone 5,WB
+Z6,Zone 6,WC

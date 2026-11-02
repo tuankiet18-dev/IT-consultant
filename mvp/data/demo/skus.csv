@@ -1,0 +1,21 @@
+sku_id,name,pallet_factor
+SKU-01,Cement standard,1
+SKU-02,Plasterboard standard,1
+SKU-03,Insulation standard,1
+SKU-04,Timber standard,1
+SKU-05,Roofing sheet standard,1
+SKU-06,Bricks standard,1
+SKU-07,Mortar standard,1
+SKU-08,Tile adhesive standard,1
+SKU-09,Drywall screws standard,1
+SKU-10,Paint pail standard,1
+SKU-11,Cement large,2
+SKU-12,Plasterboard large,2
+SKU-13,Insulation large,2
+SKU-14,Timber large,2
+SKU-15,Roofing sheet large,2
+SKU-16,Bricks large,2
+SKU-17,Mortar large,2
+SKU-18,Tile adhesive large,2
+SKU-19,Drywall screws large,2
+SKU-20,Paint pail large,2

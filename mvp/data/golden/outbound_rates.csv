@@ -1,0 +1,5 @@
+warehouse_id,zone_id,cost_per_pallet
+A,N,3
+A,S,7
+B,N,7
+B,S,4

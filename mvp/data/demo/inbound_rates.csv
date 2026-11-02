@@ -1,0 +1,7 @@
+supplier_id,warehouse_id,cost_per_pallet
+SUP1,WA,44
+SUP1,WB,26
+SUP1,WC,16
+SUP2,WA,48
+SUP2,WB,24
+SUP2,WC,18
