@@ -65,8 +65,7 @@ export function AppProvider({ children }) {
 
   const go = useCallback((t) => {
     setTab(t);
-    if (t === "approve") loadAudit(run);
-    if (t === "review" && run) loadExplanation(run);
+    if (t === "review" && run) { loadExplanation(run); loadAudit(run); }
     window.scrollTo({ top: 0 });
   }, [run, loadAudit, loadExplanation]);
 

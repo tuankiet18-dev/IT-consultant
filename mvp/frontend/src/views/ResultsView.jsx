@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { useApp } from "../store.jsx";
 import { Kpi, Note, PageHead, RunBanner, Section } from "../components/ui.jsx";
 import { CostChart, LoadChart } from "../components/charts.jsx";
+import PlanDetails from "./PlanView.jsx";
 import { fmt, solverText } from "../utils";
 
 export default function ResultsView() {
@@ -11,7 +12,7 @@ export default function ResultsView() {
   return (
     <div>
       <PageHead title="Results" lead="How the optimised plan compares with the preferred-warehouse baseline.">
-        <button type="button" className="btn btn-primary" onClick={() => go("plan")}>See the plan <ArrowRight size={16} aria-hidden="true" /></button>
+        <button type="button" className="btn btn-primary" onClick={() => go("review")}>Review & approve <ArrowRight size={16} aria-hidden="true" /></button>
       </PageHead>
       <RunBanner run={r} />
       {!c.baseline_valid && <Note tone="err">The preferred-warehouse baseline could not serve all demand, so no saving is reported. The optimised plan below is still valid.</Note>}
@@ -38,6 +39,9 @@ export default function ResultsView() {
       </Section>
       <Section title="Warehouse load" hint="Share of weekly capacity used.">
         <div className="card card-pad"><LoadChart c={c} ent={ent} /></div>
+      </Section>
+      <Section title="Plan details" hint="Which warehouse serves each zone and SKU, in pallets per week. Highlighted rows differ from the baseline.">
+        <PlanDetails />
       </Section>
       <Note tone="info">{c.changes.length} zone-and-SKU decision(s) differ from the baseline. Costs are in synthetic cost units, not a forecast for Company A.</Note>
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useApp } from "../store.jsx";
+import { AuditTrail, DecisionPanel } from "./ApproveView.jsx";
 import { Field, Note, PageHead, RunBanner, Section, Tag } from "../components/ui.jsx";
 import { allocMap, fmt, kindText, solverText, stateText } from "../utils";
 
@@ -91,16 +92,15 @@ function Override({ locked }) {
 }
 
 export default function ReviewView() {
-  const { run: r, runs, openRun, go } = useApp();
+  const { run: r, runs, openRun } = useApp();
   const locked = r.state !== "draft";
   return (
     <div>
-      <PageHead title="Review & adjust" lead="Read the explanation, then change a decision if the business needs it. Every change needs a reason and is logged.">
-        <button type="button" className="btn btn-primary" onClick={() => go("approve")}>Approve & audit <ArrowRight size={16} aria-hidden="true" /></button>
-      </PageHead>
+      <PageHead title="Review & approve" lead="Read the explanation, change a decision if the business needs it, then approve or reject the plan. Every change needs a reason and is logged." />
       <RunBanner run={r} />
       <div className="mt-6"><Explanation locked={locked} /></div>
-      <Section title="Change a decision" hint="Optional. Use this when the business needs a specific warehouse for a specific product."><Override locked={locked} /></Section>
+      {!locked && <Section title="Change a decision" hint="Optional. Use this when the business needs a specific warehouse for a specific product."><Override locked={locked} /></Section>}
+      <DecisionPanel />
       {runs.length > 1 && (
         <Section title="Plan versions" hint="Each decision you apply creates a new version. Open an earlier one to compare.">
           <div className="card overflow-x-auto">
@@ -118,6 +118,7 @@ export default function ReviewView() {
           </div>
         </Section>
       )}
+      <AuditTrail />
     </div>
   );
 }

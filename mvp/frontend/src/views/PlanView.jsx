@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useApp } from "../store.jsx";
-import { Field, PageHead, Section, Tag } from "../components/ui.jsx";
+import { Field, Section, Tag } from "../components/ui.jsx";
 import { allocMap, fmt } from "../utils";
 
-export default function PlanView() {
-  const { run: r, ent, go } = useApp();
+export default function PlanDetails() {
+  const { run: r, ent } = useApp();
   const [zone, setZone] = useState("");
   const [q, setQ] = useState("");
   const [only, setOnly] = useState(false);
@@ -28,10 +28,6 @@ export default function PlanView() {
 
   return (
     <div>
-      <PageHead title="Plan" lead="Which warehouse serves each zone and SKU, in pallets per week. Highlighted rows differ from the baseline.">
-        <button type="button" className="btn btn-primary" onClick={() => go("review")}>Review & adjust <ArrowRight size={16} aria-hidden="true" /></button>
-      </PageHead>
-
       <div className="card card-pad">
         <div className="grid items-end gap-4 md:grid-cols-[200px_1fr_auto]">
           <Field label="Zone">

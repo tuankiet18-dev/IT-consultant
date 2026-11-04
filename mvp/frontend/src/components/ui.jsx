@@ -1,4 +1,5 @@
-import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Info, RotateCcw, XCircle } from "lucide-react";
+import { useApp } from "../store.jsx";
 
 export function PageHead({ title, lead, children }) {
   return (
@@ -88,6 +89,7 @@ export function Legend({ items }) {
 }
 
 export function RunBanner({ run }) {
+  const { runOpt, busy } = useApp();
   const { fmt } = { fmt: (n) => Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 }) };
   return (
     <>
@@ -98,7 +100,14 @@ export function RunBanner({ run }) {
       )}
       {run.kind === "whatif" && <Note tone="info">This plan comes from a what-if on a modified copy of the data. It does not change the real scenario.</Note>}
       {run.state !== "draft" && (
-        <Note tone={run.state === "approved" ? "ok" : "err"}>This plan is {run.state}. It can no longer be changed.</Note>
+        <Note tone={run.state === "approved" ? "ok" : "err"}>
+          This plan is {run.state} and can no longer be changed. To make further changes, calculate a new version: it starts as a draft and the {run.state} plan stays in the history.
+          <div className="mt-3">
+            <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => runOpt(run.mode === "lp" ? "lp" : "milp", 30)}>
+              <RotateCcw size={16} aria-hidden="true" /> Start a new version
+            </button>
+          </div>
+        </Note>
       )}
     </>
   );

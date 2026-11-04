@@ -1,21 +1,18 @@
 import { useState } from "react";
 import { CheckCircle2, Download, ShieldCheck, XCircle } from "lucide-react";
 import { useApp } from "../store.jsx";
-import { Field, Note, PageHead, RunBanner, Section } from "../components/ui.jsx";
+import { Field, Note, Section } from "../components/ui.jsx";
 import { eventText, fmt, payloadText, solverText, when } from "../utils";
 
-export default function ApproveView() {
-  const { run: r, audit, chain, decide, exportZip } = useApp();
+export function DecisionPanel() {
+  const { run: r, decide, exportZip } = useApp();
   const [comment, setComment] = useState("");
   const draft = r.state === "draft";
   const c = r.comparison;
   const failed = r.verify.optimised_violations.length > 0;
   return (
     <div>
-      <PageHead title="Approve & audit" lead="Nothing is executed by Nordic Flow. An approved plan is exported for the existing ERP, WMS and TMS." />
-      <RunBanner run={r} />
-
-      <Section title={`Decision on plan ${r.id}`}>
+      <Section title={`Decision on plan ${r.id}`} hint="Nothing is executed by Nordic Flow. An approved plan is exported for the existing ERP, WMS and TMS.">
         <div className="card card-pad">
           <p className="text-[15px] text-slate-700">
             Optimised cost <b className="text-slate-900">{fmt(c.optimised.total)}</b>
@@ -34,6 +31,14 @@ export default function ApproveView() {
         </div>
       </Section>
 
+    </div>
+  );
+}
+
+export function AuditTrail() {
+  const { audit, chain } = useApp();
+  return (
+    <div>
       <Section title="Audit trail" hint="Who did what, and when, for this scenario.">
         {chain && (
           <Note tone={chain.ok ? "ok" : "err"}>
