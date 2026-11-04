@@ -18,6 +18,21 @@ CATEGORY_LABEL = {"inbound_freight": "inbound freight", "inbound_handling": "inb
                   "outbound_freight": "outbound freight", "outbound_handling": "outbound handling"}
 
 
+def _route_cost(ds: Dataset, w: str, z: str, p: str):
+    """Best-case delivered cost of one pallet of SKU p through warehouse w to zone z (cheapest supplier)."""
+    if (w, z) not in ds.outbound:
+        return None
+    inb = [ds.inbound[s, w] + ds.warehouses[w].handling_in for s in ds.suppliers
+           if (s, w) in ds.inbound and ds.supply.get((s, p), 0) > 0]
+    if not inb:
+        return None
+    return round(min(inb) + ds.outbound[w, z] + ds.warehouses[w].handling_out, 1)
+
+
+def _main(d: dict):
+    return max(d, key=lambda k: d[k]) if d else None
+
+
 def build_facts(ds: Dataset, base: Plan, opt: Plan, cmp: dict, pins: list[dict] | None = None,
                 unpinned_total: float | None = None) -> dict:
     changes = []
@@ -27,12 +42,23 @@ def build_facts(ds: Dataset, base: Plan, opt: Plan, cmp: dict, pins: list[dict] 
             "zone": ds.zones[ch["zone"]].name, "sku": ds.skus[ch["sku"]].name, "pallets": moved,
             "baseline_from": [{"warehouse": ds.warehouses[w].name, "pallets": q} for w, q in sorted(ch["baseline"].items())],
             "optimised_from": [{"warehouse": ds.warehouses[w].name, "pallets": q} for w, q in sorted(ch["optimised"].items())],
+            "zone_preferred_warehouse": ds.warehouses[ds.zones[ch["zone"]].preferred_warehouse].name,
         })
+        bw, ow = _main(ch["baseline"]), _main(ch["optimised"])
+        bc = _route_cost(ds, bw, ch["zone"], ch["sku"]) if bw else None
+        oc = _route_cost(ds, ow, ch["zone"], ch["sku"]) if ow else None
+        if bc is not None and oc is not None:
+            changes[-1].update({"baseline_route_cost_per_pallet": bc, "optimised_route_cost_per_pallet": oc,
+                                "route_cost_difference_per_pallet": round(bc - oc, 1)})
     changes.sort(key=lambda c: -c["pallets"])
     cb, co = cmp["baseline"], cmp["optimised"]
     valid = cmp.get("baseline_valid", True)
     facts = {
         "currency": "cost units",
+        "how_to_read": "route cost per pallet = cheapest supplier to the warehouse + handling in + warehouse to zone + handling out",
+        "baseline_rule": "each zone is served from its preferred warehouse; if that warehouse is full, the next cheapest warehouse is used",
+        "total_demand_pallets": round(sum(ds.demand.values())),
+        "total_weekly_capacity": round(sum(w.capacity for w in ds.warehouses.values())),
         "mode": opt.mode, "solver_status": opt.status,
         "network": {"suppliers": len(ds.suppliers), "warehouses": len(ds.warehouses),
                     "zones": len(ds.zones), "skus": len(ds.skus)},
@@ -47,6 +73,7 @@ def build_facts(ds: Dataset, base: Plan, opt: Plan, cmp: dict, pins: list[dict] 
                                     "optimised": round(cmp["utilisation_optimised"][w] * 100)}
             for w in ds.warehouses},
         "warehouses_at_capacity": [ds.warehouses[w].name for w in cmp["binding_warehouses"]],
+        "warehouses_full_in_baseline": [ds.warehouses[w].name for w in ds.warehouses if cmp["utilisation_baseline"][w] >= 0.995],
     }
     if pins:
         facts["planner_pins"] = [{"zone": ds.zones[p["zone"]].name, "sku": ds.skus[p["sku"]].name,
@@ -106,6 +133,16 @@ def _leaf_numbers(x, out: set):
             _leaf_numbers(v, out)
 
 
+_SPACES = "".join(map(chr, (0x202F, 0x00A0, 0x2009, 0x2007, 0x2060)))   # narrow no-break, no-break, thin, figure space, word joiner
+
+
+def clean_text(text: str) -> str:
+    """Models often write 32 698 with a no-break space; turn digit groups into 32,698 and other odd spaces into plain ones."""
+    text = re.sub(rf"(?<=\d)[{_SPACES}](?=\d{{3}}(?!\d))", ",", text)
+    text = re.sub(rf"[{_SPACES}]", " ", text)
+    return text.replace(chr(0x2011), "-").replace(chr(0x2212), "-").strip()
+
+
 def check_numbers(text: str, facts: dict) -> list[str]:
     """Return the numbers in text that are not in the facts (empty list = all numbers are supported)."""
     allowed: set[float] = set()
@@ -122,10 +159,21 @@ def check_numbers(text: str, facts: dict) -> list[str]:
     return unmatched
 
 
-SYSTEM = ("You explain warehouse allocation plans to a logistics planner in plain English. Use ONLY the numbers and "
-          "names in the JSON facts. Never calculate, estimate or invent numbers, percentages, causes or names. Refer to "
-          "warehouses, zones and SKUs by name. Write 90 to 140 words of plain prose, no headings, no bullet points. "
-          "Finish with one sentence saying the planner should review before approving.")
+SYSTEM = (
+    "You are explaining a warehouse allocation result to a logistics planner who must decide whether to approve it. "
+    "Write in plain English, in three short paragraphs separated by a blank line, 160 to 230 words in total, no headings, "
+    "no bullet points.\n"
+    "Paragraph 1 - the result: the optimised cost against the preferred-warehouse baseline, the saving and its percentage, "
+    "and that the baseline is a synthetic rule (see baseline_rule), not Company A's actual plan.\n"
+    "Paragraph 2 - why: which cost types went down or up (cost_change_by_type) and what moved. Use largest_changes: say which "
+    "warehouse served the zone and SKU before and after, and explain the move with the route cost per pallet figures and "
+    "route_cost_difference_per_pallet. Mention warehouses_full_in_baseline when it explains a move, and warehouses_at_capacity "
+    "as a limit on further savings.\n"
+    "Paragraph 3 - what to check: that the data is synthetic, any planner decisions, and that the planner should review "
+    "before approving.\n"
+    "Rules: use ONLY the numbers and names in the JSON facts. Never calculate, add up, estimate or invent numbers, "
+    "percentages, causes or names. Do not give a reason that the facts do not support; if a move has no route cost figures, "
+    "just describe it. Refer to warehouses, zones and SKUs by name. Write numbers without extra decimals.")
 
 
 def explain(facts: dict, client: GroqClient | None = None, use_llm: bool = True) -> dict:
@@ -140,6 +188,7 @@ def explain(facts: dict, client: GroqClient | None = None, use_llm: bool = True)
                             {"role": "user", "content": "Facts (JSON):\n" + json.dumps(facts, indent=1)}])
     except LLMError as e:
         return {"text": tmpl, "source": "deterministic", "reason": str(e), "unsupported_numbers": []}
+    text = clean_text(text)
     bad = check_numbers(text, facts)
     if bad:
         return {"text": tmpl, "source": "deterministic", "reason": "LLM text rejected: numbers not in facts " + ", ".join(bad),

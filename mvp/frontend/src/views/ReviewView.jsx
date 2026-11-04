@@ -5,6 +5,43 @@ import { DecisionPanel } from "./ApproveView.jsx";
 import { Field, Note, PageHead, RunBanner, Section, Tag } from "../components/ui.jsx";
 import { allocMap, fmt, kindText, solverText, stateText } from "../utils";
 
+function Evidence({ f }) {
+  const rows = (f.largest_changes || []).filter((c) => c.route_cost_difference_per_pallet != null);
+  const from = (arr) => arr.map((x) => `${x.warehouse} ${fmt(x.pallets)}`).join(", ");
+  return (
+    <details className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+      <summary className="cursor-pointer text-sm font-medium text-slate-700">What this explanation is based on</summary>
+      <p className="hint mt-2">The text only restates these figures, which the system calculated from your data. The AI assistant does no calculation.</p>
+      <dl className="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+        <div className="flex justify-between gap-3"><dt className="text-slate-500">Baseline cost</dt><dd className="font-medium">{f.baseline_total == null ? "unusable" : fmt(f.baseline_total)}</dd></div>
+        <div className="flex justify-between gap-3"><dt className="text-slate-500">Optimised cost</dt><dd className="font-medium">{fmt(f.optimised_total)}</dd></div>
+        {Object.entries(f.cost_change_by_type || {}).map(([k, v]) => (
+          <div key={k} className="flex justify-between gap-3"><dt className="text-slate-500 capitalize">{k}</dt><dd className="font-medium">{(v > 0 ? "+" : "") + fmt(v)}</dd></div>
+        ))}
+        <div className="flex justify-between gap-3"><dt className="text-slate-500">Total demand (pallets)</dt><dd className="font-medium">{fmt(f.total_demand_pallets)}</dd></div>
+        <div className="flex justify-between gap-3"><dt className="text-slate-500">Weekly capacity</dt><dd className="font-medium">{fmt(f.total_weekly_capacity)}</dd></div>
+        <div className="flex justify-between gap-3"><dt className="text-slate-500">Full in baseline</dt><dd className="font-medium">{(f.warehouses_full_in_baseline || []).join(", ") || "none"}</dd></div>
+        <div className="flex justify-between gap-3"><dt className="text-slate-500">Full in optimised plan</dt><dd className="font-medium">{(f.warehouses_at_capacity || []).join(", ") || "none"}</dd></div>
+      </dl>
+      {rows.length > 0 && (
+        <div className="mt-4 overflow-x-auto rounded-lg border border-slate-200 bg-white">
+          <table className="tbl">
+            <thead><tr><th>Zone and SKU</th><th>Baseline</th><th>Optimised</th><th className="num">Route cost per pallet (before, after)</th><th className="num">Saved per pallet</th></tr></thead>
+            <tbody>
+              {rows.map((c, i) => (
+                <tr key={i}><td>{c.zone} · {c.sku}</td><td>{from(c.baseline_from)}</td><td>{from(c.optimised_from)}</td>
+                  <td className="num">{fmt(c.baseline_route_cost_per_pallet, 1)} → {fmt(c.optimised_route_cost_per_pallet, 1)}</td>
+                  <td className="num font-medium text-emerald-700">{fmt(c.route_cost_difference_per_pallet, 1)}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      <p className="hint mt-2">Route cost per pallet = cheapest supplier to the warehouse + handling in + warehouse to zone + handling out.</p>
+    </details>
+  );
+}
+
 function Explanation({ locked }) {
   const { explanation: e, explain, approveExpl, clearExplanation, config } = useApp();
   const [text, setText] = useState("");
@@ -30,11 +67,12 @@ function Explanation({ locked }) {
             <Tag tone={e.status === "approved" ? "good" : "neutral"}>{e.status === "approved" ? `Approved by ${e.approved_by}${e.edited ? " (edited)" : ""}` : "Draft: needs your review"}</Tag>
           </div>
           {e.reason && <Note tone="warn">The AI assistant could not be used this time, so the standard summary is shown instead.</Note>}
-          <textarea className="input mt-3 min-h-[160px] text-[15px] leading-relaxed" value={text} onChange={(ev) => setText(ev.target.value)} aria-label="Explanation text" />
+          <textarea className="input mt-3 min-h-[280px] text-[15px] leading-relaxed" value={text} onChange={(ev) => setText(ev.target.value)} aria-label="Explanation text" />
           <div className="mt-3 flex flex-wrap gap-3">
             <button type="button" className="btn btn-success" disabled={locked || e.status === "approved"} onClick={() => approveExpl(text)}>Approve explanation</button>
             <button type="button" className="btn btn-secondary" onClick={clearExplanation}>Start over</button>
           </div>
+          {e.facts && <Evidence f={e.facts} />}
           <p className="hint mt-3">The Results page holds the official numbers. This text only restates them.</p>
         </>
       )}

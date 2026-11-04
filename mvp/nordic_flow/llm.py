@@ -15,7 +15,7 @@ class LLMError(RuntimeError):
 
 
 class GroqClient:
-    def __init__(self, api_key: str | None = None, model: str | None = None, timeout: float = 20.0):
+    def __init__(self, api_key: str | None = None, model: str | None = None, timeout: float = 30.0):
         self.api_key = api_key if api_key is not None else os.environ.get("GROQ_API_KEY", "")
         self.model = model or os.environ.get("GROQ_MODEL", DEFAULT_MODEL)
         self.timeout = timeout
@@ -24,15 +24,18 @@ class GroqClient:
     def enabled(self) -> bool:
         return bool(self.api_key)
 
-    def chat(self, messages: list[dict], temperature: float = 0.2, max_tokens: int = 400) -> str:
+    def chat(self, messages: list[dict], temperature: float = 0.2, max_tokens: int = 2000) -> str:
         if not self.enabled:
             raise LLMError("GROQ_API_KEY is not set")
         try:
-            r = httpx.post(BASE_URL, timeout=self.timeout,
-                           headers={"Authorization": f"Bearer {self.api_key}"},
-                           json={"model": self.model, "messages": messages,
-                                 "temperature": temperature, "max_tokens": max_tokens})
+            body = {"model": self.model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens}
+            if "gpt-oss" in self.model:
+                body["reasoning_effort"] = "low"      # reasoning tokens count against max_tokens; keep them small
+            r = httpx.post(BASE_URL, timeout=self.timeout, headers={"Authorization": f"Bearer {self.api_key}"}, json=body)
             r.raise_for_status()
-            return r.json()["choices"][0]["message"]["content"].strip()
+            choice = r.json()["choices"][0]
+            if choice.get("finish_reason") == "length":
+                raise LLMError("LLM answer was cut off")     # never show half a sentence
+            return choice["message"]["content"].strip()
         except (httpx.HTTPError, KeyError, IndexError, ValueError) as e:
             raise LLMError(f"LLM request failed: {type(e).__name__}") from e
