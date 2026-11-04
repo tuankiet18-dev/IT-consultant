@@ -35,13 +35,13 @@ Hạn nộp: **22:00 GMT+7, thứ Hai 9/11/2026** (mục tiêu gửi trước 18
 | AI có kiểm chứng | Cảnh "AI bị chặn" (model bịa số thì bị loại), câu chuyện thật của đội (model bị cắt cụt, bộ kiểm tra từ chối `32 698`), planner sửa rồi duyệt | Video, AI Journal |
 | Bám Round 1 | Bảng đối chiếu từng giả thuyết Round 1 với việc MVP chứng minh được và **không** chứng minh được | Video (1 cảnh), User Journey |
 
-## 4. Phân công (3 luồng việc, điền tên vào)
+## 4. Phân công (3 luồng việc)
 
 | Luồng | Người | Việc chính |
 |---|---|---|
-| **K: Kỹ thuật** | _tên_ | Bảng thử độ bền, cập nhật e2e, ghim thư viện, gộp 2 nút Explanation, sửa lỗi phát hiện khi chạy thử trên Windows/Mac, kiểm tra Groq lần cuối |
-| **V: Video và câu chuyện** | _tên_ | Bảng đối chiếu Round 1, kịch bản 7 phút, quay, phụ đề tiếng Anh |
-| **T: Tài liệu** | _tên_ | AI Journal (điền thời gian thật), User Journey, System Context, kiểm tra danh sách nộp |
+| **K: Kỹ thuật** | Bách | Bảng thử độ bền, cập nhật e2e, ghim thư viện, gộp 2 nút Explanation, sửa lỗi phát hiện khi chạy thử trên Windows/Mac, kiểm tra Groq lần cuối |
+| **V: Video và câu chuyện** | Nhật Anh | Bảng đối chiếu Round 1, kịch bản 7 phút, quay, phụ đề tiếng Anh |
+| **T: Tài liệu** | Kiệt | AI Journal (điền thời gian thật), User Journey, System Context, kiểm tra danh sách nộp |
 
 Claude hỗ trợ trực tiếp: viết code cho luồng K, bản nháp kịch bản, bản nháp AI Journal, dựng lại hai PDF. Phần chỉ đội làm được: thời gian thật cho AI Journal, giọng đọc, quyết định cuối về nội dung.
 
