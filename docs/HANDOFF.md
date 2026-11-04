@@ -30,7 +30,7 @@ export GROQ_API_KEY=...                                # optional; Windows Power
 uvicorn api.main:app --port 8000                       # http://localhost:8000
 ```
 
-Free Groq key: console.groq.com/keys. Model is set by `GROQ_MODEL` (default `llama-3.3-70b-versatile`; free-tier names change, so check the console if the call returns an error). The "Generate with AI (Groq)" button only enables when a key is present.
+Free Groq key: console.groq.com/keys. Model is set by `GROQ_MODEL` (default `openai/gpt-oss-120b`, verified live on 4 Nov 2026; `llama-3.3-70b-versatile` was no longer available; free-tier names change, so check the console if the call returns an error). The "Generate with AI (Groq)" button only enables when a key is present.
 
 ## What to do next, in order
 

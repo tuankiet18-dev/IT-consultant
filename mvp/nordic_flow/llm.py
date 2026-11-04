@@ -6,7 +6,7 @@ from __future__ import annotations
 import os
 import httpx
 
-DEFAULT_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_MODEL = "openai/gpt-oss-120b"
 BASE_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 
