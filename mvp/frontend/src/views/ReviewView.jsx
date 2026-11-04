@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useApp } from "../store.jsx";
-import { AuditTrail, DecisionPanel } from "./ApproveView.jsx";
+import { DecisionPanel } from "./ApproveView.jsx";
 import { Field, Note, PageHead, RunBanner, Section, Tag } from "../components/ui.jsx";
 import { allocMap, fmt, kindText, solverText, stateText } from "../utils";
 
@@ -118,7 +118,6 @@ export default function ReviewView() {
           </div>
         </Section>
       )}
-      <AuditTrail />
     </div>
   );
 }

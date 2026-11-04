@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, ClipboardCheck, Database, FlaskConical, Loader2 } from "lucide-react";
+import { BarChart3, Boxes, ClipboardCheck, Database, FlaskConical, Loader2, ShieldCheck } from "lucide-react";
 import { useApp } from "./store.jsx";
 import { Tag } from "./components/ui.jsx";
 import { solverText, stateText } from "./utils";
@@ -6,11 +6,13 @@ import DataView from "./views/DataView.jsx";
 import ResultsView from "./views/ResultsView.jsx";
 import ReviewView from "./views/ReviewView.jsx";
 import WhatIfView from "./views/WhatIfView.jsx";
+import AuditView from "./views/AuditView.jsx";
 
 const STEPS = [
   { id: "data", label: "Data", icon: Database, view: DataView },
   { id: "results", label: "Results", icon: BarChart3, view: ResultsView },
   { id: "review", label: "Review & approve", icon: ClipboardCheck, view: ReviewView },
+  { id: "audit", label: "Audit trail", icon: ShieldCheck, view: AuditView },
   { id: "whatif", label: "What-if", icon: FlaskConical, view: WhatIfView },
 ];
 

@@ -39,7 +39,7 @@ export function AuditTrail() {
   const { audit, chain } = useApp();
   return (
     <div>
-      <Section title="Audit trail" hint="Who did what, and when, for this scenario.">
+      <Section>
         {chain && (
           <Note tone={chain.ok ? "ok" : "err"}>
             {chain.ok
