@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useApp } from "../store.jsx";
 import { DecisionPanel } from "./ApproveView.jsx";
@@ -45,7 +45,18 @@ function Evidence({ f }) {
 function Explanation({ locked }) {
   const { explanation: e, explain, approveExpl, clearExplanation, config } = useApp();
   const [text, setText] = useState("");
+  const ref = useRef(null);
   useEffect(() => { setText(e ? e.text : ""); }, [e]);
+  // Grow the box to fit the whole explanation, and re-fit when the width changes (so nothing hides behind a scrollbar).
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => { if (el.clientWidth < 200) return; el.style.height = "auto"; el.style.height = el.scrollHeight + 2 + "px"; };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el.parentElement);
+    return () => ro.disconnect();
+  }, [text, e]);
   const llmOn = config && config.llm_enabled;
   return (
     <div className="card card-pad">
@@ -67,7 +78,7 @@ function Explanation({ locked }) {
             <Tag tone={e.status === "approved" ? "good" : "neutral"}>{e.status === "approved" ? `Approved by ${e.approved_by}${e.edited ? " (edited)" : ""}` : "Draft: needs your review"}</Tag>
           </div>
           {e.reason && <Note tone="warn">The AI assistant could not be used this time, so the standard summary is shown instead.</Note>}
-          <textarea className="input mt-3 min-h-[280px] text-[15px] leading-relaxed" value={text} onChange={(ev) => setText(ev.target.value)} aria-label="Explanation text" />
+          <textarea ref={ref} className="input mt-3 resize-none overflow-hidden px-4 py-3 text-base leading-7" style={{ minHeight: 220 }} value={text} onChange={(ev) => setText(ev.target.value)} aria-label="Explanation text" />
           <div className="mt-3 flex flex-wrap gap-3">
             <button type="button" className="btn btn-success" disabled={locked || e.status === "approved"} onClick={() => approveExpl(text)}>Approve explanation</button>
             <button type="button" className="btn btn-secondary" onClick={clearExplanation}>Start over</button>
