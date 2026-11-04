@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { useApp } from "../store.jsx";
 import { Field, Kpi, Note, PageHead, Section } from "../components/ui.jsx";
-import { fmt } from "../utils";
+import { fmt, solverText } from "../utils";
 
 export default function WhatIfView() {
   const { scenario, ent, whatif: w, setWhatifChanges, runWhatIf, openRun } = useApp();
@@ -65,7 +65,7 @@ export default function WhatIfView() {
           {!res.feasible ? (
             <>
               <Note tone="err">
-                <b>No feasible plan exists with this change. </b>Diagnostic hints (not a proof): {(res.diagnosis.likely_causes || []).join("; ") || "see data checks"}
+                <b>No feasible plan exists with this change. </b>Likely causes (indicative, not a proof): {(res.diagnosis.likely_causes || []).join("; ") || "see the data checks"}
               </Note>
               {res.diagnosis.unmet_by_zone_sku.length > 0 && (
                 <div className="card mt-4 overflow-x-auto">
@@ -79,13 +79,13 @@ export default function WhatIfView() {
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-3">
-                <Kpi label="Optimised cost with the change" tone="brand" value={fmt(res.comparison.optimised.total)} sub={`solver ${res.status}`} />
-                <Kpi label="Current plan" value={res.reference ? fmt(res.reference.optimised_total) : "n/a"} sub={res.reference ? `run ${res.reference.run_id}` : "no reference run"} />
+                <Kpi label="Optimised cost with the change" tone="brand" value={fmt(res.comparison.optimised.total)} sub={solverText(res.status).toLowerCase()} />
+                <Kpi label="Current plan" value={res.reference ? fmt(res.reference.optimised_total) : "n/a"} sub={res.reference ? `plan ${res.reference.run_id}` : "no reference plan"} />
                 <Kpi label="Difference" tone={res.reference && res.reference.delta > 0 ? "bad" : "default"}
                   value={res.reference ? (res.reference.delta > 0 ? "+" : "") + fmt(res.reference.delta) : "n/a"}
                   sub={res.reference && res.reference.delta > 0 ? "the change makes the plan dearer" : "cost units"} />
               </div>
-              <button type="button" className="btn btn-secondary mt-4" onClick={() => openRun(res.id, "results")}>Open this what-if run</button>
+              <button type="button" className="btn btn-secondary mt-4" onClick={() => openRun(res.id, "results")}>View full results</button>
             </>
           )}
         </Section>

@@ -21,3 +21,28 @@ export function allocMap(rows) {
 
 export const payloadText = (p) =>
   Object.entries(p).map(([k, v]) => `${k}=${typeof v === "object" ? JSON.stringify(v) : v}`).join("  ").slice(0, 220);
+
+export const solverText = (status) =>
+  status === "OPTIMAL" ? "Proven optimal" : status === "FEASIBLE" ? "Best found within time limit" : status;
+export const stateText = (s) => (s === "approved" ? "Approved" : s === "rejected" ? "Rejected" : "Draft");
+export const kindText = (k) => (k === "override" ? "Planner-adjusted" : k === "whatif" ? "What-if" : "Original");
+
+const EVENTS = {
+  SCENARIO_UPLOADED: "Data loaded",
+  RUN_COMPLETED: "Plan calculated",
+  OVERRIDE_APPLIED: "Planner decision applied",
+  OVERRIDE_REJECTED: "Planner decision rejected by the solver",
+  WHATIF_RUN: "What-if calculated",
+  WHATIF_INFEASIBLE: "What-if had no feasible plan",
+  EXPLANATION_GENERATED: "Explanation drafted",
+  EXPLANATION_APPROVED: "Explanation approved",
+  PLAN_APPROVED: "Plan approved",
+  PLAN_REJECTED: "Plan rejected",
+  EXPORT_DOWNLOADED: "Approved plan exported",
+  MAPPING_CONFIRMED: "SKU match confirmed",
+};
+export const eventText = (t) => EVENTS[t] || t.replaceAll("_", " ").toLowerCase().replace(/^./, (c) => c.toUpperCase());
+export const when = (ts) => {
+  const d = new Date(ts);
+  return isNaN(d) ? ts : d.toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+};

@@ -1,6 +1,7 @@
 import { BarChart3, Boxes, ClipboardCheck, Database, FlaskConical, Loader2, ShieldCheck, Table2, X } from "lucide-react";
 import { useApp } from "./store.jsx";
 import { Tag } from "./components/ui.jsx";
+import { solverText, stateText } from "./utils";
 import DataView from "./views/DataView.jsx";
 import ResultsView from "./views/ResultsView.jsx";
 import PlanView from "./views/PlanView.jsx";
@@ -23,8 +24,8 @@ function StatusStrip() {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Tag tone="warn">Synthetic data</Tag>
-      <Tag tone={ai ? "good" : "neutral"}>{config == null ? "AI: checking" : ai ? `AI ready · ${config.llm_model}` : "AI off · deterministic summaries"}</Tag>
-      {run && <Tag tone={run.state === "approved" ? "good" : run.state === "rejected" ? "bad" : "info"}>Run {run.id} · {run.state}</Tag>}
+      <span className="hidden sm:inline-flex"><Tag tone={ai ? "good" : "neutral"}>{config == null ? "AI: checking" : ai ? "AI assistant on" : "AI assistant off"}</Tag></span>
+      {run && <Tag tone={run.state === "approved" ? "good" : run.state === "rejected" ? "bad" : "info"}>Plan {run.id} · {stateText(run.state)}</Tag>}
     </div>
   );
 }
@@ -81,7 +82,7 @@ export default function App() {
         </nav>
         <div className="m-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
           <div className="font-medium text-slate-800">{scenario ? scenario.name : "No scenario loaded"}</div>
-          <div className="mt-1">{run ? `Run ${run.id} · ${run.mode.toUpperCase()} · ${run.status}` : "Load data to begin"}</div>
+          <div className="mt-1">{run ? `Plan ${run.id} · ${stateText(run.state)}` : "Load data to begin"}</div>
         </div>
         <p className="px-5 pb-5 text-xs leading-relaxed text-slate-500">
           NEW AURA · IT Consultant Challenge 2026, Round 2 MVP. Costs are synthetic cost units, not a forecast for Company A.
@@ -93,7 +94,7 @@ export default function App() {
           <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-8">
             <div className="flex items-center gap-2 lg:hidden">
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-white"><Boxes size={18} aria-hidden="true" /></span>
-              <b className="text-slate-900">Nordic Flow</b>
+              <b className="whitespace-nowrap text-slate-900">Nordic Flow</b>
             </div>
             <div className="hidden text-sm text-slate-500 lg:block">
               Step {STEPS.indexOf(current) + 1} of {STEPS.length} · <span className="font-medium text-slate-800">{current.label}</span>

@@ -93,12 +93,12 @@ export function RunBanner({ run }) {
     <>
       {run.kind === "override" && (
         <Note tone="info">
-          This run includes {run.pins.length} planner decision(s) fixed by hand. They cost {fmt(run.cost_of_planner_decisions)} cost units more than the unconstrained optimum.
+          This plan includes {run.pins.length} decision(s) fixed by the planner. They cost {fmt(run.cost_of_planner_decisions)} cost units more than the unconstrained optimum.
         </Note>
       )}
-      {run.kind === "whatif" && <Note tone="info">This is a what-if run on a modified copy of the data.</Note>}
+      {run.kind === "whatif" && <Note tone="info">This plan comes from a what-if on a modified copy of the data. It does not change the real scenario.</Note>}
       {run.state !== "draft" && (
-        <Note tone={run.state === "approved" ? "ok" : "err"}>This run is {run.state}. It can no longer be changed.</Note>
+        <Note tone={run.state === "approved" ? "ok" : "err"}>This plan is {run.state}. It can no longer be changed.</Note>
       )}
     </>
   );

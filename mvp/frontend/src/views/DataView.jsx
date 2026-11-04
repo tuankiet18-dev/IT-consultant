@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowRight, FileUp, FlaskConical, Play, Sparkles } from "lucide-react";
+import { FileUp, FlaskConical, Loader2, Play, Sparkles } from "lucide-react";
 import { useApp } from "../store.jsx";
 import { Field, Kpi, Note, PageHead, Section, Tag } from "../components/ui.jsx";
 import { fmt } from "../utils";
@@ -28,29 +28,29 @@ function Mapping() {
   return (
     <details className="card group mt-8">
       <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-sm font-semibold text-slate-900">
-        Optional: map another catalogue to these SKUs
-        <span className="text-xs font-normal text-slate-500 group-open:hidden">Show</span>
+        Advanced: match products from another catalogue
+        <span className="text-xs font-normal text-slate-500 group-open:hidden">Optional</span>
       </summary>
       <div className="border-t border-slate-100 px-5 py-4">
-        <p className="hint">Paste one item per line as "code, name". Suggestions use text similarity (and the AI, if you tick it); nothing changes until you confirm a match.</p>
+        <p className="hint">Paste one product per line as "code, name". We suggest the closest SKU in this scenario. Nothing changes until you confirm a match.</p>
         <textarea className="input mt-3" value={text} onChange={(e) => setText(e.target.value)} placeholder={"CEM-25, cement standard\nRF-L, roofing sheet large"} />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" checked={llm} onChange={(e) => setLlm(e.target.checked)} className="h-4 w-4 accent-brand-600" /> Also ask the AI to pick (Groq)
+            <input type="checkbox" checked={llm} onChange={(e) => setLlm(e.target.checked)} className="h-4 w-4 accent-brand-600" /> Ask the AI assistant to help
           </label>
           <button type="button" className="btn btn-secondary" onClick={submit}>Suggest matches</button>
         </div>
         {mapping && (
           <div className="mt-4 overflow-x-auto">
             <table className="tbl">
-              <thead><tr><th>External item</th><th>Best candidates</th><th>AI pick</th><th /></tr></thead>
+              <thead><tr><th>Your product</th><th>Closest matches</th><th>AI suggestion</th><th /></tr></thead>
               <tbody>
                 {mapping.map((m, i) => (
                   <tr key={i}>
                     <td>{(m.external.code || "") + " " + m.external.name}</td>
                     <td>{m.candidates.map((c) => <div key={c.sku_id}>{c.name} <Tag tone={c.confidence > 0.75 ? "good" : "warn"}>{c.confidence.toFixed(2)}</Tag></div>)}</td>
                     <td>{m.llm_pick ? `${ent.sku(m.llm_pick.sku_id)}: ${m.llm_pick.reason || ""}` : "–"}</td>
-                    <td>{m.confirmed ? <Tag tone="good">Confirmed</Tag> : <button type="button" className="btn btn-secondary" onClick={() => confirmMap(i)}>Confirm top match</button>}</td>
+                    <td>{m.confirmed ? <Tag tone="good">Confirmed</Tag> : <button type="button" className="btn btn-secondary" onClick={() => confirmMap(i)}>Confirm best match</button>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -76,16 +76,16 @@ export default function DataView() {
   const warns = s ? s.issues.filter((i) => i.severity === "warning") : [];
   return (
     <div>
-      <PageHead title="Choose the data" lead="Load an example, or upload the eight CSV files (as a ZIP or selected together). The data is checked before anything is calculated." />
+      <PageHead title="Choose the data" lead="Start with an example, or upload your own eight CSV files (as a ZIP or selected together). Everything is checked before any plan is calculated." />
       <div className="grid gap-4 md:grid-cols-3">
         <Choice icon={FlaskConical} title="Synthetic demo" text="2 suppliers, 3 warehouses, 6 zones, 20 SKUs. Same size as the Round 1 pilot." onClick={() => loadSample("demo")} />
-        <Choice icon={Sparkles} title="Worked example (700 → 500)" text="The hand-checkable example from the Round 1 proposal." onClick={() => loadSample("golden")} />
+        <Choice icon={Sparkles} title="Worked example" text="The small example from the Round 1 proposal: cost falls from 700 to 500." onClick={() => loadSample("golden")} />
         <div className="card card-pad">
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-50 text-brand-700"><FileUp size={18} aria-hidden="true" /></span>
           <div className="mt-2 text-base font-semibold text-slate-900">Upload files</div>
           <input ref={fileRef} type="file" multiple accept=".csv,.zip" aria-label="Choose CSV or ZIP files"
             className="mt-2 block w-full cursor-pointer text-sm text-slate-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200" />
-          <button type="button" className="btn btn-secondary mt-3" onClick={onUpload}>Check files</button>
+          <button type="button" className="btn btn-secondary mt-3" onClick={onUpload}>Upload and check</button>
         </div>
       </div>
 
@@ -102,6 +102,7 @@ export default function DataView() {
             <p className="hint mt-3">Total demand {fmt(s.summary.demand_pallets)} pallets; total warehouse capacity {fmt(s.summary.capacity_total)} pallet-equivalents per week.</p>
           </Section>
 
+          {s.issues.length === 0 && <Note tone="ok">All data checks passed: no errors and no warnings.</Note>}
           {s.issues.length > 0 && (
             <Section title={`Data checks: ${errs.length} error(s), ${warns.length} warning(s)`}>
               <div className="card overflow-x-auto">
@@ -119,22 +120,28 @@ export default function DataView() {
           )}
 
           {s.valid && (
-            <Section title="Run the optimisation" hint="The service calculates the preferred-warehouse baseline and the lowest-cost plan, then checks both independently.">
+            <Section title="Calculate the plan" hint="We build the preferred-warehouse baseline and the lowest-cost plan, then check both independently.">
               <div className="card card-pad">
-                <div className="grid items-end gap-4 md:grid-cols-[1fr_200px_auto]">
-                  <Field label="Method">
-                    <select className="input" value={mode} onChange={(e) => setMode(e.target.value)}>
-                      <option value="milp">MILP: whole pallets (recommended)</option>
-                      <option value="lp">LP: fractional pallets (lower bound)</option>
-                    </select>
-                  </Field>
-                  <Field label="Time limit (seconds)">
-                    <input className="input" type="number" min={1} max={300} value={tl} onChange={(e) => setTl(+e.target.value)} />
-                  </Field>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <p className="text-sm text-slate-600">Uses whole pallets and usually takes a few seconds.</p>
                   <button type="button" className="btn btn-primary" disabled={busy} onClick={() => runOpt(mode, tl)}>
-                    <Play size={16} aria-hidden="true" /> Run optimisation <ArrowRight size={16} aria-hidden="true" />
+                    {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Play size={16} aria-hidden="true" />} Calculate plan
                   </button>
                 </div>
+                <details className="mt-4 border-t border-slate-100 pt-3">
+                  <summary className="cursor-pointer text-sm font-medium text-slate-600">Advanced settings</summary>
+                  <div className="mt-3 grid gap-4 md:grid-cols-2">
+                    <Field label="Method">
+                      <select className="input" value={mode} onChange={(e) => setMode(e.target.value)}>
+                        <option value="milp">Whole pallets (recommended)</option>
+                        <option value="lp">Fractional pallets (lower bound)</option>
+                      </select>
+                    </Field>
+                    <Field label="Time limit (seconds)">
+                      <input className="input" type="number" min={1} max={300} value={tl} onChange={(e) => setTl(+e.target.value)} />
+                    </Field>
+                  </div>
+                </details>
               </div>
             </Section>
           )}
