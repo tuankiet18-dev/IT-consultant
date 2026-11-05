@@ -1,0 +1,2 @@
+status,total_demand_pallets,total_allocated_pallets,inbound_cost,handling_cost,outbound_cost,total_cost
+OPTIMAL,100,100,380,200,340,920

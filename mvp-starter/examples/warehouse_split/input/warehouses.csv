@@ -1,0 +1,3 @@
+warehouse_id,capacity_pallets,handling_cost_per_pallet
+WH_A,60,2
+WH_B,100,2
