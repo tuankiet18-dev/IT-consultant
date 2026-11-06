@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from .baseline import baseline
 from .diagnosis import diagnose
+from .evidence import demo_guard, robustness
 from .io import load_dataset
 from .optimiser import solve
 from .report import compare
@@ -31,7 +32,20 @@ def main(argv=None) -> int:
     r = sub.add_parser("run"); r.add_argument("data"); r.add_argument("--mode", choices=["lp", "milp"], default="milp")
     r.add_argument("--time-limit", type=float, default=30); r.add_argument("--out")
     s = sub.add_parser("synth"); s.add_argument("out"); s.add_argument("--seed", type=int, default=7)
+    sub.add_parser("demo-guard")
+    rob = sub.add_parser("robustness")
+    rob.add_argument("--seeds", type=int, default=10)
+    rob.add_argument("--out", required=True)
     a = ap.parse_args(argv)
+
+    if a.cmd == "demo-guard":
+        demo_guard()
+        return 0
+    if a.cmd == "robustness":
+        if a.seeds < 1:
+            rob.error("--seeds must be positive")
+        robustness(a.seeds, a.out)
+        return 0
 
     if a.cmd == "synth":
         print("wrote", generate(a.out, a.seed)); return 0

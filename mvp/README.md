@@ -9,7 +9,7 @@ A local web app: FastAPI + SQLite + OR-Tools, with a plain HTML/JS front end (no
 cd mvp
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-pytest -q                                              # 52 tests
+pytest -q                                              # 53 tests
 uvicorn api.main:app --port 8000                       # open http://localhost:8000
 ```
 
@@ -81,3 +81,22 @@ python -m nordic_flow run data/demo --out out/demo
 - One planning period, no inventory carry-over, linear costs, no vehicle routing, no ERP/WMS/TMS connection (CSV in, CSV out).
 - Single simulated planner; no login.
 - The Groq call has not been tested against the live service in the development environment (no key, restricted network); it is covered by tests with a fake client.
+
+## Round 2 checks
+
+Python 3.11.4 was tested on Windows. From the MVP directory:
+
+```bash
+python -m nordic_flow demo-guard
+python -m nordic_flow robustness --out ../docs/round2/ROBUSTNESS.md
+```
+
+The guard demo uses simulated model responses and the production numeric check.
+For a live check, set `GROQ_API_KEY` in the server environment and generate an AI explanation three times on Synthetic demo. Check for three complete paragraphs, grounded numbers, and any fallback reason.
+
+For the browser walkthrough, install Playwright and Chromium in your Node environment, then run `node tests/e2e_ui.js` against the running app. Use `BASE_URL` for another port, `BROWSER_CHANNEL=msedge` for installed Edge, and `SHOTS` to save screenshots. Use a disposable database for the walkthrough.
+
+## Reset the recording database
+
+1. Stop the server. If the default local database is disposable, delete the MVP's `var/` directory. This clears local runs and audit history.
+2. Restart the server and load Synthetic demo again.
