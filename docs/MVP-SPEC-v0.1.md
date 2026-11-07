@@ -1,295 +1,264 @@
 ---
-title: "NEW AURA: Nordic Flow MVP Specification"
-subtitle: "Round 2 · v0.1 bản nháp để cả đội đọc và góp ý · 2/11/2026"
+title: "Nordic Flow MVP Specification"
+subtitle: "Đặc tả hiện hành v0.2 cập nhật ngày 7 tháng 11 năm 2026"
 ---
 
-**Hạn nộp Round 2: 22:00 (GMT+7) thứ Hai 9/11/2026.** Tài liệu này mô tả MVP sẽ build, **chưa có code mới ngoài phần lõi bộ giải đã làm** (thư mục `mvp/nordic_flow/`, 14 kiểm thử pass). Mục tiêu: cả đội thống nhất *làm gì, làm thế nào, ai làm*, rồi mới code.
+# 1. Mục tiêu và phạm vi
 
-# 0. Cách đọc và góp ý
+Nordic Flow giúp planner chọn lượng hàng đi từ xưởng / nhà cung cấp thẳng tới khách hoặc qua một hay nhiều kho hiện có, với tổng chi phí thấp nhất trong các giới hạn đã khai báo. Planner xem kết quả, chọn tuyến thủ công hoặc kho giao cuối, duyệt phương án và xuất file.
 
-Mỗi yêu cầu có mã (ví dụ **F-04**) để góp ý chính xác ("sửa F-04 thành..."). Chỗ nào cần đội quyết định được đánh dấu **[QUYẾT ĐỊNH]** và tập trung ở mục 15. Hạn góp ý đề xuất: **hết ngày 3/11**, để bắt đầu code API và giao diện ngày 4/11 mà không đổi hướng giữa chừng.
+Đây là ứng dụng local dùng FastAPI, React, SQLite và OR-Tools. Dữ liệu ví dụ là synthetic. Hạn nộp Round 2 là 22 giờ GMT+7 ngày 9 tháng 11 năm 2026.
 
-Ba câu hỏi nên trả lời khi đọc:
-1. MVP này có cho thấy đúng ý tưởng Round 1 (phân bổ hàng qua kho hiện hữu, planner nắm quyền) không?
-2. Có gì trong "Phải có" mà đội không kịp làm trong 7 ngày?
-3. Có gì giám khảo sẽ hỏi mà spec chưa trả lời?
+Một lần chạy đại diện cho một kỳ kế hoạch. Mọi chặng vận chuyển hoàn thành trong kỳ đó. Năng lực kho là lượng hàng xử lý trong kỳ. Định tuyến xe, lịch nhận hàng, thời gian vận chuyển và tồn kho chuyển sang kỳ sau cần thêm dữ liệu và mô hình riêng.
 
-# 1. Mục tiêu và nguyên tắc
+Hợp đồng dữ liệu và API đầy đủ nằm ở `round2/01_CONTRACTS_AND_ARCHITECTURE.md`. File Markdown này là nguồn đặc tả hiện hành. Các bản PDF/DOCX trước đó chưa được xuất lại cho phần giao thẳng và hướng dẫn sử dụng trong đợt cập nhật này; ba tài liệu nộp bài được giữ để hoàn thiện sau khi chốt MVP.
 
-**Mục tiêu MVP:** cho giám khảo thấy trong một video 7 phút rằng một planner có thể nhập dữ liệu thật-giả, nhận một phương án phân bổ rẻ hơn thói quen, hiểu vì sao, chỉnh và duyệt, với mọi bước có kiểm soát.
+# 2. Người dùng và hành trình
 
-**Bốn tiêu chí chấm của Round 2 và cách spec trả lời:**
+Planner nhập dữ liệu, xem phương án, quyết định các yêu cầu nghiệp vụ và duyệt kết quả. MVP dùng một vai planner local.
 
-| Tiêu chí | Cách MVP đáp ứng |
-|---|---|
-| Chất lượng kỹ thuật | Kiểm tra dữ liệu, bộ kiểm tra độc lập, bộ kiểm thử (có ví dụ tính tay 700→500), xử lý lỗi rõ ràng |
-| Kiến trúc hợp lý | Các khối tách lớp (mục 6), giao diện chỉ gọi API, lõi tính toán không phụ thuộc giao diện |
-| Dùng AI phù hợp | AI chỉ diễn đạt và gợi ý, mọi số do code tính và kiểm tra lại, planner xác nhận (mục 9) |
-| Lập luận kỹ thuật khớp Round 1 | Mỗi quyết định kỹ thuật trỏ về slide Round 1 (bảng đối chiếu ở mục 13) |
+Trang `User guide` mở được ngay từ thanh điều hướng, trước khi tải dữ liệu. Trang có hướng dẫn từng trường trong 8 CSV bắt buộc và 3 CSV tùy chọn, ví dụ nội dung file, giải thích quy trình và ZIP testcase tải xuống chạy ngay.
 
-**Nguyên tắc thiết kế:**
-1. **Toán học ra con số, AI chỉ diễn đạt.**
-2. **Planner luôn nắm quyền:** hệ thống đề xuất, người duyệt, hệ thống hiện có thực thi.
-3. **Không im lặng sửa dữ liệu:** lỗi thì báo rõ, không tự đoán.
-4. **Trung thực về giới hạn:** dữ liệu demo là tổng hợp, không phải dự báo cho Company A.
-5. **Tích hợp, không thay thế:** vào bằng CSV, ra bằng CSV.
-
-# 2. Phạm vi
-
-**Trong phạm vi (khớp Round 1, slide 4):** một vùng Thụy Điển, 2 nhà cung cấp, 3 kho hiện hữu, 20 SKU xếp pallet, một kỳ kế hoạch (một tuần) mỗi lần chạy, planner duyệt trước khi thực thi.
-
-**Ngoài phạm vi:** xây kho mới; định tuyến xe (VRP) và lịch xe (vẫn ở TMS); dự báo nhu cầu; thay ERP; tồn kho nhiều kỳ; nhiều nước; tự động thực thi kế hoạch; xác thực người dùng thật (MVP dùng một vai planner giả lập).
-
-**Dữ liệu:** tổng hợp, tạo bởi `nordic_flow.synth`, ghi rõ trên giao diện ("Synthetic data").
-
-# 3. Người dùng và hành trình
-
-**Planner (người dùng chính):** nhân viên lập kế hoạch phân phối, ra quyết định kho nào phục vụ đơn nào mỗi tuần. Muốn: giảm công làm tay, hiểu vì sao đề xuất, giữ quyền chỉnh.
-
-**Ops sponsor / quản lý (người xem phụ):** xem kết quả đã duyệt và nhật ký. MVP không có màn hình riêng; dùng chung màn Nhật ký.
-
-**Hành trình chính (bản chuẩn cho tài liệu User Journey và video):**
-
-| Bước | Planner làm | Hệ thống làm | Yêu cầu |
-|---|---|---|---|
-| 1 | Tải các file CSV | Đọc, kiểm tra, hiện lỗi (file, dòng) hoặc xác nhận hợp lệ | F-01, F-02 |
-| 2 | Sửa file có lỗi, tải lại | Chặn chạy cho tới khi hết lỗi | F-02 |
-| 3 | Bấm "Run" | Tính baseline, chạy tối ưu, tự kiểm tra lại phương án | F-03..F-06 |
-| 4 | Xem so sánh | Hiện chi phí baseline và tối ưu, % tiết kiệm, chi phí theo chặng, mức đầy của kho | F-07 |
-| 5 | Đọc giải thích | AI viết bản nháp giải thích, code đã kiểm tra số | F-10 |
-| 6 | Chỉnh một quyết định (ví dụ giữ 20 pallet ở kho A) | Ghim quyết định đó, tính lại phần còn lại, hiện chi phí tăng thêm bao nhiêu | F-08 |
-| 7 | Duyệt (kèm ghi chú) | Khóa kế hoạch, ghi nhật ký, cho xuất CSV | F-09, F-11 |
-| 8 | Thử "đóng kho A" | Chạy kịch bản what-if, so với kế hoạch gốc | F-12 |
-
-# 4. Yêu cầu chức năng
-
-Ưu tiên: **M** = phải có, **S** = nên có (làm khi M xong), **C** = có thể (bỏ nếu thiếu thời gian). Trạng thái: **Done** = đã có trong `mvp/`.
-
-| Mã | Yêu cầu | Ưu tiên | Trạng thái |
-|---|---|---|---|
-| F-01 | Nhập 8 file CSV bắt buộc và 1 file tùy chọn (mục 5) bằng tải lên hoặc chọn thư mục mẫu | M | Một phần (đọc từ thư mục: Done) |
-| F-02 | Kiểm tra dữ liệu: thiếu cột, số âm, mã không tồn tại, trùng khóa, nhu cầu lẻ khi MILP, thiếu cung, thiếu sức chứa, thiếu tuyến. Báo lỗi kèm file và dòng. **Lỗi chặn chạy** | M | Done |
-| F-03 | Baseline "thói quen": mỗi vùng lấy từ kho ưa thích, nhà cung cấp rẻ nhất trước, kho đầy thì chuyển sang kho kế tiếp | M | Done |
-| F-04 | Bộ tối ưu LP (hàng chia nhỏ) và MILP (nguyên pallet), giới hạn thời gian cấu hình được, trả trạng thái OPTIMAL / FEASIBLE / INFEASIBLE | M | Done |
-| F-05 | Bộ kiểm tra độc lập `verify_plan`: mọi phương án (baseline, tối ưu, sau chỉnh) phải qua kiểm tra trước khi hiển thị | M | Done |
-| F-06 | Chẩn đoán vô nghiệm: nói rõ thiếu cung, sức chứa hay tuyến, và lượng thiếu theo vùng và SKU | M | Done |
-| F-07 | So sánh: tổng chi phí, tiết kiệm (số và %), chi phí theo 4 loại, mức đầy từng kho, danh sách quyết định khác nhau giữa hai phương án | M | Done (phần tính) |
-| F-08 | **Chỉnh bởi planner:** ghim phân bổ (vùng, SKU, kho, số lượng) rồi tính lại phần còn lại; hiện chi phí tăng so với tối ưu; bắt buộc ghi lý do | M | Chưa |
-| F-09 | **Duyệt:** planner duyệt hoặc từ chối, kèm ghi chú; sau khi duyệt kế hoạch bị khóa | M | Chưa |
-| F-10 | **Giải thích AI** có kiểm tra số và duyệt bởi planner (mục 9) | M | Chưa |
-| F-11 | **Nhật ký kiểm toán:** ghi mọi sự kiện: tải dữ liệu, chạy, chỉnh, duyệt, giải thích; xem lại được | M | Chưa |
-| F-12 | **What-if:** đóng kho, đổi tỷ lệ nhu cầu của một vùng, đổi cước một tuyến; so với kế hoạch gốc | S | Chưa |
-| F-13 | **Gợi ý ánh xạ SKU** khi catalog ngoài dùng mã khác (mục 9.3); chỉ dùng sau khi planner xác nhận | S | Chưa |
-| F-14 | Xuất kế hoạch CSV (inbound, outbound, so sánh) | M | Done (CLI) |
-| F-15 | Lưu kịch bản và các lần chạy để mở lại | S | Chưa |
-| F-16 | Chế độ AI dự phòng không cần mạng (giải thích bằng mẫu câu) | M | Chưa |
-
-# 5. Đặc tả dữ liệu vào
-
-Một thư mục = một kịch bản. Đơn vị: số lượng là **pallet**, chi phí là **đơn vị tiền mỗi pallet**, sức chứa kho là **pallet-tương-đương mỗi kỳ** (pallet × pallet_factor).
-
-| File | Cột | Quy tắc |
+| Bước | Planner làm | Hệ thống làm |
 |---|---|---|
-| `suppliers.csv` | supplier_id, name | id duy nhất |
-| `warehouses.csv` | warehouse_id, name, capacity_pallets, handling_in, handling_out | số ≥ 0 |
-| `zones.csv` | zone_id, name, preferred_warehouse | kho ưa thích phải tồn tại; chỉ baseline dùng |
-| `skus.csv` | sku_id, name, pallet_factor | pallet_factor > 0 |
-| `inbound_rates.csv` | supplier_id, warehouse_id, cost_per_pallet | có dòng = tuyến được phép |
-| `outbound_rates.csv` | warehouse_id, zone_id, cost_per_pallet | có dòng = tuyến được phép |
-| `supply.csv` | supplier_id, sku_id, max_pallets | tối đa mỗi kỳ |
-| `demand.csv` | zone_id, sku_id, pallets | nguyên khi MILP |
-| `warehouse_skus.csv` (tùy chọn) | warehouse_id, sku_id | nếu có: SKU nào kho được giữ; không có: tất cả |
+| 1 | Chọn dữ liệu mẫu hoặc tải CSV/ZIP | Đọc và kiểm tra dữ liệu, báo file và dòng khi có lỗi |
+| 2 | Bấm Calculate plan | Tạo baseline, tối ưu và kiểm tra độc lập cả hai phương án |
+| 3 | Xem Results | Hiện tổng chi phí, mức tiết kiệm hợp lệ, luồng hàng, mức sử dụng kho và chi tiết từng chặng |
+| 4 | Tạo bản giải thích chuẩn hoặc bản nháp AI | Tạo facts từ kết quả tính, kiểm tra số trong phản hồi AI |
+| 5 | Mở màn chỉnh tuyến hoặc chọn kho giao cuối, nhập số pallet và lý do | Dành hàng trên đường hoàn chỉnh hoặc ghim giao cuối, rồi tối ưu lại thành một lần chạy con |
+| 6 | Duyệt hoặc từ chối phương án | Khóa lần chạy, ghi audit, mở quyền xuất khi được duyệt |
+| 7 | Xuất ZIP hoặc chạy What-if | Tải các chặng phân bổ và báo cáo, hoặc thử thay đổi trên bản sao dữ liệu |
 
-Các kiểm tra chặn chạy: thiếu file hoặc cột; số không hợp lệ hoặc âm; khóa trùng; tham chiếu tới mã không tồn tại; tổng cung một SKU nhỏ hơn tổng cầu; tổng sức chứa nhỏ hơn tổng cầu; một cặp (vùng, SKU) không có đường nào phục vụ. Cảnh báo (không chặn): cung lẻ khi MILP (sẽ làm tròn xuống).
+# 3. Chức năng hiện hành
 
-# 6. Kiến trúc
+| Mã | Chức năng |
+|---|---|
+| F-01 | Nhập 8 CSV bắt buộc và 3 CSV tùy chọn, qua nhiều file hoặc một ZIP |
+| F-02 | Kiểm tra tham chiếu, cột, số liệu, tuyến, SKU, khả năng đi đến vùng và chu trình kho–kho |
+| F-03 | Baseline ưu tiên kho giao cuối đã khai báo và phân bổ theo quy tắc tham lam |
+| F-04 | Tối ưu LP hoặc MILP với giao thẳng hoặc qua nhiều kho trong cùng kỳ, có giới hạn thời gian |
+| F-05 | Kiểm tra độc lập cung, cầu, cân bằng hàng, giới hạn từng kho và tuyến chuyển kho |
+| F-06 | Chẩn đoán trường hợp thiếu cung, năng lực xử lý hoặc đường đi phù hợp |
+| F-07 | So sánh 6 nhóm chi phí, sử dụng kho, giao thẳng, giao cuối và các chặng trung chuyển |
+| F-08 | Ghim chính xác lượng giao từ một kho cuối đến một vùng và SKU, có lý do, tạo lần chạy con |
+| F-09 | Duyệt hoặc từ chối phương án và khóa trạng thái |
+| F-10 | Giải thích từ facts, chọn bản chuẩn hoặc Groq, duyệt văn bản riêng |
+| F-11 | Nhật ký sự kiện có chuỗi mã băm |
+| F-12 | What-if đóng kho, đổi năng lực, thay đổi nhu cầu hoặc cước tuyến |
+| F-13 | Gợi ý khớp SKU và xác nhận trước khi ghi nhận |
+| F-14 | Xuất phân bổ inbound, transfers, outbound, direct cùng báo cáo và audit |
+| F-15 | Lưu kịch bản và lịch sử các lần chạy trong SQLite |
+| F-16 | Giải thích chuẩn hoạt động khi Groq thiếu key, lỗi hoặc bị bộ kiểm tra số từ chối |
+| F-17 | Hướng dẫn sử dụng trong ứng dụng, có giải thích input và ZIP testcase tải xuống |
 
-```
-            ┌──────────────────────────────┐
-  Planner → │   Giao diện web (UI)         │
-            └──────────────┬───────────────┘
-                           │ HTTP/JSON
-            ┌──────────────┴───────────────┐
-            │   API  (FastAPI)             │
-            │   ┌────────── dịch vụ ─────┐ │
-            │   │ ScenarioService        │ │   đọc, kiểm tra, lưu kịch bản
-            │   │ RunService             │ │   baseline → tối ưu → verify → so sánh
-            │   │ OverrideService        │ │   ghim và tính lại
-            │   │ ExplainService         │ │   sự thật → LLM → kiểm tra số
-            │   │ MappingService         │ │   gợi ý ánh xạ SKU
-            │   │ AuditService           │ │   nhật ký bất biến
-            │   └───────────┬────────────┘ │
-            └───────────────┼──────────────┘
-          ┌─────────────────┼──────────────────┐
-          ▼                 ▼                  ▼
-   nordic_flow (lõi)    SQLite             Nhà cung cấp LLM
-   io, validation,      scenarios, runs,   (tùy chọn, qua biến
-   baseline, optimiser, overrides,         môi trường; có chế độ
-   verify, report,      approvals,         dự phòng không mạng)
-   diagnosis            audit_events
+# 4. Hợp đồng dữ liệu đầu vào
+
+Một bộ dữ liệu có tám CSV bắt buộc. Có thể bổ sung ba CSV tùy chọn trong cùng thư mục hoặc ZIP. Tất cả kho, kể cả kho trung gian, được khai báo trong cùng `warehouses.csv`. File CSV dùng UTF-8, dấu phẩy ngăn cột, có dòng tiêu đề đúng tên; mỗi dòng dữ liệu phải có đúng số ô như tiêu đề.
+
+| File | Các cột | Quy tắc |
+|---|---|---|
+| `suppliers.csv` | supplier_id, name | Mã duy nhất |
+| `warehouses.csv` | warehouse_id, name, capacity_pallets, handling_in, handling_out | Năng lực và phí không âm |
+| `zones.csv` | zone_id, name, preferred_warehouse | Kho baseline ưu tiên phải tồn tại; có thể để trống nếu vùng có tuyến giao thẳng với giới hạn dương |
+| `skus.csv` | sku_id, name, pallet_factor | Hệ số năng lực lớn hơn 0 |
+| `inbound_rates.csv` | supplier_id, warehouse_id, cost_per_pallet | Tuyến nhà cung cấp đến kho có hướng |
+| `outbound_rates.csv` | warehouse_id, zone_id, cost_per_pallet | Tuyến kho giao cuối đến vùng có hướng |
+| `supply.csv` | supplier_id, sku_id, max_pallets | Nguồn cung tối đa mỗi kỳ |
+| `demand.csv` | zone_id, sku_id, pallets | Nhu cầu phải được đáp ứng đủ, nguyên pallet khi MILP |
+| `warehouse_skus.csv` tùy chọn | warehouse_id, sku_id | Nếu có file, đây là danh sách SKU được phép tại từng kho |
+| `transfer_rates.csv` tùy chọn | from_warehouse_id, to_warehouse_id, cost_per_pallet | Tuyến chuyển từ một kho đến kho khác |
+| `direct_rates.csv` tùy chọn | supplier_id, zone_id, cost_per_pallet | Tuyến xưởng / nhà cung cấp giao thẳng tới khách, không qua kho |
+
+`transfer_rates.csv` có thể thêm cột `max_pallets`. Bỏ cột hoặc để trống giá trị cho phép lượng chuyển không giới hạn trên tuyến. Giá trị 0 đóng tuyến. Giá trị dương giới hạn tổng pallet của mọi SKU đi qua tuyến trong kỳ.
+
+`direct_rates.csv` cũng có thể thêm `max_pallets` với quy tắc tương tự, dùng chung cho tất cả SKU trên tuyến xưởng → khách. Không có file này thì không được tự tạo đường giao thẳng. Giao thẳng dùng nguồn cung và đáp ứng nhu cầu như đường qua kho, nhưng không sử dụng năng lực hay phí nhận/xuất kho.
+
+```csv
+supplier_id,zone_id,cost_per_pallet,max_pallets
+SUP1,Z1,7,10
 ```
 
-**Quy tắc kiến trúc:**
-- Lõi `nordic_flow` **không biết** gì về web hay cơ sở dữ liệu; chỉ nhận và trả cấu trúc dữ liệu thuần.
-- UI không tính toán nghiệp vụ; chỉ gọi API và hiển thị.
-- Nhật ký chỉ thêm mới, không sửa hoặc xóa.
-- Khóa API đọc từ biến môi trường, không nằm trong repo; có `.env.example`.
+Trường hợp hoàn toàn không dùng kho vẫn gửi đủ 8 file bắt buộc. Ba file `warehouses.csv`, `inbound_rates.csv`, `outbound_rates.csv` chỉ có dòng tiêu đề, không có dòng dữ liệu. Trong `zones.csv`, giữ cột `preferred_warehouse` và để giá trị trống cho vùng giao thẳng. Một mã kho ưu tiên khác rỗng phải tham chiếu kho thực sự tồn tại.
 
-**Công nghệ đề xuất:** Python 3.11+, FastAPI, OR-Tools (SCIP cho MILP, GLOP cho LP), SQLite, pytest. UI xem mục 15 (Q1).
+Ví dụ định dạng với số minh họa
 
-# 7. API (hợp đồng giữa UI và backend)
+```csv
+from_warehouse_id,to_warehouse_id,cost_per_pallet,max_pallets
+HUB,REG,3,20
+REG,LOCAL,2,20
+```
 
-| Phương thức và đường dẫn | Việc | Trả về |
-|---|---|---|
-| `POST /api/scenarios` | Tải bộ CSV; kiểm tra | `scenario_id`, danh sách lỗi và cảnh báo |
-| `GET /api/scenarios/{id}` | Xem kịch bản và dữ liệu tóm tắt | kích thước, trạng thái hợp lệ |
-| `POST /api/scenarios/{id}/runs` | Chạy: `{mode, time_limit}` | `run_id`, tóm tắt so sánh |
-| `GET /api/runs/{id}` | Chi tiết một lần chạy | baseline, tối ưu, so sánh, trạng thái solver, kết quả verify |
-| `POST /api/runs/{id}/overrides` | Ghim `{zone, sku, warehouse, pallets, reason}` | kế hoạch mới, chi phí tăng thêm, hoặc từ chối kèm chẩn đoán |
-| `GET /api/runs/{id}/explanation` | Bản nháp giải thích | văn bản, nguồn (AI hoặc mẫu), kết quả kiểm tra số |
-| `POST /api/runs/{id}/explanation/approve` | Planner xác nhận hoặc sửa | trạng thái |
-| `POST /api/runs/{id}/approve` | Duyệt `{decision, comment}` | trạng thái đã khóa |
-| `GET /api/runs/{id}/export` | Tải CSV | zip |
-| `POST /api/scenarios/{id}/whatif` | `{changes[]}` rồi chạy | `run_id` mới, so với gốc |
-| `GET /api/audit?run_id=` | Nhật ký | danh sách sự kiện |
-| `POST /api/mapping/suggest` | Gợi ý ánh xạ SKU từ catalog ngoài | danh sách đề xuất kèm độ tin cậy |
+Tuyến A đến B có hướng riêng. Mạng các tuyến kho–kho đã khai báo phải là đồ thị có hướng không có chu trình, kể cả khi một tuyến có `max_pallets=0`. Tự chuyển từ A về A là lỗi dữ liệu. Số kho trung gian phụ thuộc các tuyến hợp lệ trong đồ thị.
 
-Mọi lỗi trả về JSON `{code, message, details}`, không trả stack trace.
+Mọi mã được tham chiếu phải tồn tại. Giá và lượng phải là số hữu hạn không âm. Một tuyến thiếu trong file được coi là không được phép. Bỏ file chuyển kho tạo mạng chuyển kho rỗng và giữ cách chạy của bộ dữ liệu cũ.
 
-# 8. Mô hình tối ưu
+## Đơn vị và năng lực
 
-**Biến:** `x[s,w,p]` (nhà cung cấp → kho), `y[w,z,p]` (kho → vùng); LP: số thực ≥ 0; MILP: số nguyên ≥ 0.
+- Số lượng hàng và giới hạn tuyến chuyển kho / giao thẳng dùng pallet.
+- Năng lực kho dùng pallet-tương-đương mỗi kỳ, bằng lượng pallet nhận nhân với `pallet_factor`.
+- Hàng nhận từ nhà cung cấp và từ kho khác đều tiêu tốn năng lực của kho nhận.
+- Phí nhập, phí xuất và cước đều tính trên mỗi pallet.
+- Mọi kho mà SKU đi qua phải cho phép SKU đó.
 
-**Mục tiêu:** tối thiểu hóa Σ (cước nhập + phí xử lý nhập)·x + Σ (cước xuất + phí xử lý xuất)·y.
+Ví dụ, 10 pallet có `pallet_factor=2` đi qua HUB rồi REG sử dụng 20 đơn vị năng lực ở HUB và 20 ở REG. Đây là lượng xử lý ở từng kho trong kỳ.
 
-**Ràng buộc:**
-1. Cung: Σw x[s,w,p] ≤ cung[s,p].
-2. Cầu: Σw y[w,z,p] = cầu[z,p].
-3. Cân bằng kho: Σs x[s,w,p] = Σz y[w,z,p] (không giữ tồn).
-4. Sức chứa: Σ pallet_factor[p] · Σs x[s,w,p] ≤ capacity[w].
-5. Chỉ dùng tuyến có trong rates và SKU được phép tại kho.
+# 5. Mô hình tối ưu
 
-**Ghim (override), F-08:** thêm ràng buộc `y[w,z,p] = số lượng ghim`, giải lại; chi phí tăng = chi phí sau ghim − chi phí tối ưu. Nếu vô nghiệm thì từ chối và dùng chẩn đoán để nói lý do.
+Bốn nhóm biến phân bổ được lưu theo SKU.
 
-**What-if, F-12:** nhân bản kịch bản, áp thay đổi (đóng kho = sức chứa 0; nhân nhu cầu; đổi cước), chạy như bình thường.
+```text
+x[supplier,warehouse,sku]            hàng từ nhà cung cấp vào kho
+t[from_warehouse,to_warehouse,sku]  hàng chuyển giữa các kho
+y[warehouse,zone,sku]               hàng từ kho giao cuối đến vùng
+d[supplier,zone,sku]                hàng từ xưởng thẳng tới khách
+```
 
-**Chi phí không tính vào mục tiêu:** phí thuê kho cố định đã cam kết (không phải tiết kiệm).
+Với mỗi kho và SKU, cân bằng hàng được viết
 
-# 9. Đặc tả AI
+```text
+hàng từ nhà cung cấp + hàng nhận chuyển kho
+    = hàng giao vùng + hàng gửi chuyển kho
+```
 
-## 9.1 Vai trò
+Nguồn cung được dùng chung cho `x + d`; nhu cầu được đáp ứng bằng `y + d`. Cân bằng hàng tại kho chỉ áp dụng phần có đi qua kho. Các giới hạn gồm năng lực xử lý tại từng kho, giới hạn từng tuyến chuyển kho / giao thẳng và SKU được phép tại mọi kho đi qua. Giới hạn tuyến cộng lượng của mọi SKU. MILP dùng biến nguyên không âm. LP dùng biến liên tục không âm.
 
-AI **không** quyết định phương án, **không** sinh số. Nó chỉ (a) viết lại các sự thật bằng lời dễ hiểu và (b) gợi ý ánh xạ SKU. Cả hai đều cần người xác nhận.
+Mục tiêu cộng cước từ nhà cung cấp, cước chuyển kho, cước giao vùng và cước giao thẳng. Mỗi lần nhập vào một kho chịu `handling_in`. Mỗi lần xuất khỏi kho chịu `handling_out`. Chặng chuyển kho vì vậy chịu phí xuất ở kho gửi, cước chuyển và phí nhập ở kho nhận, mỗi khoản một lần. Giao thẳng chỉ chịu cước `direct_rates.csv`, không có phí xử lý kho.
 
-## 9.2 Giải thích kế hoạch (F-10, F-16)
-
-1. Code tạo **gói sự thật** (JSON): tiết kiệm, % tiết kiệm, danh sách thay đổi (vùng, SKU, kho cũ, kho mới, số pallet), kho nào đầy, chi phí theo loại, lý do chuyển ("kho A đạt 100% sức chứa").
-2. Gói sự thật đưa vào LLM kèm chỉ dẫn: "chỉ dùng các số trong gói; không thêm số mới".
-3. **Kiểm tra số:** code rút mọi số trong câu trả lời, mỗi số phải có trong gói sự thật (cho phép làm tròn). Sai thì loại bản AI và dùng bản mẫu.
-4. Bản nháp ở trạng thái **Draft**. Planner đọc, sửa nếu cần, rồi **Approve**; trạng thái và người duyệt ghi vào nhật ký.
-5. **Chế độ dự phòng (F-16):** không có khóa API hoặc mất mạng thì dùng câu mẫu điền sự thật. Demo vẫn chạy.
-
-## 9.3 Gợi ý ánh xạ SKU (F-13, mức S)
-
-Đầu vào: catalog ngoài có mã và tên khác (ví dụ "CEM-25KG-A" so với "Xi măng 25kg loại A"). Bước 1 so khớp mờ bằng code (tên, đơn vị) để lấy ứng viên; bước 2 (tùy chọn) LLM xếp hạng lại. Mỗi đề xuất có độ tin cậy; **không có đề xuất nào được áp dụng khi planner chưa bấm xác nhận**.
-
-## 9.4 Rủi ro AI và cách phòng
-
-| Rủi ro | Phòng |
+| Nhóm báo cáo | Nội dung |
 |---|---|
-| AI bịa số | Kiểm tra số trước khi hiển thị (9.2 bước 3) |
-| Lộ dữ liệu | Chỉ gửi gói sự thật đã tổng hợp, không gửi file gốc; MVP dùng dữ liệu tổng hợp |
-| Lộ khóa API | Biến môi trường; quét trước khi nộp |
-| Phụ thuộc mạng | Chế độ dự phòng bằng mẫu câu |
+| inbound_freight | Cước nhà cung cấp đến kho |
+| transfer_freight | Cước kho đến kho |
+| outbound_freight | Cước kho giao cuối đến vùng |
+| direct_freight | Cước xưởng / nhà cung cấp thẳng tới vùng |
+| inbound_handling | Phí mọi lần nhận hàng, gồm nhận chuyển kho |
+| outbound_handling | Phí mọi lần gửi hàng, gồm gửi chuyển kho |
 
-# 10. Lưu trữ và nhật ký
+Kết quả là lượng luồng tổng hợp theo SKU trên từng chặng. Việc theo dõi danh tính từng pallet hoặc gắn một đơn hàng với toàn bộ lộ trình cần thêm mô hình truy vết.
 
-SQLite, các bảng chính: `scenarios`, `runs` (kèm JSON của kế hoạch, trạng thái solver, kết quả verify), `overrides`, `approvals`, `explanations`, `audit_events`.
+# 6. Baseline, kiểm tra và tiết kiệm
 
-**Một sự kiện nhật ký gồm:** thời gian, loại (`SCENARIO_UPLOADED`, `RUN_COMPLETED`, `OVERRIDE_APPLIED`, `EXPLANATION_APPROVED`, `PLAN_APPROVED`...), tác nhân (planner hoặc hệ thống), run_id, nội dung chi tiết (JSON), và mã băm chuỗi để phát hiện sửa đổi. Không có lệnh sửa hoặc xóa.
+Baseline thử kho giao cuối được vùng ưu tiên trước, rồi các kho giao cuối khác theo cước giao vùng tăng dần. Khi có chuyển kho, nó chọn đường đi rẻ nhất hiện còn khả năng nhận hàng từ một nhà cung cấp đến kho giao cuối đang xét. Nếu các đường qua kho chưa phục vụ hết nhu cầu, baseline mới dùng giao thẳng theo cước tăng dần. Nguồn cung, năng lực mọi kho, giới hạn tuyến và SKU được phép đều được trừ dần sau mỗi lần phân bổ.
 
-# 11. Màn hình giao diện
+Quy tắc baseline giữ thứ tự xử lý vùng và SKU hiện có. Vì tham lam, baseline có thể thất bại trong một bộ dữ liệu mà solver vẫn tìm được phương án. Các bộ dữ liệu không có tuyến chuyển kho hoặc giao thẳng tiếp tục dùng hành vi baseline trước đó. Dữ liệu chỉ giao thẳng có thể có baseline hợp lệ; đây vẫn là quy tắc tham chiếu giả lập, không phải kế hoạch thực tế của doanh nghiệp.
 
-1. **Dữ liệu:** tải file; bảng lỗi (file, dòng, nội dung); nút "Dùng dữ liệu mẫu".
-2. **Chạy và so sánh:** chọn LP hoặc MILP; ô số lớn (baseline, tối ưu, tiết kiệm, %); trạng thái solver; biểu đồ cột cước theo 4 loại; thanh mức đầy từng kho (trước và sau).
-3. **Chi tiết kế hoạch:** bảng (vùng, SKU, kho, pallet) lọc được; tô màu các dòng khác baseline.
-4. **Giải thích và chỉnh:** bản giải thích (nguồn AI hay mẫu, kết quả kiểm tra số); form ghim quyết định và lý do; hiện chi phí tăng thêm.
-5. **Duyệt và nhật ký:** nút Approve / Reject kèm ghi chú; dòng thời gian sự kiện; nút xuất CSV.
-6. **What-if:** chọn thay đổi, chạy, so hai kế hoạch cạnh nhau.
+Bộ kiểm tra độc lập tính lại cung/cầu dùng chung, cân bằng hàng, năng lực từng kho, tuyến được phép và giới hạn chuyển kho / giao thẳng từ kết quả luồng. Chi phí được tính lại từ số pallet và đơn giá. Baseline phải đáp ứng đủ nhu cầu và qua kiểm tra thì mới có số tiết kiệm.
 
-Bản nhãn "Synthetic data" luôn hiển thị.
+Tiết kiệm bằng tổng chi phí baseline trừ tổng chi phí tối ưu. Giá trị phần trăm dùng cùng tổng chi phí baseline. Trường hợp baseline không hợp lệ trả `saving=null` và `saving_pct=null`.
 
-# 12. Yêu cầu phi chức năng
+# 7. Planner điều chỉnh và What-if
 
-| Mã | Yêu cầu |
+Form `Serve from` chọn kho làm chặng giao cuối đến vùng. Ghim lượng hàng có nghĩa là cố định `y[warehouse,zone,sku]` bằng đúng số pallet yêu cầu. Solver lựa chọn lại nguồn cung và các kho trung gian còn lại trong các giới hạn.
+
+Form `Create manual route` chọn nhà cung cấp, danh sách kho theo thứ tự, khách, SKU, số pallet và lý do. Đây là lượng hàng dành trước trên đường hoàn chỉnh; tổng lượng dành trước được cộng trên từng chặng chung và phần nhu cầu còn lại được tối ưu. Nguồn cung, năng lực kho/tuyến, SKU hợp lệ và các ghim giao cuối vẫn được kiểm tra. Mỗi chặng phải có trong input. Lý do không tự tạo giá mới; cước đã thỏa thuận phải được nhập vào bảng cước.
+
+Chọn loại giao thẳng sẽ gửi danh sách `warehouses: []`. Tuyến xưởng → khách phải có trong `direct_rates.csv`; danh sách kho rỗng không tự tạo tuyến hay cước. API cho phép từ 0 đến 100 kho trong một đường thủ công, với 0 là giao thẳng. Nhu cầu và nguồn cung vẫn dùng chung với các đường qua kho.
+
+Thêm, sửa hoặc xóa ràng buộc tuyến tạo bản con, giữ nguyên bản gốc và hiển thị chênh lệch tổng tiền. Ví dụ mẫu branching gốc 102, dành 6 pallet qua B→D thành 132 (+30), qua A→E thành 114 (+12). Thứ tự kho dựa trên đồ thị, nên E→A được biểu diễn nếu khai báo đủ Xưởng→E, E→A, A→Khách. Giới hạn không có chu trình vẫn giữ nguyên; không thể đồng thời thêm E→A và giữ A→E trong cùng dữ liệu.
+
+Results có bảng `Complete route cost ranking`, lọc theo khách/SKU và xếp đường hoàn chỉnh từ rẻ đến đắt, gồm toàn bộ cước và phí nhận/xuất kho. Người dùng nhập lượng so sánh để xem báo giá; bảng báo vượt giới hạn nếu đường không chở đủ lượng đó khi dùng riêng. Chọn một dòng chỉ làm nổi bật đúng đường đó bằng màu cam, không tính lại phương án. Lượng hàng/chi phí theo đường trong phương án là cách phân rã số liệu luồng; không khẳng định danh tính pallet khi gộp/tách hàng. Mạng lớn chỉ trả tối đa 100 đường rẻ nhất và ghi rõ còn đường khác.
+
+Bảng xếp hạng gồm cả đường giao thẳng, giá bằng cước đã khai báo và phí xử lý kho bằng 0. Giới hạn dùng riêng của đường giao thẳng là mức nhỏ nhất giữa nguồn cung, nhu cầu và `max_pallets` của tuyến nếu có.
+
+Mỗi điều chỉnh có lý do và tạo lần chạy con. Nếu không có phương án đáp ứng quyết định đó, API trả lỗi và giữ lịch sử phương án trước.
+
+What-if dùng một bản sao dữ liệu. Đóng một kho đặt năng lực kho bằng 0, chặn cả hàng từ nhà cung cấp và hàng nhận trung chuyển tại kho đó; đường xưởng → khách không bị chặn vì không dùng kho. API đổi cước chấp nhận `kind` là `inbound`, `outbound`, `transfer` hoặc `direct`. Nhu cầu và năng lực cũng có thể thay đổi.
+
+# 8. Kiến trúc và API
+
+```text
+Planner -> React UI -> FastAPI -> api/service.py -> nordic_flow
+                              |
+                              +-> SQLite
+                              |
+                              +-> Groq tùy chọn qua HTTPS
+```
+
+React được build bằng Vite vào `mvp/web/`, rồi FastAPI phục vụ file tĩnh. Thư mục `mvp/api/` chứa routes, use cases, SQLite và audit. Lõi `mvp/nordic_flow/` dùng các cấu trúc dữ liệu Python.
+
+| Phương thức và đường dẫn dưới /api | Nội dung |
 |---|---|
-| N-01 | Chạy local bằng một lệnh cài đặt, một lệnh chạy; hướng dẫn trong README |
-| N-02 | Chạy dữ liệu demo (2/3/6/20) xong trong dưới 30 giây ở chế độ MILP |
-| N-03 | Kết quả tái lập được: cùng dữ liệu và tham số cho cùng chi phí |
-| N-04 | Không có mật khẩu, khóa API hay thông tin nhạy cảm trong repo hoặc file nộp |
-| N-05 | Mọi lỗi hiển thị bằng câu dễ hiểu, không lộ stack trace |
-| N-06 | Mã có kiểm thử cho lõi tính toán và các API chính |
+| POST /scenarios/sample | `{name}` là `golden`, `demo`, `transshipment` hoặc `branching` |
+| POST /scenarios | Multipart `files`, CSV hoặc ZIP, và tên kịch bản |
+| GET /scenarios, GET /scenarios/{id} | Danh sách và chi tiết dữ liệu |
+| POST /scenarios/{id}/runs | `{mode,time_limit}` |
+| GET /scenarios/{id}/runs, GET /runs/{id} | Lịch sử và kết quả đầy đủ |
+| POST /runs/{id}/overrides | `{zone,sku,warehouse,pallets,reason}` |
+| POST /runs/{id}/routes | `{supplier,warehouses:[...],zone,sku,pallets,reason}` dành hàng trên đường hoàn chỉnh |
+| GET /runs/{id}/paths | Query `zone,sku,quantity,limit`; giá cả đường, giới hạn dùng riêng và phân rã phương án |
+| DELETE /runs/{id}/routes/{index} | Xóa một ràng buộc tuyến trong bản con |
+| POST /runs/{id}/decision | `{decision,comment}`, quyết định `approve` hoặc `reject` |
+| GET /runs/{id}/export | ZIP khi phương án đã được duyệt |
+| POST /runs/{id}/explanation | `{use_llm}` |
+| GET /runs/{id}/explanation | Bản giải thích hiện hành |
+| POST /runs/{id}/explanation/approve | Planner duyệt hoặc sửa văn bản |
+| POST /scenarios/{id}/whatif | `{changes,mode,time_limit,reference_run_id}` |
+| GET /audit, GET /audit/verify | Sự kiện và kiểm tra chuỗi băm |
+| POST /mapping/suggest, POST /mapping/confirm | Gợi ý và xác nhận SKU |
 
-# 13. Đối chiếu với Round 1 và những gì khác
+Mọi lỗi dùng JSON với `code`, `message` và `details`. Mỗi plan có bốn mảng `inbound`, `transfers`, `outbound`, `direct`. Một dòng chuyển kho có dạng
 
-| Round 1 (slide) | MVP |
+```json
+{"from_warehouse":"HUB","to_warehouse":"REG","sku":"SKU-01","pallets":10}
+```
+
+Một dòng giao thẳng có dạng `{"supplier":"SUP1","zone":"Z1","sku":"SKU-01","pallets":10}`. Plan JSON cũ thiếu `transfers` hoặc `direct` được đọc thành mảng rỗng. Báo cáo cũ thiếu `transfer_freight` hoặc `direct_freight` được hiển thị bằng 0. Run trả metadata `network.direct_lanes` theo dữ liệu hiệu lực của lần chạy, gồm `supplier,zone,cost_per_pallet,max_pallets,available,unavailable_reason`. SQLite tiếp tục lưu dữ liệu và phương án dưới dạng JSON.
+
+# 9. Giải thích và dùng AI
+
+Code tạo facts từ phương án đã tính và kiểm tra. Facts gồm chi phí, mức thay đổi giữa nguồn giao từ kho / xưởng, các chặng chuyển kho, giao thẳng và trạng thái năng lực.
+
+Bản chuẩn dùng mẫu câu điền facts. Planner có thể chọn riêng `Write standard summary` hoặc `Write with AI assistant`. Khi bật Groq, facts được gửi qua HTTPS để soạn bản nháp. Bộ kiểm tra số có thể loại số không được dữ kiện hỗ trợ và trả về bản chuẩn.
+
+Kiểm tra số chưa xác minh được toàn bộ ý nghĩa của văn bản. Planner kiểm tra vai trò của con số, đơn vị, hướng tăng giảm, tên kho và nhận định nguyên nhân trước khi duyệt. Giá trị trong facts giữ độ chính xác của báo cáo. Các cước tuyến ước tính được gọi rõ là ước tính.
+
+Duyệt giải thích và duyệt phương án là hai thao tác riêng. Các bản nháp AI cần được đọc trước khi xác nhận. AI cũng có thể gợi ý SKU trong danh sách ứng viên, rồi planner xác nhận.
+
+# 10. Lưu trữ, duyệt và xuất
+
+Các bảng SQLite chính là `scenarios`, `runs`, `explanations` và `audit_events`. Run lưu baseline, tối ưu, so sánh, pins, thay đổi What-if và kết quả kiểm tra dưới dạng JSON.
+
+Tuyến thủ công lưu riêng trong `route_pins_json`, mặc định `[]`. Khi mở database cũ, ứng dụng bổ sung cột này và giữ nguyên dữ liệu cùng audit. Run trả `route_pins`; ZIP xuất có thêm `manual_routes.json`.
+
+Phương án mới ở trạng thái `draft`. Duyệt chuyển sang `approved`, từ chối chuyển sang `rejected`. Cả hai quyết định khóa lần chạy. Một phương án đã được duyệt mới có quyền xuất ZIP.
+
+ZIP chứa inbound, transfers, outbound và direct của phương án tối ưu, cùng các file baseline tương ứng khi baseline hợp lệ. File `optimised_direct.csv` / `baseline_direct.csv` có các cột `supplier,zone,sku,pallets`; luồng rỗng vẫn có file chỉ chứa tiêu đề. Nó cũng chứa `comparison.json`, `planner_decisions.json`, `manual_routes.json`, `audit_log.json` và `STATUS.txt`. Audit ghi sự kiện xuất sau khi chuẩn bị ZIP.
+
+# 11. Giao diện
+
+Ba bước chính là `Data`, `Results` và `Review & approve`. `Audit trail`, `What-if` và `User guide` là các màn hỗ trợ. `User guide` dùng được khi chưa tải bộ dữ liệu nào.
+
+Data có Synthetic demo, Worked example, Multi-warehouse example, Warehouse transfer chain và tải file; sau khi tải, phần chọn nguồn thu vào `Change data`. Results giữ KPI, sơ đồ giao thẳng / đa chặng và bảng xếp hạng mở sẵn; chi phí, năng lực và bảng luồng mở khi cần. Chỉnh tuyến thủ công và kho giao cuối là hai màn con riêng của Results. Review giữ hai nút giải thích, tóm tắt quyết định chỉ đọc, lịch sử phiên bản mở rộng và bước duyệt; nút xuất chỉ hiện sau duyệt. `User guide` có hướng dẫn input từng trường, các bước thao tác, câu hỏi thường gặp và ZIP testcase 10–16 tải xuống từ `/examples/`.
+
+# 12. Dữ liệu kiểm thử và nghiệm thu
+
+| Bộ hoặc tình huống | Kết quả kỳ vọng |
 |---|---|
-| Pilot 2 nhà cung cấp, 3 kho, 20 SKU, chạy mỗi tuần (slide 4) | Giữ nguyên |
-| Planner nắm quyền, đề xuất rồi duyệt (slide 5) | F-08, F-09, F-11 |
-| Bộ giải LP/MILP, trạng thái solver hiển thị (slide 6) | F-04, F-06 |
-| AI: ánh xạ SKU, giải thích, học từ chỉnh sửa (slide 6) | Giải thích (F-10) và ánh xạ SKU (F-13, mức S). **Học từ chỉnh sửa không làm** (pha 2) |
-| Ví dụ tính tay 700→500 (slide 7) | Dùng làm kiểm thử vàng |
-| Cổng pilot: giảm chi phí ≥ 5%, giảm thời gian chuẩn bị ≥ 30%, không giảm OTIF, 0 vi phạm cứng (slide 8) | MVP đo chi phí và vi phạm cứng; **không đo thời gian chuẩn bị hay OTIF** (cần người dùng thật) |
-| Dữ liệu Thụy Điển thật (tuần 1 khám phá) | **Khác:** MVP dùng dữ liệu tổng hợp. Phải nói rõ trong video |
+| `data/golden` | Baseline 700, tối ưu 500, chạy khi thiếu file chuyển kho |
+| `data/demo` | Các kết quả và báo cáo dùng dữ liệu synthetic |
+| `data/transshipment` | Luồng 10 pallet qua HUB, REG, LOCAL, baseline 210, tối ưu 170 |
+| ZIP 10 — `10_direct_factory_customer.zip` | Không có kho; 10 pallet giao thẳng giá 7, baseline và tối ưu đều 70 |
+| ZIP 11 — `11_chain_3_warehouses.zip` | 10 pallet qua 3 kho, baseline và tối ưu đều 130 |
+| ZIP 12 — `12_chain_4_warehouses.zip` | 10 pallet qua 4 kho, baseline và tối ưu đều 160 |
+| ZIP 13 — `13_chain_5_warehouses.zip` | 10 pallet qua 5 kho, baseline và tối ưu đều 190 |
+| ZIP 14 — `14_chain_8_warehouses.zip` | 10 pallet qua 8 kho, baseline và tối ưu đều 280 |
+| ZIP 15 — `15_chain_12_warehouses.zip` | 10 pallet qua 12 kho, baseline và tối ưu đều 400 |
+| ZIP 16 — `16_mixed_direct_chain_5.zip` | Baseline qua 5 kho có giá 190; tối ưu 3 pallet giao thẳng + 7 qua 5 kho, tổng 145 |
+| Chuyển kho bắt buộc | Hàng đến vùng dù kho giao cuối chỉ nhận từ kho khác |
+| Đường trực tiếp rẻ hơn | Solver chọn đường có tổng chi phí thấp nhất |
+| Năng lực kho trung gian | Mọi lần nhận đều được tính, quá tải bị chặn |
+| Giới hạn tuyến | Tổng pallet mọi SKU trên tuyến đáp ứng max_pallets |
+| Đóng kho, hạn chế SKU | Phương án dùng đường còn hợp lệ hoặc báo không có nghiệm |
+| Chu trình, self-link, mã sai | Lỗi dữ liệu chặn chạy |
+| Plan JSON cũ | Mảng chuyển kho / giao thẳng mặc định rỗng và đọc lại được |
+| Xuất ZIP và duyệt | Có CSV chuyển kho và giao thẳng, xuất chỉ sau duyệt |
+| Báo cáo và giải thích | Tổng chi phí khớp các chặng, giữ số lẻ, mô tả đúng lượng đổi kho |
 
-**Những chỗ MVP khác Round 1 và lý do (nội dung bắt buộc trong video):**
-1. Dữ liệu tổng hợp vì chưa có dữ liệu Company A.
-2. Thêm kịch bản what-if và nhật ký kiểm toán có mã băm: để làm rõ "kiểm soát" mà Round 1 chỉ nói đại ý.
-3. Không làm phần học từ chỉnh sửa: cần dữ liệu dùng thật qua thời gian.
+Số test và thời gian benchmark được ghi từ lần chạy kiểm thử thực tế. Kết quả synthetic giúp kiểm chứng hành vi mô hình. Các giả thuyết về tiết kiệm thực tế, thời gian planner và mức dịch vụ cần dữ liệu vận hành.
 
-# 14. Kiểm thử và tiêu chí nghiệm thu
+Các chuỗi mới dùng N kho với cước đầu 2, mỗi chặng kho–kho 1, cước cuối 3, mỗi kho nhận 1 và xuất 1. Giá mỗi pallet là `3N + 4`. Mẫu hỗn hợp dùng tuyến giao thẳng giá 4, giới hạn tổng 3 pallet, nên tối ưu `3 × 4 + 7 × 19 = 145`. Số 3/4/5/8/12 là số kho được ghé, tương ứng N−1 chặng chuyển kho; mô hình không cố định số tầng bằng tên kho.
 
-| Kiểm tra | Cách | Đạt khi |
-|---|---|---|
-| Ví dụ tính tay | `test_golden` | Baseline 700, tối ưu 500, kế hoạch đúng |
-| Dữ liệu sai | Test validation | Mỗi loại lỗi được báo đúng file, dòng |
-| Vô nghiệm | Test diagnosis | Chỉ đúng nguyên nhân (cung, sức chứa, tuyến) |
-| Kế hoạch hợp lệ | `verify_plan` trên mọi kế hoạch | Không có vi phạm |
-| Ghim | Test OverrideService | Chi phí sau ghim ≥ chi phí tối ưu; ghim bất khả thi bị từ chối |
-| AI kiểm tra số | Test ExplainService với đầu ra giả có số bịa | Bị loại, chuyển sang mẫu |
-| Nhật ký | Test AuditService | Không sửa được; chuỗi băm toàn vẹn |
-| Hành trình đầu-cuối | Chạy tay theo bảng mục 3 | Đủ 8 bước không lỗi |
+# 13. Tài liệu bài nộp và AI Journal
 
-# 15. Kế hoạch, phân vai và quyết định mở
+Video, User Journey và System Context Diagram phải khớp các chức năng đa chặng được trình diễn. User Journey đi từ nhập dữ liệu tới duyệt và xuất. Sơ đồ hệ thống thể hiện đúng browser, API, core, SQLite, CSV và dịch vụ Groq tùy chọn.
 
-**Mốc:** T3 3/11 góp ý spec; T4 4/11 API; T5 5/11 giao diện; T6 6/11 duyệt, nhật ký, giải thích AI, what-if; T7 7/11 đóng băng tính năng, kiểm thử, nháp tài liệu; CN 8/11 quay video, rà soát; T2 9/11 gửi trước 18:00.
-
-**Phân vai [QUYẾT ĐỊNH]:** ghi tên vào ô trống.
-
-| Nhóm việc | Người |
-|---|---|
-| Lõi tối ưu, kiểm thử toán (đã có phần lớn) | |
-| API và lưu trữ (SQLite, nhật ký) | |
-| Giao diện | |
-| AI (giải thích, ánh xạ SKU) | |
-| User Journey, System Context Diagram | |
-| Video và AI Journal | |
-
-**Quyết định mở:**
-
-| # | Câu hỏi | Đề xuất mặc định |
-|---|---|---|
-| Q1 | Giao diện dùng gì? | Web nhẹ (một trang tĩnh gọi API FastAPI) nếu có người quen front-end; ngược lại Streamlit cho nhanh |
-| Q2 | Dùng LLM nào, có khóa API chưa? | Nếu chưa có, dùng chế độ mẫu câu và nói rõ trong AI Journal |
-| Q3 | F-13 (ánh xạ SKU) có làm không? | Chỉ làm sau khi mọi mục M xong |
-| Q4 | F-12 (what-if) làm đầy đủ hay một loại (đóng kho)? | Chỉ đóng kho trước |
-| Q5 | Có cần thêm màn Ops sponsor? | Không, dùng màn Nhật ký |
-| Q6 | Ngôn ngữ giao diện và video? | Tiếng Anh |
-
-# 16. AI Journal: cần ghi từ bây giờ
-
-Mẫu BTC yêu cầu tối đa 5 tác vụ với thời gian ước tính ban đầu, thời gian thực tế khi dùng AI, ai kiểm tra, kết quả; cộng 2–3 quyết định then chốt và 4 câu phản tư. Với mỗi lần dùng AI cho việc đáng kể, ghi một dòng: **việc gì · ước tính · thực tế · ai kiểm tra · kết quả · chỗ nào bị sửa hoặc từ chối**. Ví dụ đã có: tinh chỉnh dữ liệu demo (kết quả ban đầu chỉ ~1% rồi chỉnh cước nhập để có ~4%; người kiểm tra: cần ghi rõ đây là lựa chọn thiết kế).
-
-# 17. Phụ lục: các thuật ngữ
-
-SKU, LP, MILP, solver, baseline, constraint, ROI... xem phần giải thích thuật ngữ đã gửi cho đội; ngắn gọn: **SKU** = mã một loại hàng; **LP** = tối ưu tuyến tính, hàng chia nhỏ được; **MILP** = như LP nhưng có biến nguyên (pallet nguyên); **solver** = phần mềm tìm lời giải; **baseline** = cách làm thói quen dùng để so sánh.
+AI Journal ghi tối đa năm tác vụ, chiến lược tối đa 150 từ, hai đến ba quyết định và phần phản tư. Thời gian chưa ghi được điền `Not recorded` theo xác nhận của nhóm. Người kiểm chứng ghi rõ các kiểm tra đã thực sự làm.

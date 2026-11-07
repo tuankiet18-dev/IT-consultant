@@ -1,0 +1,3 @@
+from_warehouse_id,to_warehouse_id,cost_per_pallet,max_pallets
+HUB,REG,3,20
+REG,LOCAL,2,20

@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle2, Info, RotateCcw, XCircle } from "lucide-react";
 import { useApp } from "../store.jsx";
+import { fmt } from "../utils";
 
 export function PageHead({ title, lead, children }) {
   return (
@@ -90,18 +91,17 @@ export function Legend({ items }) {
 
 export function RunBanner({ run }) {
   const { runOpt, busy } = useApp();
-  const { fmt } = { fmt: (n) => Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 }) };
   return (
     <>
       {run.kind === "override" && (
         <Note tone="info">
-          This plan includes {run.pins.length} decision(s) fixed by the planner. They cost {fmt(run.cost_of_planner_decisions)} cost units more than the unconstrained optimum.
+          {run.pins.length + (run.route_pins || []).length} planner decision(s) applied · Original cost {fmt(run.optimum_total)} → current {fmt(run.comparison.optimised.total)} · Cost difference from the original plan: {run.cost_of_planner_decisions > 0 ? "+" : ""}{fmt(run.cost_of_planner_decisions)} cost units.
         </Note>
       )}
-      {run.kind === "whatif" && <Note tone="info">This plan comes from a what-if on a modified copy of the data. It does not change the real scenario.</Note>}
+      {run.kind === "whatif" && <Note tone="info">What-if result · Uses the changes selected for this scenario.</Note>}
       {run.state !== "draft" && (
         <Note tone={run.state === "approved" ? "ok" : "err"}>
-          This plan is {run.state} and can no longer be changed. To make further changes, calculate a new version: it starts as a draft and the {run.state} plan stays in the history.
+          {run.state === "approved" ? "Approved plan. Export is available below." : "Rejected plan. Start a new version to try another allocation."}
           <div className="mt-3">
             <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => runOpt(run.mode === "lp" ? "lp" : "milp", 30)}>
               <RotateCcw size={16} aria-hidden="true" /> Start a new version

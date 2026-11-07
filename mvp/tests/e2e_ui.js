@@ -37,6 +37,8 @@ async function main() {
     await shot('5-review');
     await button('Approve explanation').click();
     await page.getByText('Approved by planner').waitFor();
+    await page.getByText('Adjust plan', { exact: true }).click();
+    await button('Change delivery warehouse').click();
 
     await page.getByRole('combobox', { name: 'Zone', exact: true }).selectOption('Z1');
     await page.getByRole('combobox', { name: 'SKU', exact: true }).selectOption('SKU-01');
@@ -44,7 +46,7 @@ async function main() {
     await page.getByRole('combobox', { name: 'Serve from' }).selectOption('WB');
     await page.getByRole('spinbutton', { name: 'Exactly (pallets)' }).fill('8');
     const reason = 'Customer contract names this warehouse';
-    await page.getByRole('textbox', { name: 'Reason (required)' }).fill(reason);
+    await page.getByRole('textbox', { name: 'Reason (required)', exact: true }).fill(reason);
     const [override] = await Promise.all([
       page.waitForResponse(response => response.url().endsWith('/overrides')),
       button('Apply decision and recalculate').click(),
@@ -52,6 +54,7 @@ async function main() {
     assert.ok(override.ok(), await override.text());
     await page.getByRole('heading', { name: 'Where the cost sits' }).waitFor();
     await step('Review & approve').click();
+    await page.getByText(/^Manual decisions \(/).click();
     await page.getByRole('cell', { name: reason }).waitFor();
     await shot('6-override');
 
@@ -59,7 +62,6 @@ async function main() {
     await button('Approve plan').click();
     const exportButton = button('Export approved plan (ZIP)');
     await exportButton.waitFor();
-    await page.getByText('Approved', { exact: true }).first().waitFor();
     await shot('7-approve');
     const [download] = await Promise.all([page.waitForEvent('download'), exportButton.click()]);
     assert.match(download.suggestedFilename(), /\.zip$/i);

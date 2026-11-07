@@ -1,0 +1,4 @@
+supplier_id,warehouse_id,cost_per_pallet
+SUP1,HUB,2
+SUP1,REG,12
+SUP1,LOCAL,20

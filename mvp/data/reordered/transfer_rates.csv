@@ -1,0 +1,2 @@
+from_warehouse_id,to_warehouse_id,cost_per_pallet,max_pallets
+E,A,3,12

@@ -25,6 +25,29 @@ export default function PlanDetails() {
 
   const lanes = {};
   for (const x of r.optimised.inbound) { const k = x.supplier + ">" + x.warehouse; lanes[k] = (lanes[k] || 0) + x.pallets; }
+  const transferMap = new Map();
+  for (const [side, flows] of [["baseline", r.baseline.transfers || []], ["optimised", r.optimised.transfers || []]]) {
+    for (const flow of flows) {
+      const key = JSON.stringify([flow.from_warehouse, flow.to_warehouse, flow.sku]);
+      const row = transferMap.get(key) || { ...flow, baseline: 0, optimised: 0 };
+      row[side] += flow.pallets;
+      transferMap.set(key, row);
+    }
+  }
+  const transferRows = [...transferMap.values()].filter(row => {
+    if (only && Math.abs(row.baseline - row.optimised) < 1e-6) return false;
+    return !q || ent.sku(row.sku).toLowerCase().includes(q.toLowerCase()) || row.sku.toLowerCase().includes(q.toLowerCase());
+  });
+  const directMap = new Map();
+  for (const [side, flows] of [["baseline", r.baseline.direct || []], ["optimised", r.optimised.direct || []]]) {
+    for (const flow of flows) {
+      const key = JSON.stringify([flow.supplier, flow.zone, flow.sku]);
+      const row = directMap.get(key) || { ...flow, baseline: 0, optimised: 0 };
+      row[side] += flow.pallets;
+      directMap.set(key, row);
+    }
+  }
+  const directRows = [...directMap.values()].filter(row => (!zone || row.zone === zone) && (!only || Math.abs(row.baseline - row.optimised) > 1e-6) && (!q || ent.sku(row.sku).toLowerCase().includes(q.toLowerCase()) || row.sku.toLowerCase().includes(q.toLowerCase())));
 
   return (
     <div>
@@ -48,9 +71,9 @@ export default function PlanDetails() {
         </div>
       </div>
 
-      <div className="card mt-4 overflow-x-auto">
+      {keys.length > 0 && <div className="card mt-4 overflow-x-auto">
         <table className="tbl">
-          <thead><tr><th>Zone</th><th>SKU</th><th>Optimised: served from (pallets)</th><th>Baseline: served from (pallets)</th><th /></tr></thead>
+          <thead><tr><th>Zone</th><th>SKU</th><th>Optimised final warehouse (pallets)</th><th>Baseline final warehouse (pallets)</th><th /></tr></thead>
           <tbody>
             {rows.map((k) => {
               const [z, s] = k.split("|");
@@ -66,10 +89,32 @@ export default function PlanDetails() {
             {!rows.length && <tr><td colSpan={5} className="py-8 text-center text-slate-500">No rows match these filters.</td></tr>}
           </tbody>
         </table>
-      </div>
-      <p className="hint mt-2">{rows.length} of {keys.length} zone-and-SKU rows shown.</p>
+      </div>}
+      {keys.length > 0 && <p className="hint mt-2">{rows.length} of {keys.length} warehouse-delivery rows shown.</p>}
 
-      <Section title="Inbound flows" hint="Supplier to warehouse, pallets.">
+      {directMap.size > 0 && <Section title="Direct deliveries" hint="Factory to customer, without warehouse handling."><div className="card overflow-x-auto"><table className="tbl"><thead><tr><th>Factory</th><th>Customer</th><th>Product</th><th className="num">Baseline pallets</th><th className="num">Optimised pallets</th></tr></thead><tbody>{directRows.map(row => <tr key={JSON.stringify([row.supplier, row.zone, row.sku])}><td>{ent.supplier(row.supplier)}</td><td>{ent.zone(row.zone)}</td><td>{ent.sku(row.sku)}</td><td className="num">{r.comparison.baseline_valid ? fmt(row.baseline) : "unusable"}</td><td className="num">{fmt(row.optimised)}</td></tr>)}{!directRows.length && <tr><td colSpan={5}>No direct deliveries match these filters.</td></tr>}</tbody></table></div></Section>}
+
+      {transferMap.size > 0 && (
+        <Section title="Warehouse transfers" hint="Pallets moved between warehouses, by product. The zone filter applies to final deliveries above.">
+          <div className="card overflow-x-auto">
+            <table className="tbl">
+              <thead><tr><th>From warehouse</th><th>To warehouse</th><th>SKU</th><th className="num">Baseline pallets</th><th className="num">Optimised pallets</th></tr></thead>
+              <tbody>
+                {transferRows.map(row => (
+                  <tr key={JSON.stringify([row.from_warehouse, row.to_warehouse, row.sku])} className={Math.abs(row.baseline - row.optimised) > 1e-6 ? "row-changed" : ""}>
+                    <td>{ent.wh(row.from_warehouse)}</td><td>{ent.wh(row.to_warehouse)}</td><td>{ent.sku(row.sku)}</td>
+                    <td className="num">{r.comparison.baseline_valid ? fmt(row.baseline) : "unusable"}</td><td className="num">{fmt(row.optimised)}</td>
+                  </tr>
+                ))}
+                {!transferRows.length && <tr><td colSpan={5} className="py-6 text-center text-slate-500">No transfers match these filters.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+          <p className="hint mt-2">Quantities are shown for each leg. Goods can appear on several consecutive legs.</p>
+        </Section>
+      )}
+
+      {Object.keys(lanes).length > 0 && <Section title="Inbound flows" hint="Pallets from each supplier to each warehouse.">
         <div className="card overflow-x-auto">
           <table className="tbl">
             <thead><tr><th>Supplier</th><th>Warehouse</th><th className="num">Pallets</th></tr></thead>
@@ -81,7 +126,7 @@ export default function PlanDetails() {
             </tbody>
           </table>
         </div>
-      </Section>
+      </Section>}
     </div>
   );
 }

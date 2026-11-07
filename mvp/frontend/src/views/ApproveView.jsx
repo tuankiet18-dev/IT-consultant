@@ -5,29 +5,47 @@ import { Field, Note, Section } from "../components/ui.jsx";
 import { eventText, fmt, payloadText, solverText, when } from "../utils";
 
 export function DecisionPanel() {
-  const { run: r, decide, exportZip } = useApp();
+  const { run: r, decide, exportZip, busy } = useApp();
   const [comment, setComment] = useState("");
   const draft = r.state === "draft";
   const c = r.comparison;
   const failed = r.verify.optimised_violations.length > 0;
   return (
     <div>
-      <Section title={`Decision on plan ${r.id}`} hint="Nothing is executed by Nordic Flow. An approved plan is exported for the existing ERP, WMS and TMS.">
+      <Section title={`Decision on plan ${r.id}`} hint={draft ? "Review the checks, then approve or reject." : r.state === "approved" ? "Approved and ready to export." : "This plan was rejected."}>
         <div className="card card-pad">
-          <p className="text-[15px] text-slate-700">
-            Optimised cost <b className="text-slate-900">{fmt(c.optimised.total)}</b>
-            {c.saving != null ? `, saving ${fmt(c.saving)} (${fmt(c.saving_pct, 1)}%)` : ", no saving reported"} · {solverText(r.status).toLowerCase()} · checks {failed ? "failed" : "passed"}
-          </p>
-          <Field label="Comment (required if rejecting)" className="mt-4">
-            <input className="input" value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Reviewed cost, capacity and lanes" disabled={!draft} />
-          </Field>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <button type="button" className="btn btn-success" disabled={!draft} onClick={() => decide("approve", comment)}><CheckCircle2 size={16} aria-hidden="true" /> Approve plan</button>
-            <button type="button" className="btn btn-danger" disabled={!draft} onClick={() => decide("reject", comment)}><XCircle size={16} aria-hidden="true" /> Reject</button>
-            <button type="button" className="btn btn-secondary" disabled={r.state !== "approved"} title={r.state === "approved" ? "" : "Only approved plans can be exported"} onClick={exportZip}>
+          <dl className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <dt className="label">Plan cost</dt>
+              <dd className="text-2xl font-semibold text-slate-900">{fmt(c.optimised.total)}</dd>
+            </div>
+            <div>
+              <dt className="label">Saving against baseline</dt>
+              <dd className="text-2xl font-semibold text-slate-900">
+                {c.saving == null ? "n/a" : fmt(c.saving)}
+                {c.saving != null && <span className="ml-2 text-sm font-normal text-slate-500">{fmt(c.saving_pct, 1)}%</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="label">Plan checks</dt>
+              <dd className={"font-semibold " + (failed ? "text-red-700" : "text-emerald-700")}>{failed ? "Failed" : "Passed"}</dd>
+              <dd className="mt-1 text-sm text-slate-500">{solverText(r.status)}</dd>
+            </div>
+          </dl>
+          {draft && <>
+            <Field label="Comment (required if rejecting)" className="mt-4">
+              <input className="input" value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Reviewed cost, capacity and lanes" />
+            </Field>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button type="button" className="btn btn-success" disabled={busy} onClick={() => decide("approve", comment)}><CheckCircle2 size={16} aria-hidden="true" /> Approve plan</button>
+              <button type="button" className="btn btn-danger" disabled={busy} onClick={() => decide("reject", comment)}><XCircle size={16} aria-hidden="true" /> Reject</button>
+            </div>
+          </>}
+          {r.state === "approved" && <div className="mt-4">
+            <button type="button" className="btn btn-primary" disabled={busy} onClick={exportZip}>
               <Download size={16} aria-hidden="true" /> Export approved plan (ZIP)
             </button>
-          </div>
+          </div>}
         </div>
       </Section>
 
@@ -43,8 +61,8 @@ export function AuditTrail() {
         {chain && (
           <Note tone={chain.ok ? "ok" : "err"}>
             {chain.ok
-              ? <><ShieldCheck size={14} className="mr-1 inline" aria-hidden="true" />Audit trail verified ({chain.events} events). Each entry is linked to the one before it, so any edit would be detected. This is tamper-evident, not tamper-proof.</>
-              : "The audit trail failed verification. Entries may have been changed."}
+              ? <><ShieldCheck size={14} className="mr-1 inline" aria-hidden="true" />Audit trail verified ({chain.events} events).</>
+              : "Audit verification failed. Review the event history before using this plan."}
           </Note>
         )}
         <ol className="card mt-4 divide-y divide-slate-100">

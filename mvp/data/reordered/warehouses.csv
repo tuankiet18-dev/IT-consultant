@@ -1,0 +1,3 @@
+warehouse_id,name,capacity_pallets,handling_in,handling_out
+A,Warehouse A,12,1,1
+E,Warehouse E,12,1,1

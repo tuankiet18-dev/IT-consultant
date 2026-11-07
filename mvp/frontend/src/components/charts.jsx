@@ -11,7 +11,7 @@ export function CostChart({ c }) {
         <div className="flex h-8 overflow-hidden rounded-md bg-slate-100" style={{ width: `${(d.total / max) * 100}%` }}
           role="img" aria-label={`${label} total ${fmt(d.total)} cost units`}>
           {COST.map((k) => (
-            <div key={k.key} title={`${k.label}: ${fmt(d[k.key])}`} style={{ width: `${d.total ? (d[k.key] / d.total) * 100 : 0}%`, background: k.color }} />
+            <div key={k.key} title={`${k.label}: ${fmt(d[k.key] ?? 0)}`} style={{ width: `${d.total ? ((d[k.key] ?? 0) / d.total) * 100 : 0}%`, background: k.color }} />
           ))}
         </div>
       ) : (
@@ -32,12 +32,12 @@ export function CostChart({ c }) {
           </thead>
           <tbody>
             {COST.map((k) => {
-              const d = c.optimised[k.key] - c.baseline[k.key];
+              const d = (c.optimised[k.key] ?? 0) - (c.baseline[k.key] ?? 0);
               return (
                 <tr key={k.key}>
                   <td><span className="mr-2 inline-block h-2.5 w-2.5 rounded-sm" style={{ background: k.color }} aria-hidden="true" />{k.label}</td>
-                  <td className="num">{c.baseline_valid ? fmt(c.baseline[k.key]) : "n/a"}</td>
-                  <td className="num">{fmt(c.optimised[k.key])}</td>
+                  <td className="num">{c.baseline_valid ? fmt(c.baseline[k.key] ?? 0) : "n/a"}</td>
+                  <td className="num">{fmt(c.optimised[k.key] ?? 0)}</td>
                   <td className={"num font-medium " + (!c.baseline_valid ? "" : d < 0 ? "text-emerald-700" : d > 0 ? "text-amber-700" : "")}>
                     {c.baseline_valid ? (d > 0 ? "+" : "") + fmt(d) : "n/a"}
                   </td>

@@ -70,7 +70,10 @@ export function AppProvider({ children }) {
     window.scrollTo({ top: 0 });
   }, [run, loadAudit, loadExplanation]);
 
-  const resetRun = () => { setRun(null); setRuns([]); setExplanation(null); setAudit([]); };
+  const resetRun = () => {
+    setRun(null); setRuns([]); setExplanation(null); setAudit([]); setChain(null);
+    setWhatif({ changes: [], result: null }); setMapping(null);
+  };
 
   const actions = {
     loadSample: (name) => act(async () => {
@@ -87,6 +90,7 @@ export function AppProvider({ children }) {
     openRun: (id, nextTab) => act(async () => {
       const r = await api(`/runs/${id}`); setRun(r); setExplanation(null); setAudit([]); await refreshRuns(r.scenario_id);
       if (nextTab) setTab(nextTab);
+      if (nextTab === "review" || (!nextTab && tab === "review")) await loadExplanation(r);
     }),
     explain: (use_llm) => act(async () => {
       setExplanation(await api(`/runs/${run.id}/explanation`, { method: "POST", json: { use_llm } }));
@@ -99,6 +103,14 @@ export function AppProvider({ children }) {
     applyOverride: (body) => act(async () => {
       const r = await api(`/runs/${run.id}/overrides`, { method: "POST", json: body });
       setRun(r); setExplanation(null); await refreshRuns(r.scenario_id); toast(`New run ${r.id} created`); setTab("results"); window.scrollTo({ top: 0 });
+    }),
+    applyRoute: (body) => act(async () => {
+      const r = await api(`/runs/${run.id}/routes`, { method: "POST", json: body });
+      setRun(r); setExplanation(null); await refreshRuns(r.scenario_id); toast(`Manual route saved in plan ${r.id}`); setTab("results"); window.scrollTo({ top: 0 });
+    }),
+    removeRoute: (index) => act(async () => {
+      const r = await api(`/runs/${run.id}/routes/${index}`, { method: "DELETE" });
+      setRun(r); setExplanation(null); await refreshRuns(r.scenario_id); toast(`Route constraint removed in plan ${r.id}`); setTab("results"); window.scrollTo({ top: 0 });
     }),
     decide: (decision, comment) => act(async () => {
       const r = await api(`/runs/${run.id}/decision`, { method: "POST", json: { decision, comment, actor: "planner" } });

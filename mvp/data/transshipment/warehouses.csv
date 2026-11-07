@@ -1,0 +1,4 @@
+warehouse_id,name,capacity_pallets,handling_in,handling_out
+HUB,Central hub,20,1,1
+REG,Regional warehouse,20,1,1
+LOCAL,Local warehouse,20,1,1

@@ -1,9 +1,11 @@
-export const fmt = (n, d = 0) =>
-  n == null ? "n/a" : Number(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+export const fmt = (n, d) =>
+  n == null ? "n/a" : Number(n).toLocaleString("en-US", { minimumFractionDigits: d ?? 0, maximumFractionDigits: d ?? 6 });
 export const pct = (x) => fmt(x * 100, 0) + "%";
 
 export const COST = [
+  { key: "direct_freight", label: "Factory-to-customer freight", color: "#EC4899" },
   { key: "inbound_freight", label: "Inbound freight", color: "#1E293B" },
+  { key: "transfer_freight", label: "Warehouse transfer freight", color: "#8B5CF6" },
   { key: "inbound_handling", label: "Inbound handling", color: "#94A3B8" },
   { key: "outbound_freight", label: "Outbound freight", color: "#2563EB" },
   { key: "outbound_handling", label: "Outbound handling", color: "#93C5FD" },
@@ -32,6 +34,9 @@ const EVENTS = {
   RUN_COMPLETED: "Plan calculated",
   OVERRIDE_APPLIED: "Planner decision applied",
   OVERRIDE_REJECTED: "Planner decision rejected by the solver",
+  ROUTE_OVERRIDE_APPLIED: "Manual route applied",
+  ROUTE_OVERRIDE_REJECTED: "Manual route rejected",
+  ROUTE_OVERRIDE_REMOVED: "Manual route constraint removed",
   WHATIF_RUN: "What-if calculated",
   WHATIF_INFEASIBLE: "What-if had no feasible plan",
   EXPLANATION_GENERATED: "Explanation drafted",

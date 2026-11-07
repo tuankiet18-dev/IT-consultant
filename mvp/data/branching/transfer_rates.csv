@@ -1,0 +1,10 @@
+from_warehouse_id,to_warehouse_id,cost_per_pallet,max_pallets
+A,D,1,12
+A,E,5,12
+A,F,7,12
+B,D,4,12
+B,E,1,12
+B,F,4,12
+C,D,5,12
+C,E,4,12
+C,F,1,12

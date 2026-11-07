@@ -1,12 +1,14 @@
-import { BarChart3, Boxes, ClipboardCheck, Database, FlaskConical, Loader2, ShieldCheck } from "lucide-react";
+import { BarChart3, BookOpen, Boxes, ClipboardCheck, Database, FlaskConical, Loader2, ShieldCheck } from "lucide-react";
 import { useApp } from "./store.jsx";
 import { Tag } from "./components/ui.jsx";
-import { solverText, stateText } from "./utils";
+import { stateText } from "./utils";
 import DataView from "./views/DataView.jsx";
 import ResultsView from "./views/ResultsView.jsx";
 import ReviewView from "./views/ReviewView.jsx";
 import WhatIfView from "./views/WhatIfView.jsx";
 import AuditView from "./views/AuditView.jsx";
+import { ManualRouteView, DeliveryWarehouseView } from "./views/AdjustmentView.jsx";
+import GuideView from "./views/GuideView.jsx";
 
 const STEPS = [
   { id: "data", label: "Data", icon: Database, view: DataView },
@@ -14,15 +16,17 @@ const STEPS = [
   { id: "review", label: "Review & approve", icon: ClipboardCheck, view: ReviewView },
   { id: "audit", label: "Audit trail", icon: ShieldCheck, view: AuditView },
   { id: "whatif", label: "What-if", icon: FlaskConical, view: WhatIfView },
+  { id: "guide", label: "User guide", icon: BookOpen, view: GuideView },
 ];
+const EDITORS = {
+  route: { label: "Manual route", view: ManualRouteView },
+  delivery: { label: "Delivery warehouse", view: DeliveryWarehouseView },
+};
 
 function StatusStrip() {
-  const { config, run } = useApp();
-  const ai = config && config.llm_enabled;
+  const { run } = useApp();
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Tag tone="warn">Synthetic data</Tag>
-      <span className="hidden sm:inline-flex"><Tag tone={ai ? "good" : "neutral"}>{config == null ? "AI: checking" : ai ? "AI assistant on" : "AI assistant off"}</Tag></span>
       {run && <Tag tone={run.state === "approved" ? "good" : run.state === "rejected" ? "bad" : "info"}>Plan {run.id} · {stateText(run.state)}</Tag>}
     </div>
   );
@@ -39,10 +43,9 @@ function NavItem({ step, index, active, disabled, onClick, compact }) {
         (active ? "bg-brand-50 text-brand-800" : "text-slate-600 hover:bg-slate-100")
       }
     >
-      <span className={"grid h-6 w-6 shrink-0 place-items-center rounded-md text-xs " + (active ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600")}>
-        {index + 1}
-      </span>
-      <Icon size={16} aria-hidden="true" className="hidden shrink-0 sm:block" />
+      {index < 3 ? (
+        <span className={"grid h-6 w-6 shrink-0 place-items-center rounded-md text-xs " + (active ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600")}>{index + 1}</span>
+      ) : <Icon size={20} aria-hidden="true" className="mx-0.5 shrink-0" />}
       <span className="whitespace-nowrap">{step.label}</span>
     </button>
   );
@@ -61,7 +64,8 @@ function Toasts() {
 
 export default function App() {
   const { tab, go, run, scenario, busy } = useApp();
-  const current = STEPS.find((s) => s.id === tab) || STEPS[0];
+  const current = EDITORS[tab] || STEPS.find((s) => s.id === tab) || STEPS[0];
+  const activeTab = EDITORS[tab] ? "results" : tab;
   const View = current.view;
   return (
     <div className="min-h-screen lg:flex">
@@ -74,17 +78,19 @@ export default function App() {
           </div>
         </div>
         <nav aria-label="Workflow" className="flex-1 space-y-1 px-3 py-2">
-          {STEPS.map((s, i) => (
-            <NavItem key={s.id} step={s} index={i} active={tab === s.id} disabled={s.id !== "data" && !run} onClick={() => go(s.id)} />
+          <p className="px-3 pb-2 text-xs font-medium uppercase tracking-wide text-slate-400">Planning</p>
+          {STEPS.slice(0, 3).map((s, i) => (
+            <NavItem key={s.id} step={s} index={i} active={activeTab === s.id} disabled={s.id !== "data" && !run} onClick={() => go(s.id)} />
+          ))}
+          <p className="px-3 pb-2 pt-6 text-xs font-medium uppercase tracking-wide text-slate-400">Explore & track</p>
+          {STEPS.slice(3).map((s, i) => (
+            <NavItem key={s.id} step={s} index={i + 3} active={activeTab === s.id} disabled={s.id !== "guide" && !run} onClick={() => go(s.id)} />
           ))}
         </nav>
         <div className="m-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-          <div className="font-medium text-slate-800">{scenario ? scenario.name : "No scenario loaded"}</div>
+          <div className="font-medium text-slate-800">{scenario ? ({ "sample:demo": "Synthetic demo", "sample:golden": "Worked example", "sample:transshipment": "Warehouse transfer chain", "sample:branching": "Multi-warehouse example" }[scenario.source] || scenario.name) : "No data loaded"}</div>
           <div className="mt-1">{run ? `Plan ${run.id} · ${stateText(run.state)}` : "Load data to begin"}</div>
         </div>
-        <p className="px-5 pb-5 text-xs leading-relaxed text-slate-500">
-          NEW AURA · IT Consultant Challenge 2026, Round 2 MVP. Costs are synthetic cost units, not a forecast for Company A.
-        </p>
       </aside>
 
       <div className="min-w-0 flex-1 lg:pl-64">
@@ -95,7 +101,7 @@ export default function App() {
               <b className="whitespace-nowrap text-slate-900">Nordic Flow</b>
             </div>
             <div className="hidden text-sm text-slate-500 lg:block">
-              Step {STEPS.indexOf(current) + 1} of {STEPS.length} · <span className="font-medium text-slate-800">{current.label}</span>
+              {EDITORS[tab] ? <span>Results / </span> : STEPS.indexOf(current) < 3 && <span>Step {STEPS.indexOf(current) + 1} of 3 · </span>}<span className="font-medium text-slate-800">{current.label}</span>
             </div>
             <div className="flex items-center gap-3">
               {busy && <Loader2 size={16} className="animate-spin text-brand-600" aria-label="Working" />}
@@ -104,7 +110,7 @@ export default function App() {
           </div>
           <nav aria-label="Workflow" className="flex gap-1 overflow-x-auto border-t border-slate-100 px-3 py-2 lg:hidden">
             {STEPS.map((s, i) => (
-              <NavItem key={s.id} compact step={s} index={i} active={tab === s.id} disabled={s.id !== "data" && !run} onClick={() => go(s.id)} />
+              <NavItem key={s.id} compact step={s} index={i} active={activeTab === s.id} disabled={!["data", "guide"].includes(s.id) && !run} onClick={() => go(s.id)} />
             ))}
           </nav>
         </header>

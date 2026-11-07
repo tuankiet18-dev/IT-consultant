@@ -14,100 +14,150 @@ from .llm import GroqClient, LLMError
 from .report import cost_breakdown, utilisation
 from .schema import Dataset, Plan
 
-CATEGORY_LABEL = {"inbound_freight": "inbound freight", "inbound_handling": "inbound handling",
+CATEGORY_LABEL = {"inbound_freight": "inbound freight", "transfer_freight": "warehouse transfer freight", "direct_freight": "direct delivery freight", "inbound_handling": "inbound handling",
                   "outbound_freight": "outbound freight", "outbound_handling": "outbound handling"}
 
 
 def _route_cost(ds: Dataset, w: str, z: str, p: str):
     """Best-case delivered cost of one pallet of SKU p through warehouse w to zone z (cheapest supplier)."""
-    if (w, z) not in ds.outbound:
+    if ds.transfers or ds.direct or (w, z) not in ds.outbound:
         return None
     inb = [ds.inbound[s, w] + ds.warehouses[w].handling_in for s in ds.suppliers
            if (s, w) in ds.inbound and ds.supply.get((s, p), 0) > 0]
     if not inb:
         return None
-    return round(min(inb) + ds.outbound[w, z] + ds.warehouses[w].handling_out, 1)
+    return round(min(inb) + ds.outbound[w, z] + ds.warehouses[w].handling_out, 6)
 
 
 def _main(d: dict):
     return max(d, key=lambda k: d[k]) if d else None
 
 
+def _fmt(value: float) -> str:
+    return f"{value:,.6f}".rstrip("0").rstrip(".")
+
+
 def build_facts(ds: Dataset, base: Plan, opt: Plan, cmp: dict, pins: list[dict] | None = None,
-                unpinned_total: float | None = None) -> dict:
+                unpinned_total: float | None = None, route_pins: list[dict] | None = None) -> dict:
+    valid = cmp.get("baseline_valid", base.status == "BASELINE")
     changes = []
-    for ch in cmp["changes"]:
-        moved = sum(ch["optimised"].values())
+    pairs = set((z, p) for _, z, p in (*base.outbound, *opt.outbound, *base.direct, *opt.direct))
+    for zone, sku in sorted(pairs) if valid else []:
+        bw_sources = {w: q for (w, z, p), q in base.outbound.items() if z == zone and p == sku}
+        ow_sources = {w: q for (w, z, p), q in opt.outbound.items() if z == zone and p == sku}
+        bd_sources = {s: q for (s, z, p), q in base.direct.items() if z == zone and p == sku}
+        od_sources = {s: q for (s, z, p), q in opt.direct.items() if z == zone and p == sku}
+        if bw_sources == ow_sources and bd_sources == od_sources:
+            continue
+        moved = round(sum(max(q - bw_sources.get(w, 0), 0) for w, q in ow_sources.items())
+                      + sum(max(q - bd_sources.get(s, 0), 0) for s, q in od_sources.items()), 6)
+        preferred = ds.warehouses.get(ds.zones[zone].preferred_warehouse)
         changes.append({
-            "zone": ds.zones[ch["zone"]].name, "sku": ds.skus[ch["sku"]].name, "pallets": moved,
-            "baseline_from": [{"warehouse": ds.warehouses[w].name, "pallets": q} for w, q in sorted(ch["baseline"].items())],
-            "optimised_from": [{"warehouse": ds.warehouses[w].name, "pallets": q} for w, q in sorted(ch["optimised"].items())],
-            "zone_preferred_warehouse": ds.warehouses[ds.zones[ch["zone"]].preferred_warehouse].name,
+            "zone": ds.zones[zone].name, "sku": ds.skus[sku].name, "pallets": moved,
+            "baseline_from": [{"warehouse": ds.warehouses[w].name, "pallets": q} for w, q in sorted(bw_sources.items())],
+            "optimised_from": [{"warehouse": ds.warehouses[w].name, "pallets": q} for w, q in sorted(ow_sources.items())],
+            "baseline_direct_from": [{"supplier": ds.suppliers[s].name, "pallets": q} for s, q in sorted(bd_sources.items())],
+            "optimised_direct_from": [{"supplier": ds.suppliers[s].name, "pallets": q} for s, q in sorted(od_sources.items())],
+            "zone_preferred_warehouse": preferred.name if preferred else None,
         })
-        bw, ow = _main(ch["baseline"]), _main(ch["optimised"])
-        bc = _route_cost(ds, bw, ch["zone"], ch["sku"]) if bw else None
-        oc = _route_cost(ds, ow, ch["zone"], ch["sku"]) if ow else None
+        bw, ow = _main(bw_sources), _main(ow_sources)
+        bc = _route_cost(ds, bw, zone, sku) if bw else None
+        oc = _route_cost(ds, ow, zone, sku) if ow else None
         if bc is not None and oc is not None:
             changes[-1].update({"baseline_route_cost_per_pallet": bc, "optimised_route_cost_per_pallet": oc,
-                                "route_cost_difference_per_pallet": round(bc - oc, 1)})
+                                "route_cost_difference_per_pallet": round(bc - oc, 6)})
     changes.sort(key=lambda c: -c["pallets"])
     cb, co = cmp["baseline"], cmp["optimised"]
-    valid = cmp.get("baseline_valid", True)
+    baseline_load = {warehouse: 0.0 for warehouse in ds.warehouses}
+    for (_, warehouse, sku), quantity in list(base.inbound.items()) + list(base.transfers.items()):
+        baseline_load[warehouse] += quantity * ds.skus[sku].pallet_factor
     facts = {
         "currency": "cost units",
-        "how_to_read": "route cost per pallet = cheapest supplier to the warehouse + handling in + warehouse to zone + handling out",
-        "baseline_rule": "each zone is served from its preferred warehouse; if that warehouse is full, the next cheapest warehouse is used",
-        "total_demand_pallets": round(sum(ds.demand.values())),
-        "total_weekly_capacity": round(sum(w.capacity for w in ds.warehouses.values())),
+        "how_to_read": "warehouse route figures are cheapest-supplier estimates where present; transfer movements are individual legs; direct movements go supplier-to-customer without warehouse handling",
+        "baseline_rule": "prefer each zone's assigned final warehouse, then others by outbound rate, using available supplier paths; use declared direct supplier-to-zone routes for remaining demand, within all supply and capacity limits",
+        "total_demand_pallets": round(sum(ds.demand.values()), 6),
+        "total_weekly_capacity": round(sum(w.capacity for w in ds.warehouses.values()), 6),
         "mode": opt.mode, "solver_status": opt.status,
         "network": {"suppliers": len(ds.suppliers), "warehouses": len(ds.warehouses),
                     "zones": len(ds.zones), "skus": len(ds.skus)},
         "baseline_valid": valid,
-        "baseline_total": round(cb["total"]) if valid else None, "optimised_total": round(co["total"]),
-        "saving": round(cmp["saving"]) if valid else None, "saving_percent": round(cmp["saving_pct"], 1) if valid else None,
-        "cost_change_by_type": {CATEGORY_LABEL[k]: round(co[k] - cb[k]) for k in CATEGORY_LABEL},
-        "decisions_changed": len(cmp["changes"]),
+        "baseline_total": cb["total"] if valid else None, "optimised_total": co["total"],
+        "saving": cmp["saving"] if valid else None, "saving_percent": round(cmp["saving_pct"], 1) if valid else None,
+        "cost_change_by_type": {label: round(co.get(key, 0) - cb.get(key, 0), 6) for key, label in CATEGORY_LABEL.items()} if valid else {},
+        "decisions_changed": len(changes) if valid else None,
         "largest_changes": changes[:6],
+        "transfer_movements": [
+            {"from_warehouse": ds.warehouses[a].name, "to_warehouse": ds.warehouses[b].name,
+             "sku": ds.skus[sku].name, "pallets": quantity}
+            for (a, b, sku), quantity in sorted(opt.transfers.items())
+        ],
+        "transfer_pallet_legs": round(sum(opt.transfers.values()), 6),
+        "direct_movements": [{"supplier": ds.suppliers[s].name, "zone": ds.zones[z].name,
+                              "sku": ds.skus[p].name, "pallets": q}
+                             for (s, z, p), q in sorted(opt.direct.items())],
+        "direct_pallets": round(sum(opt.direct.values()), 6),
+        "delivered_pallets": round(sum(opt.direct.values()) + sum(opt.outbound.values()), 6),
         "warehouse_load_percent": {
-            ds.warehouses[w].name: {"baseline": round(cmp["utilisation_baseline"][w] * 100),
-                                    "optimised": round(cmp["utilisation_optimised"][w] * 100)}
+            ds.warehouses[w].name: {"baseline": round(cmp["utilisation_baseline"][w] * 100, 4) if valid else None,
+                                    "optimised": round(cmp["utilisation_optimised"][w] * 100, 4)}
             for w in ds.warehouses},
         "warehouses_at_capacity": [ds.warehouses[w].name for w in cmp["binding_warehouses"]],
-        "warehouses_full_in_baseline": [ds.warehouses[w].name for w in ds.warehouses if cmp["utilisation_baseline"][w] >= 0.995],
+        "warehouses_full_in_baseline": [w.name for w in ds.warehouses.values()
+                                       if w.capacity > 0 and abs(baseline_load[w.id] - w.capacity) <= 1e-6] if valid else [],
     }
     if pins:
         facts["planner_pins"] = [{"zone": ds.zones[p["zone"]].name, "sku": ds.skus[p["sku"]].name,
                                   "warehouse": ds.warehouses[p["warehouse"]].name, "pallets": p["pallets"]} for p in pins]
-        if unpinned_total is not None:
-            facts["cost_of_pins"] = round(co["total"] - unpinned_total)
+    if route_pins:
+        facts["planner_routes"] = [{"supplier": ds.suppliers[route["supplier"]].name,
+                                   "warehouses": [ds.warehouses[warehouse].name for warehouse in route["warehouses"]],
+                                   "zone": ds.zones[route["zone"]].name, "sku": ds.skus[route["sku"]].name,
+                                   "pallets": route["pallets"]} for route in route_pins]
+    if (pins or route_pins) and unpinned_total is not None:
+        facts["cost_of_pins"] = round(co["total"] - unpinned_total, 6)
     return facts
 
 
 def template_text(f: dict) -> str:
+    baseline_label = "direct-delivery baseline" if f["network"]["warehouses"] == 0 and f.get("direct_pallets", 0) else "preferred-warehouse baseline"
     if f.get("baseline_valid", True):
-        parts = [f"The optimised plan costs {f['optimised_total']:,} {f['currency']} against {f['baseline_total']:,} for the "
-                 f"preferred-warehouse baseline (a synthetic rule, not Company A's actual plan), a saving of {f['saving']:,} ({f['saving_percent']}%). Solver status: {f['solver_status']}."]
+        difference = (f"an additional cost of {_fmt(abs(f['saving']))}" if f["saving"] < 0
+                      else f"a saving of {_fmt(f['saving'])}")
+        parts = [f"The optimised plan costs {_fmt(f['optimised_total'])} {f['currency']} against {_fmt(f['baseline_total'])} for the "
+                 f"{baseline_label}, {difference} ({_fmt(abs(f['saving_percent']))}%). Solver status is {f['solver_status']}."]
     else:
-        parts = [f"The optimised plan costs {f['optimised_total']:,} {f['currency']}. The preferred-warehouse baseline could not serve all "
-                 f"demand, so no saving is reported. Solver status: {f['solver_status']}."]
+        parts = [f"The optimised plan costs {_fmt(f['optimised_total'])} {f['currency']}. The preferred-warehouse baseline could not serve all "
+                 f"demand, so no saving is reported. Solver status is {f['solver_status']}."]
     drivers = sorted(f["cost_change_by_type"].items(), key=lambda kv: kv[1])
     cuts = [(k, v) for k, v in drivers if v < 0] if f.get("baseline_valid", True) else []
     if cuts:
         k, v = cuts[0]
-        parts.append(f"The largest reduction is in {k} ({abs(v):,}).")
+        parts.append(f"The largest reduction is in {k} ({_fmt(abs(v))}).")
     if f["decisions_changed"]:
         c = f["largest_changes"][0]
-        was = ", ".join(f"{x['pallets']:g} pallets from {x['warehouse']}" for x in c["baseline_from"]) or "nothing"
-        now = ", ".join(f"{x['pallets']:g} pallets from {x['warehouse']}" for x in c["optimised_from"])
-        parts.append(f"{f['decisions_changed']} zone-and-SKU decisions differ from the baseline. The largest is {c['sku']} "
-                     f"for {c['zone']}: the baseline used {was}; the optimised plan uses {now}.")
-    else:
-        parts.append("No zone-and-SKU decision differs from the baseline.")
+        was = ", ".join([*(f"{_fmt(x['pallets'])} pallets from {x['warehouse']}" for x in c["baseline_from"]),
+                         *(f"{_fmt(x['pallets'])} pallets directly from {x['supplier']}" for x in c.get("baseline_direct_from", []))]) or "nothing"
+        now = ", ".join([*(f"{_fmt(x['pallets'])} pallets from {x['warehouse']}" for x in c["optimised_from"]),
+                         *(f"{_fmt(x['pallets'])} pallets directly from {x['supplier']}" for x in c.get("optimised_direct_from", []))]) or "nothing"
+        parts.append(f"{f['decisions_changed']} zone-and-SKU allocations differ from the baseline. The largest reassignment is {_fmt(c['pallets'])} pallets of {c['sku']} "
+                     f"for {c['zone']}. The baseline used {was}. The optimised plan uses {now}.")
+    elif f.get("baseline_valid", True):
+        parts.append("The final deliveries match the baseline." if f.get("direct_pallets", 0) else "The final warehouse allocations match the baseline.")
+    for movement in f.get("direct_movements", [])[:6]:
+        parts.append(f"Deliver {_fmt(movement['pallets'])} pallets of {movement['sku']} directly "
+                     f"from {movement['supplier']} to {movement['zone']}, without warehouse handling.")
+    for movement in f.get("transfer_movements", [])[:6]:
+        parts.append(f"Transfer {_fmt(movement['pallets'])} pallets of {movement['sku']} "
+                     f"from {movement['from_warehouse']} to {movement['to_warehouse']}.")
     if f["warehouses_at_capacity"]:
-        parts.append("At full capacity in the optimised plan: " + ", ".join(f["warehouses_at_capacity"]) + ".")
+        parts.append("Warehouses at full capacity include " + ", ".join(f["warehouses_at_capacity"]) + ".")
     if f.get("planner_pins"):
-        parts.append(f"The plan includes {len(f['planner_pins'])} planner decision(s) fixed by hand" +
-                     (f", costing {f['cost_of_pins']:,} more than the unconstrained optimum." if "cost_of_pins" in f else "."))
+        parts.append(f"The plan includes {len(f['planner_pins'])} final-delivery decision(s) fixed by hand.")
+    for route in f.get("planner_routes", []):
+        path = " to ".join([route["supplier"], *route["warehouses"], route["zone"]])
+        parts.append(f"The planner reserved {_fmt(route['pallets'])} pallets of {route['sku']} along {path}.")
+    if "cost_of_pins" in f:
+        parts.append(f"The cost difference from the original plan is {_fmt(f['cost_of_pins'])}.")
     parts.append("A planner should review this before approving.")
     return " ".join(parts)
 
@@ -164,16 +214,23 @@ SYSTEM = (
     "Write in plain English, in three short paragraphs separated by a blank line, 160 to 230 words in total, no headings, "
     "no bullet points.\n"
     "Paragraph 1 - the result: the optimised cost against the preferred-warehouse baseline, the saving and its percentage, "
-    "and that the baseline is a synthetic rule (see baseline_rule), not Company A's actual plan.\n"
+    "and a brief description of the baseline_rule.\n"
     "Paragraph 2 - why: which cost types went down or up (cost_change_by_type) and what moved. Use largest_changes: say which "
     "warehouse served the zone and SKU before and after, and explain the move with the route cost per pallet figures and "
-    "route_cost_difference_per_pallet. Mention warehouses_full_in_baseline when it explains a move, and warehouses_at_capacity "
-    "as a limit on further savings.\n"
-    "Paragraph 3 - what to check: that the data is synthetic, any planner decisions, and that the planner should review "
-    "before approving.\n"
+    "route_cost_difference_per_pallet as cheapest-supplier estimates. Describe warehouses_full_in_baseline and warehouses_at_capacity "
+    "as capacity observations. Describe transfer_movements as individual warehouse-to-warehouse legs. "
+    "Describe direct_movements as supplier-to-customer deliveries that do not visit a warehouse or pay warehouse handling. "
+    "largest_changes can include baseline_direct_from or optimised_direct_from suppliers alongside final warehouses; "
+    "do not describe a direct supplier as a warehouse. "
+    "transfer_pallet_legs counts visits across legs, so one pallet can appear more than once. "
+    "If baseline_valid is false, omit all savings, cost-change and reassignment comparisons.\n"
+    "Paragraph 3 - what to check: any planner decisions, capacity constraints, and what the planner should review "
+    "before approving. planner_routes reserves quantities along complete ordered paths. "
+    "cost_of_pins compares the full plan with its original unpinned reference. "
+    "Do not invent a discount or business benefit from a planner choice.\n"
     "Rules: use ONLY the numbers and names in the JSON facts. Never calculate, add up, estimate or invent numbers, "
     "percentages, causes or names. Do not give a reason that the facts do not support; if a move has no route cost figures, "
-    "just describe it. Refer to warehouses, zones and SKUs by name. Write numbers without extra decimals.")
+    "just describe it. Refer to warehouses, zones and SKUs by name. Preserve supplied precision for costs and quantities.")
 
 
 def explain(facts: dict, client: GroqClient | None = None, use_llm: bool = True) -> dict:

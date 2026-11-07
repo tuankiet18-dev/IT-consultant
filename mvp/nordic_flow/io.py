@@ -14,7 +14,11 @@ REQUIRED = {
     "supply.csv": ["supplier_id", "sku_id", "max_pallets"],
     "demand.csv": ["zone_id", "sku_id", "pallets"],
 }
-OPTIONAL = {"warehouse_skus.csv": ["warehouse_id", "sku_id"]}
+OPTIONAL = {
+    "warehouse_skus.csv": ["warehouse_id", "sku_id"],
+    "transfer_rates.csv": ["from_warehouse_id", "to_warehouse_id", "cost_per_pallet"],
+    "direct_rates.csv": ["supplier_id", "zone_id", "cost_per_pallet"],
+}
 
 
 def _num(v: str, file: str, row: int, col: str, issues: list[Issue], minimum: float = 0.0):
@@ -44,6 +48,9 @@ def _rows(path: Path, columns: list[str], issues: list[Issue]):
             issues.append(Issue("error", name, None, f"missing column(s): {', '.join(missing)}"))
             return
         for i, row in enumerate(reader, start=2):  # header is row 1
+            if None in row or any(value is None for value in row.values()):
+                issues.append(Issue("error", name, i, "row must have the same number of fields as the header"))
+                continue
             yield i, {k: (v or "").strip() for k, v in row.items()}
 
 
@@ -97,6 +104,32 @@ def load_dataset(folder: str | Path) -> tuple[Dataset, list[Issue]]:
     pairs("outbound_rates.csv", "warehouse_id", "zone_id", "cost_per_pallet", ds.outbound)
     pairs("supply.csv", "supplier_id", "sku_id", "max_pallets", ds.supply)
     pairs("demand.csv", "zone_id", "sku_id", "pallets", ds.demand)
+
+    transfers = folder / "transfer_rates.csv"
+    if transfers.exists():
+        for i, r in _rows(transfers, OPTIONAL[transfers.name], issues) or []:
+            cost = _num(r["cost_per_pallet"], transfers.name, i, "cost_per_pallet", issues)
+            key = (r["from_warehouse_id"], r["to_warehouse_id"])
+            if cost is None or dup(key, ds.transfers, transfers.name, i):
+                continue
+            ds.transfers[key] = cost
+            if r.get("max_pallets"):
+                cap = _num(r["max_pallets"], transfers.name, i, "max_pallets", issues)
+                if cap is not None:
+                    ds.transfer_capacity[key] = cap
+
+    direct = folder / "direct_rates.csv"
+    if direct.exists():
+        for i, r in _rows(direct, OPTIONAL[direct.name], issues) or []:
+            cost = _num(r["cost_per_pallet"], direct.name, i, "cost_per_pallet", issues)
+            key = (r["supplier_id"], r["zone_id"])
+            if cost is None or dup(key, ds.direct, direct.name, i):
+                continue
+            ds.direct[key] = cost
+            if r.get("max_pallets"):
+                cap = _num(r["max_pallets"], direct.name, i, "max_pallets", issues)
+                if cap is not None:
+                    ds.direct_capacity[key] = cap
 
     elig = folder / "warehouse_skus.csv"
     if elig.exists():

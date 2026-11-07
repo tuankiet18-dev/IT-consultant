@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS runs(
   id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, scenario_id INTEGER NOT NULL, kind TEXT NOT NULL,
   parent_run_id INTEGER, state TEXT NOT NULL, mode TEXT NOT NULL, status TEXT NOT NULL, solve_seconds REAL,
   pins_json TEXT NOT NULL, changes_json TEXT NOT NULL, optimum_total REAL, reference_run_id INTEGER,
-  baseline_json TEXT NOT NULL, optimised_json TEXT NOT NULL, comparison_json TEXT NOT NULL, verify_json TEXT NOT NULL);
+  baseline_json TEXT NOT NULL, optimised_json TEXT NOT NULL, comparison_json TEXT NOT NULL, verify_json TEXT NOT NULL,
+  route_pins_json TEXT NOT NULL DEFAULT '[]');
 CREATE TABLE IF NOT EXISTS explanations(
   id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, run_id INTEGER NOT NULL, text TEXT NOT NULL,
   source TEXT NOT NULL, reason TEXT, facts_json TEXT NOT NULL, status TEXT NOT NULL, approved_by TEXT, edited INTEGER NOT NULL DEFAULT 0);
@@ -32,6 +33,10 @@ class Database:
         self.lock = threading.RLock()
         with self.lock:
             self.conn.executescript(SCHEMA)
+            # Additive migration keeps existing scenarios, approvals and audit records intact.
+            columns = {row["name"] for row in self.conn.execute("PRAGMA table_info(runs)")}
+            if "route_pins_json" not in columns:
+                self.conn.execute("ALTER TABLE runs ADD COLUMN route_pins_json TEXT NOT NULL DEFAULT '[]'")
             self.conn.commit()
 
     def execute(self, sql: str, args: tuple = ()) -> int:

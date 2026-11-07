@@ -47,6 +47,10 @@ class Dataset:
     supply: dict[tuple[str, str], float] = field(default_factory=dict)     # (supplier, sku) -> max pallets
     demand: dict[tuple[str, str], float] = field(default_factory=dict)     # (zone, sku) -> pallets
     eligible: dict[str, set[str]] | None = None                            # warehouse -> allowed SKUs (None = all)
+    transfers: dict[tuple[str, str], float] = field(default_factory=dict)    # (from warehouse, to warehouse) -> cost
+    transfer_capacity: dict[tuple[str, str], float] = field(default_factory=dict)  # optional max pallets per period
+    direct: dict[tuple[str, str], float] = field(default_factory=dict)      # (supplier, zone) -> direct freight per pallet
+    direct_capacity: dict[tuple[str, str], float] = field(default_factory=dict)  # optional route limit across SKUs
 
     def sku_allowed(self, warehouse: str, sku: str) -> bool:
         return self.eligible is None or sku in self.eligible.get(warehouse, set())
@@ -61,6 +65,8 @@ class Plan:
     outbound: dict[tuple[str, str, str], float] = field(default_factory=dict)  # (warehouse, zone, sku) -> pallets
     shortfall: dict[tuple[str, str], float] = field(default_factory=dict)      # (zone, sku) -> unmet pallets
     solve_seconds: float = 0.0
+    transfers: dict[tuple[str, str, str], float] = field(default_factory=dict)  # (from warehouse, to warehouse, sku)
+    direct: dict[tuple[str, str, str], float] = field(default_factory=dict)  # (supplier, zone, sku), no warehouse visit
 
     @property
     def usable(self) -> bool:

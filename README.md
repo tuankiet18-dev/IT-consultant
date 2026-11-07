@@ -1,38 +1,58 @@
-# Nordic Flow (team NEW AURA): IT Consultant Challenge 2026
+# Nordic Flow
 
-Goods allocation across existing warehouses for "Company A" (Nordic building-materials retailer):
-which supplier and which existing warehouse should serve each order, at the lowest total cost, with the planner approving every plan.
+Nordic Flow is the NEW AURA team's local MVP for IT Consultant Challenge 2026. It allocates goods from suppliers directly to customers or through one or more existing warehouses, minimises transport and handling cost, and lets a planner review and approve each plan.
 
-- **Round 1** (submitted): proposal deck, see `docs/round1/`.
-- **Round 2** (current): build a working MVP. Deadline **22:00 (GMT+7), 9 Nov 2026**.
+Round 1 material is in `docs/round1/`. The Round 2 deadline is 22:00 GMT+7 on 9 November 2026.
+
+## Start here
+
+- `mvp/README.md` covers installation, samples, data files and the API.
+- `docs/MVP-SPEC-v0.1.md` is the current specification, updated for multi-warehouse transfers.
+- `docs/round2/01_CONTRACTS_AND_ARCHITECTURE.md` is the canonical input, optimisation and API contract.
+- `docs/round2/AS_BUILT.md` describes the current implementation.
+- `deliverables/` contains the four submission files and their status in `deliverables/README.md`.
+
+The Markdown specification and contract describe the current implementation, including direct delivery, multi-warehouse routing and the in-app guide. Existing DOCX/PDF files and submission artifacts are draft snapshots awaiting a final refresh after the MVP is agreed.
 
 ## Repository layout
 
-```
-mvp/             The application: core (nordic_flow/), API (api/), web UI (web/), tests, sample data. See mvp/README.md
-docs/            Specification, plan and background
-  MVP-SPEC-v0.1.md   (also .pdf, .docx)   What we build and how: read this first
-  MVP-plan-7-days.md                       Day-by-day plan to 9 Nov
-  round2/                                  Team decision drafts, contracts, and AS_BUILT.md (what the code does today)
-  ai-usage-log.md                          Log of significant AI use (feeds the AI Journal)
-  round1/                                  Submitted Round 1 proposal and verified evidence
-  reference/                               Organiser material: Round 1 case, Round 2 brief, AI Journal template (confidential)
-deliverables/    The five files we must send to the organiser (status in deliverables/README.md)
+```text
+mvp/
+  nordic_flow/     Python core, optimisation, verification and reporting
+  api/             FastAPI, use cases, SQLite and audit
+  frontend/        React and Vite source
+  web/             Production frontend build served by FastAPI
+  data/            Golden, synthetic demo and multi-warehouse examples
+  tests/           Python tests and browser walkthrough
+docs/
+  reference/       Organiser case, brief and AI Journal template
+  round1/          Submitted proposal and evidence
+  round2/          Current contracts, implementation notes and test evidence
+deliverables/      Submission PDFs, video and editable sources
 ```
 
-## Quick start
+## Quick start on Windows
 
-```bash
+```powershell
 cd mvp
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-pytest -q
-uvicorn api.main:app --port 8000           # web app at http://localhost:8000
-python -m nordic_flow run data/golden      # command line: Round 1 worked example 700 -> 500
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m uvicorn api.main:app --port 8000
 ```
 
-## Rules for this repo
+Open `http://localhost:8000`. Choose **Multi-warehouse example** for factory → A/B/C → D/E/F → customer, **Warehouse transfer chain** for supplier → HUB → REG → LOCAL, or **Worked example** for the hand-worked 700 to 500 case.
 
-- Do not commit passwords, API keys or `.env` files. Use `.env.example` for variable names.
-- Case material from the organiser is confidential: keep the repo private.
-- Demo data is synthetic and must be labelled as such.
+## Transfer input
+
+The original eight required CSV files remain required. Optional `transfer_rates.csv` adds directed warehouse-to-warehouse links using `from_warehouse_id,to_warehouse_id,cost_per_pallet` and optional `max_pallets`. Every warehouse is listed in `warehouses.csv`. The declared transfer graph must be acyclic.
+
+Optional `direct_rates.csv` adds genuine supplier-to-customer routes using `supplier_id,zone_id,cost_per_pallet` and optional `max_pallets`. No warehouse handling is charged. Open **User guide** in the app for every input column and downloadable ZIP cases for0/3/4/5/8/12 warehouses, plus mixed direct/warehouse delivery.
+
+Capacity counts receipts at every visited warehouse. Costs include transfer freight and receiving/shipping handling. Detailed units, constraints, compatibility and examples are in the technical contract.
+
+## Repository rules
+
+- Keep passwords and API keys in environment variables. Use `mvp/.env.example` for variable names.
+- Keep organiser case material private.
+- Identify sample data as synthetic when presenting results.

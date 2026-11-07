@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from typing import Literal
-from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi import FastAPI, File, Form, Query, Request, UploadFile
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -31,6 +31,16 @@ class OverrideRequest(BaseModel):
     sku: str
     warehouse: str
     pallets: float = Field(ge=0)
+    reason: str = ""
+    actor: str = "planner"
+
+
+class RouteRequest(BaseModel):
+    supplier: str
+    warehouses: list[str] = Field(min_length=0, max_length=100)
+    zone: str
+    sku: str
+    pallets: float = Field(gt=0)
     reason: str = ""
     actor: str = "planner"
 
@@ -141,9 +151,22 @@ def create_app(db_path: str | Path | None = None, llm_factory=None) -> FastAPI:
     def run_detail(rid: int):
         return service.run_detail(db, rid)
 
+    @app.get("/api/runs/{rid}/paths")
+    def path_ranking(rid: int, zone: str, sku: str, quantity: float = Query(1, gt=0), limit: int = Query(50, ge=1, le=100)):
+        return service.run_path_ranking(db, rid, zone, sku, quantity, limit)
+
     @app.post("/api/runs/{rid}/overrides")
     def override(rid: int, req: OverrideRequest):
         return service.apply_override(db, rid, req.zone, req.sku, req.warehouse, req.pallets, req.reason, req.actor)
+
+    @app.post("/api/runs/{rid}/routes")
+    def manual_route(rid: int, req: RouteRequest):
+        route = {key: value for key, value in req.model_dump().items() if key != "actor"}
+        return service.apply_route_override(db, rid, route, req.actor)
+
+    @app.delete("/api/runs/{rid}/routes/{route_index}")
+    def remove_manual_route(rid: int, route_index: int):
+        return service.remove_route_override(db, rid, route_index)
 
     @app.post("/api/runs/{rid}/explanation")
     def make_explanation(rid: int, req: ExplainRequest | None = None):

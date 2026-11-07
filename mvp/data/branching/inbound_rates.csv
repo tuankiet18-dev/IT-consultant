@@ -1,0 +1,4 @@
+supplier_id,warehouse_id,cost_per_pallet
+SUP1,A,1
+SUP1,B,3
+SUP1,C,5

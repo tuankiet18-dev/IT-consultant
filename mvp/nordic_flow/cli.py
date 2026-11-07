@@ -24,6 +24,16 @@ def _write_plan(folder: Path, name: str, plan):
     with (folder / f"{name}_inbound.csv").open("w", newline="") as f:
         w = csv.writer(f); w.writerow(["supplier", "warehouse", "sku", "pallets"])
         for (s, wh, p), q in sorted(plan.inbound.items()): w.writerow([s, wh, p, q])
+    with (folder / f"{name}_transfers.csv").open("w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["from_warehouse", "to_warehouse", "sku", "pallets"])
+        for (origin, destination, sku), quantity in sorted(plan.transfers.items()):
+            writer.writerow([origin, destination, sku, quantity])
+    with (folder / f"{name}_direct.csv").open("w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["supplier", "zone", "sku", "pallets"])
+        for (supplier, zone, sku), quantity in sorted(plan.direct.items()):
+            writer.writerow([supplier, zone, sku, quantity])
 
 
 def main(argv=None) -> int:
@@ -62,15 +72,23 @@ def main(argv=None) -> int:
     bad = verify_plan(ds, opt)
     if bad:
         print("Plan failed independent check:", *bad, sep="\n  "); return 4
-    if base.status != "BASELINE" or verify_plan(ds, base):
-        print(f"optimised {compare(ds, base, opt)['optimised']['total']:.2f} ({opt.status}). The preferred-warehouse baseline "
-              "could not serve all demand, so no saving is reported.")
-        return 0
     c = compare(ds, base, opt)
-    print(f"baseline {c['baseline']['total']:.2f} ({base.status}) -> optimised {c['optimised']['total']:.2f} "
-          f"({opt.status}, {opt.solve_seconds:.2f}s)  saving {c['saving']:.2f} = {c['saving_pct']:.2f}%")
+    c["baseline_valid"] = base.status == "BASELINE" and not verify_plan(ds, base)
+    if not c["baseline_valid"]:
+        c["saving"] = c["saving_pct"] = None
+        print(f"optimised {c['optimised']['total']:.2f} ({opt.status}). The preferred-warehouse baseline "
+              "could not serve all demand, so no saving is reported.")
+    else:
+        print(f"baseline {c['baseline']['total']:.2f} ({base.status}) -> optimised {c['optimised']['total']:.2f} "
+              f"({opt.status}, {opt.solve_seconds:.2f}s)  saving {c['saving']:.2f} = {c['saving_pct']:.2f}%")
     if a.out:
-        out = Path(a.out); _write_plan(out, "baseline", base); _write_plan(out, "optimised", opt)
+        out = Path(a.out)
+        if c["baseline_valid"]:
+            _write_plan(out, "baseline", base)
+        else:
+            for flow in ("inbound", "outbound", "transfers", "direct"):
+                (out / f"baseline_{flow}.csv").unlink(missing_ok=True)
+        _write_plan(out, "optimised", opt)
         (out / "comparison.json").write_text(json.dumps(c, indent=2, default=str)); print("results in", out)
     return 0
 
