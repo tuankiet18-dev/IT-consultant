@@ -96,7 +96,7 @@ Nhiệm vụ là đảm bảo **không có gì hỏng ngoài máy của Kiệt**
 | Sáng 9/11 (trước 11:00) | Quay chính thức toàn bộ video | Nhật Anh |
 | Trước 13:00 | Dựng, xuất `MVP.mp4`, gửi Kiệt. Xuất `AI Journal.pdf` | Nhật Anh, Kiệt |
 | 13:00 đến 15:00 | Cả đội xem lại 4 file, sửa lỗi nhỏ | Cả đội |
-| 15:00 đến 17:00 | Chạy danh sách kiểm tra cuối, thu hồi key Groq, đặt repo private | Kiệt, Bách |
+| 15:00 đến 17:00 | Chạy danh sách kiểm tra cuối, thu hồi key Groq | Kiệt, Bách |
 | **Trước 18:00** | **Gửi mail**, lưu bản Sent | Kiệt |
 | 22:00 | Hạn cuối, không nhận nộp muộn | |
 
@@ -106,7 +106,7 @@ Nhiệm vụ là đảm bảo **không có gì hỏng ngoài máy của Kiệt**
 - [ ] `MVP.mp4` không quá 7:00, nghe rõ (hoặc đọc được phụ đề), số khớp lời đọc.
 - [ ] Hai PDF không quá 2 trang mỗi file (hiện đúng 2 trang); `AI Journal.pdf` theo mẫu, không còn ô vàng chưa điền.
 - [ ] **Không có key hay mật khẩu** trong bất kỳ file nộp nào. Quét bằng cách tìm `gsk_` trong các file.
-- [ ] Không có tài liệu của ban tổ chức đính kèm; repo GitHub **ở chế độ private**.
+- [ ] Không có tài liệu của ban tổ chức đính kèm trong 4 file nộp. (Repo GitHub để public theo quyết định của đội.)
 - [ ] **Đã thu hồi key Groq đã lộ trong chat** (console.groq.com/keys).
 - [ ] Mail gửi tới **EB.VN@netcompany.com**, tiêu đề **"Round 2 – NEW AURA"**, mở thử file đính kèm trên máy khác.
 - [ ] Lưu bản mail đã gửi (Sent).
@@ -115,7 +115,7 @@ Nhiệm vụ là đảm bảo **không có gì hỏng ngoài máy của Kiệt**
 
 - **Không đổi giao diện hay chữ trên màn hình** từ giờ. Nhật Anh đang quay, ảnh trong PDF đã chụp xong.
 - Không push thẳng vào `main`. Chỉ làm trên `final-round2`, nhỏ và rõ ràng, báo trong nhóm trước khi push.
-- **Không ghi key, mật khẩu, tài liệu của ban tổ chức vào repo hay vào file nộp.**
+- **Không thêm key, mật khẩu hay tài liệu mới của ban tổ chức vào repo hoặc vào file nộp.**
 - Không nói quá về sản phẩm. Đọc `docs/HIEU-DU-AN.md` mục 12 ("Những điều không được nói sai"): 4,2% không phải dự báo; chưa đo thời gian planner hay OTIF; không tích hợp ERP; nhật ký là "tamper-evident", không phải "tamper-proof"; chuyển kho và giao thẳng là phần mở rộng tùy chọn, không phải phạm vi Round 1.
 
 ## 7. Khi gặp lỗi
