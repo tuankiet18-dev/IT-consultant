@@ -16,7 +16,7 @@ Gửi **trước 18:00 ngày 9/11/2026** (hạn cứng 22:00 GMT+7, không nhậ
 >
 > Please find the Round 2 deliverables of team NEW AURA attached:
 >
-> 1. MVP.mp4: demo video of the Nordic Flow MVP (6 min 40 s), including what changed since Round 1 and why
+> 1. MVP.mp4: demo video of the Nordic Flow MVP (5 min 8 s), including what changed since Round 1 and why
 > 2. User Journey.pdf: one complete end-to-end planner journey (2 pages)
 > 3. System Context Diagram.pdf: system boundary, external entities and data flows (2 pages)
 > 4. AI Journal.pdf: how we used AI, with human validation (completed template)
@@ -39,7 +39,7 @@ Hầu hết dịch vụ email từ chối tệp lớn. Cách xử lý:
 
 Đoạn thay thế cho mục 1 khi dùng link:
 
-> 1. MVP.mp4: demo video of the Nordic Flow MVP (6 min 40 s). Download link, no sign-in needed: <DÁN LINK VÀO ĐÂY>
+> 1. MVP.mp4: demo video of the Nordic Flow MVP (5 min 8 s). Download link, no sign-in needed: <DÁN LINK VÀO ĐÂY>
 
 Đừng đổi tên file sau khi tải lên: giữ đúng `MVP.mp4`.
 
