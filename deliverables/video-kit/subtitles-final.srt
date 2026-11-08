@@ -1,0 +1,141 @@
+1
+00:00:40,000 --> 00:00:48,217
+The planner starts on the Data page. The 'Synthetic data' badge is on every screen:
+Company A's data is not available.
+
+2
+00:00:48,267 --> 00:00:53,728
+The planner drops in this week's files: eight CSV files in one ZIP.
+
+3
+00:00:53,778 --> 00:01:03,317
+Every file is checked before anything is calculated. Valid: 2 suppliers, 3 warehouses,
+6 zones, 20 products, 606 pallets.
+
+4
+00:01:03,367 --> 00:01:08,817
+What if the data is wrong? This file declares a loop between warehouses.
+
+5
+00:01:08,867 --> 00:01:20,317
+The run is blocked and the message says exactly why. There is no Calculate button: the
+system never guesses.
+
+6
+00:01:20,367 --> 00:01:29,783
+Back to the valid data set, ready to calculate.
+
+7
+00:01:29,833 --> 00:01:37,583
+The optimiser finds a plan costing 31,316 cost units against 32,698 for the baseline:
+a saving of 1,382 (4.2%).
+
+8
+00:01:37,633 --> 00:01:46,383
+This is synthetic data, so it is not a forecast. The baseline is a simple
+preferred-warehouse rule, not Company A's real plan.
+
+9
+00:01:46,433 --> 00:01:54,650
+Plan checks passed: a separate verifier, which does not use the solver, re-checked
+supply, demand, capacity and lanes.
+
+10
+00:01:54,700 --> 00:02:02,896
+The diagram shows where goods move: coloured lines carry pallets, grey dashed lines
+are declared routes left unused.
+
+11
+00:02:02,946 --> 00:02:09,587
+The ranking prices every full path, leg by leg, so the planner can see why a route is
+chosen.
+
+12
+00:02:09,637 --> 00:02:18,454
+For Zone 1 cement the cheapest path is Supplier 1 via Warehouse C, at 62 per pallet.
+Selecting a row highlights the whole path.
+
+13
+00:02:18,504 --> 00:02:26,321
+Now the planner overrides the machine. A customer contract says Zone 1 must receive
+its cement from Warehouse B.
+
+14
+00:02:26,371 --> 00:02:34,338
+The planner fixes 8 pallets of Cement standard to Warehouse B and must give a reason.
+
+15
+00:02:34,388 --> 00:02:41,475
+Everything else is recalculated around that decision as a new plan version.
+
+16
+00:02:41,525 --> 00:02:51,008
+Result: the plan cost goes from 31,316 to 31,404, plus 88 cost units. The price of the
+decision is visible and the original plan is kept.
+
+17
+00:02:51,058 --> 00:02:58,108
+Now the explanation. Code calculates every number; the AI assistant only puts the
+result into words.
+
+18
+00:02:58,158 --> 00:03:06,441
+The text is marked 'AI draft, needs review'. If any figure is not in the calculated
+facts, the whole draft is rejected.
+
+19
+00:03:06,491 --> 00:03:13,841
+Even so, the planner must read it: the number check is one guard, not proof that every
+sentence is right.
+
+20
+00:03:13,891 --> 00:03:24,741
+The supporting figures let the planner compare the text with the calculated numbers
+before approving.
+
+21
+00:03:24,791 --> 00:03:33,375
+Here is that guard in action, outside the app. A draft with correct figures is
+ACCEPTED.
+
+22
+00:03:33,425 --> 00:03:41,641
+A draft that invents a figure is REJECTED, and the standard summary is used instead.
+
+23
+00:03:41,691 --> 00:03:53,541
+The planner edits the text if needed and approves it. AI helps; a person decides.
+
+24
+00:03:53,591 --> 00:04:02,141
+Now the planner approves the plan. From this moment it is locked, and only an approved
+plan can be exported.
+
+25
+00:04:02,191 --> 00:04:09,475
+The export is a ZIP for the existing ERP, warehouse and transport systems. Nordic Flow
+executes nothing.
+
+26
+00:04:09,525 --> 00:04:19,518
+The audit trail records every step: data loaded, plan calculated, the planner's
+decision, approvals and export.
+
+27
+00:04:19,568 --> 00:04:28,875
+Each entry is linked to the one before it, so any edit is detectable: tamper-evident,
+not tamper-proof.
+
+28
+00:04:28,925 --> 00:04:37,375
+The planner can also ask 'what if'. If Warehouse A closes, no plan can meet demand.
+
+29
+00:04:37,425 --> 00:04:46,375
+Total warehouse capacity (684) is below the demand that needs handling (902). The
+system says so instead of returning a bad plan.
+
+30
+00:04:46,425 --> 00:04:54,529
+It lists the unserved pallets by zone and product, and never invents a route.
+
