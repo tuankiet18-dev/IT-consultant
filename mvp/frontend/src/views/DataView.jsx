@@ -68,6 +68,13 @@ export default function DataView() {
   const fileRef = useRef(null);
   const [mode, setMode] = useState("milp");
   const [tl, setTl] = useState(30);
+  const [picked, setPicked] = useState([]);
+  const [over, setOver] = useState(false);
+  const onPick = () => setPicked([...fileRef.current.files].map((f) => f.name));
+  const onDrop = (e) => {
+    e.preventDefault(); setOver(false);
+    if (e.dataTransfer.files.length) { fileRef.current.files = e.dataTransfer.files; onPick(); }
+  };
   const onUpload = () => {
     const f = fileRef.current.files;
     if (!f.length) return toast("Choose files first", true);
@@ -77,7 +84,7 @@ export default function DataView() {
   const warns = s ? s.issues.filter((i) => i.severity === "warning") : [];
   return (
     <div>
-      <PageHead title={s ? "Check the data" : "Choose the data"} lead={s ? "Review the checks, then calculate the plan." : "Load an example or upload your scenario CSVs or ZIP."}><button type="button" className="btn btn-secondary" onClick={() => go("guide")}>Input format guide</button></PageHead>
+      <PageHead title={s ? "Check the data" : "Load this week's data"} lead={s ? "Review the checks, then calculate the plan." : "Upload the planning files, check them, then calculate the plan."}><button type="button" className="btn btn-secondary" onClick={() => go("guide")}>Input format guide</button></PageHead>
       {!s && (
         <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600" aria-label="Planning steps">
           <span><b className="text-slate-900">1</b> Load & check data</span><ArrowRight size={16} aria-hidden="true" />
@@ -88,14 +95,40 @@ export default function DataView() {
       <details key={s ? s.id : "initial-source-picker"} open={!s} className={s ? "mb-6 rounded-lg border border-slate-200 bg-white" : ""}>
         <summary className={s ? "flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-slate-800" : "sr-only"}>
           Change data
-          {s && <span className="text-xs font-normal text-slate-500">Examples or upload</span>}
+          {s && <span className="text-xs font-normal text-slate-500">Upload new files or use a sample</span>}
         </summary>
         <div className={s ? "border-t border-slate-100 p-4" : ""}>
-          <div className="grid gap-4 md:grid-cols-2">
-            <Choice icon={FlaskConical} title="Synthetic demo" text="Pilot scale: 2 suppliers, 3 existing warehouses, 6 customer zones and 20 products." onClick={() => loadSample("demo")} />
-            <Choice icon={Sparkles} title="Worked example" text="A small allocation with 2 warehouses and 1 product, easy to check by hand." onClick={() => loadSample("golden")} />
-            <details className="card md:col-span-2">
-              <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-slate-900">
+          <div
+            onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)} onDrop={onDrop}
+            className={"rounded-xl border-2 border-dashed px-6 py-8 text-center transition-colors " + (over ? "border-brand-500 bg-brand-50" : "border-slate-300 bg-white")}>
+            <span className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-700"><FileUp size={22} aria-hidden="true" /></span>
+            <h3 className="mt-3 text-lg font-semibold text-slate-900">Upload the planning files</h3>
+            <p className="mx-auto mt-1 max-w-xl text-sm text-slate-500">Drop the 8 CSV files here, or one ZIP that contains them. Everything is checked before any plan is calculated.</p>
+            <input ref={fileRef} id="data-files" type="file" multiple accept=".csv,.zip" aria-label="Choose CSV or ZIP files" className="sr-only" onChange={onPick} />
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <label htmlFor="data-files" className="btn btn-secondary cursor-pointer">Choose files</label>
+              <button type="button" className="btn btn-primary" disabled={busy || picked.length === 0} onClick={onUpload}>Upload and check</button>
+            </div>
+            <p className="mt-3 min-h-[1.25rem] break-words text-sm text-slate-600">{picked.length ? picked.join(", ") : "No file chosen"}</p>
+            <p className="mt-2 text-xs text-slate-500">No files at hand? <a className="font-medium text-brand-700 underline" href="/examples/nordic-flow-pilot-sample.zip" download>Download the pilot sample (ZIP)</a> and upload it here, or start from a sample below.</p>
+            <details className="mx-auto mt-4 max-w-2xl text-left text-xs text-slate-500">
+              <summary className="cursor-pointer text-center">Required files</summary>
+              <p className="mt-2 leading-relaxed">suppliers.csv, warehouses.csv, zones.csv, skus.csv, inbound_rates.csv, outbound_rates.csv, supply.csv, demand.csv</p>
+              <p className="mt-2 font-medium text-slate-700">Optional extensions beyond the Round 1 pilot: warehouse transfers and direct delivery</p>
+              <p className="mt-1 leading-relaxed">transfer_rates.csv links warehouses using from_warehouse_id, to_warehouse_id and cost_per_pallet. The optional max_pallets column limits the route across all products. A blank limit allows any quantity within warehouse capacity. Zero closes that route.</p>
+              <p className="mt-2 leading-relaxed">List every warehouse in warehouses.csv. Transfer routes must move forward through an acyclic network. warehouse_skus.csv can restrict which products each warehouse accepts.</p>
+              <p className="mt-2 leading-relaxed">For factory-to-customer delivery without a warehouse, add direct_rates.csv with supplier_id, zone_id, cost_per_pallet and optional max_pallets. See Input format guide for the complete contract.</p>
+            </details>
+          </div>
+
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold text-slate-700">Or try sample data <span className="font-normal text-slate-500">(synthetic)</span></h3>
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              <Choice icon={FlaskConical} title="Synthetic demo" text="Pilot scale: 2 suppliers, 3 existing warehouses, 6 customer zones and 20 products." onClick={() => loadSample("demo")} />
+              <Choice icon={Sparkles} title="Worked example" text="A small allocation with 2 warehouses and 1 product, easy to check by hand." onClick={() => loadSample("golden")} />
+            </div>
+            <details className="mt-4 rounded-lg border border-slate-200 bg-white">
+              <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-slate-800">
                 Extended network examples
                 <span className="text-xs font-normal text-slate-500">Optional, beyond the Round 1 pilot</span>
               </summary>
@@ -107,22 +140,6 @@ export default function DataView() {
                 </div>
               </div>
             </details>
-            <div className="card card-pad md:col-span-2">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-50 text-brand-700"><FileUp size={18} aria-hidden="true" /></span>
-              <div className="mt-2 text-base font-semibold text-slate-900">Upload files</div>
-              <p className="mt-1 text-sm text-slate-500">Select all scenario CSVs together, or one ZIP.</p>
-              <input ref={fileRef} type="file" multiple accept=".csv,.zip" aria-label="Choose CSV or ZIP files"
-                className="mt-2 block w-full cursor-pointer text-sm text-slate-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200" />
-              <button type="button" className="btn btn-secondary mt-3" disabled={busy} onClick={onUpload}>Upload and check</button>
-              <details className="mt-3 text-xs text-slate-500">
-                <summary className="cursor-pointer">Required files</summary>
-                <p className="mt-2 leading-relaxed">suppliers.csv, warehouses.csv, zones.csv, skus.csv, inbound_rates.csv, outbound_rates.csv, supply.csv, demand.csv</p>
-                <p className="mt-2 font-medium text-slate-700">Optional extensions beyond the Round 1 pilot: warehouse transfers and direct delivery</p>
-                <p className="mt-1 leading-relaxed">transfer_rates.csv links warehouses using from_warehouse_id, to_warehouse_id and cost_per_pallet. The optional max_pallets column limits the route across all products. A blank limit allows any quantity within warehouse capacity. Zero closes that route.</p>
-                <p className="mt-2 leading-relaxed">List every warehouse in warehouses.csv. Transfer routes must move forward through an acyclic network. warehouse_skus.csv can restrict which products each warehouse accepts.</p>
-                <p className="mt-2 leading-relaxed">For factory-to-customer delivery without a warehouse, add direct_rates.csv with supplier_id, zone_id, cost_per_pallet and optional max_pallets. See Input format guide for the complete contract.</p>
-              </details>
-            </div>
           </div>
         </div>
       </details>

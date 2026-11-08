@@ -312,7 +312,7 @@ Gửi **đủ 8 file bắt buộc** (hoặc một ZIP chứa chúng), có thể 
 Công nghệ: React 18, Tailwind CSS, Vite; bản build nằm ở `mvp/web/` và được FastAPI phục vụ ở cổng 8000. Menu: 3 bước chính (**Data, Results, Review & approve**), cùng **Audit trail, What-if, User guide**. Trên mọi màn hình luôn có nhãn **"Synthetic data"** ở đầu và dòng cảnh báo ở thanh bên.
 
 ### Data
-Chọn dữ liệu: **Synthetic demo** (cỡ pilot) và **Worked example** (700 → 500) ở trên cùng; **Extended network examples** (chuyển kho) nằm trong mục thu gọn, ghi rõ là ngoài phạm vi pilot Round 1; hoặc tải lên. Sau khi nạp: số nhà cung cấp, kho, vùng, SKU; tổng cầu (606 pallet với demo) và tổng sức chứa (954); kết quả kiểm tra dữ liệu. **Advanced settings**: phương pháp (pallet nguyên hay phân số) và giới hạn thời gian. Nút **Calculate plan**.
+**Việc chính là tải file lên**, đúng cách planner làm: khung "Upload the planning files" nhận 8 file CSV hoặc một file ZIP, bằng **kéo thả** hoặc **Choose files**, rồi bấm **Upload and check**. Có link **Download the pilot sample (ZIP)** để lấy bộ mẫu `nordic-flow-pilot-sample.zip` (8 file CSV ở thư mục gốc) rồi tải ngược lên, dùng khi quay demo. Bên dưới, phần phụ "Or try sample data (synthetic)" có **Synthetic demo** (cỡ pilot) và **Worked example** (700 → 500); **Extended network examples** (chuyển kho) nằm trong mục thu gọn, ghi rõ là ngoài phạm vi pilot Round 1. Các nút mẫu chỉ nạp file có sẵn trong `mvp/data/` vào đúng đường xử lý của Upload. Tên scenario lấy từ tên file tải lên. Sau khi nạp: số nhà cung cấp, kho, vùng, SKU; tổng cầu (606 pallet với demo) và tổng sức chứa (954); kết quả kiểm tra dữ liệu. **Advanced settings**: phương pháp (pallet nguyên hay phân số) và giới hạn thời gian. Nút **Calculate plan**.
 
 ### Results
 - **Thẻ KPI:** *Saving* (1.382, 4,2% dưới baseline), *Optimised plan* (31.316, "proven optimal"), *Preferred-warehouse baseline* (32.698), *Plan checks* (Passed).
@@ -411,7 +411,7 @@ python -m venv .venv
 | Bước | Làm | Kỳ vọng |
 |---|---|---|
 | 1 | Mở http://localhost:8000. Nhìn đầu trang | Có nhãn **Synthetic data**; thanh bên có câu cảnh báo "not a forecast" |
-| 2 | **Data**: bấm *Synthetic demo* | 2 nhà cung cấp, 3 kho, 6 vùng, 20 SKU; cầu 606, sức chứa 954; "All data checks passed" |
+| 2 | **Data**: bấm *Download the pilot sample (ZIP)*, rồi kéo thả file vừa tải vào khung (hoặc *Choose files*) và bấm *Upload and check*. (Cách nhanh: bấm *Synthetic demo*) | Scenario tên `nordic-flow-pilot-sample`: 2 nhà cung cấp, 3 kho, 6 vùng, 20 SKU; cầu 606, sức chứa 954; "All data checks passed" |
 | 3 | Bấm **Calculate plan** | Saving **1.382** (4,2%); tối ưu **31.316**; baseline **32.698**; Plan checks **Passed** |
 | 4 | Mục *Where the cost sits* | Outbound freight **tăng** 432, inbound freight **giảm** 1.738 |
 | 5 | *Complete route cost ranking* với Zone 1, Cement standard | 6 đường, đường rẻ nhất Supplier 1 → Warehouse C → Zone 1 (62/pallet) |
@@ -424,6 +424,7 @@ python -m venv .venv
 | 12 | **Audit trail** | Các sự kiện theo thứ tự; thông báo "verified" kèm "tamper-evident, not tamper-proof" |
 | 13 | **What-if** → Close a warehouse (Warehouse A) → Run | **Không có kế hoạch khả thi**; gợi ý: sức chứa 684 < nhu cầu 902 |
 | 14 | *Start a new version* | Một bản nháp mới; bản đã duyệt vẫn còn trong lịch sử |
+| 14b | *Data* → tải lên `mvp/data/testcases/05_invalid_warehouse_cycle.zip` | Báo lỗi theo file và dòng (vòng lặp chuyển kho), **chặn không cho tính** |
 | 15 | Nạp *Worked example* → Calculate | **500** so với **700**, tiết kiệm 200 (28,6%) |
 
 ---

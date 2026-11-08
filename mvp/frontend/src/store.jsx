@@ -80,7 +80,7 @@ export function AppProvider({ children }) {
       setScenario(await api("/scenarios/sample", { method: "POST", json: { name } })); resetRun(); toast("Scenario loaded");
     }),
     upload: (files) => act(async () => {
-      const fd = new FormData(); for (const f of files) fd.append("files", f); fd.append("name", "Uploaded scenario");
+      const fd = new FormData(); for (const f of files) fd.append("files", f); const list = [...files]; fd.append("name", list.length === 1 ? list[0].name.replace(/\.(zip|csv)$/i, "") : `${list.length} uploaded files`);
       setScenario(await api("/scenarios", { method: "POST", form: fd })); resetRun();
     }),
     runOpt: (mode, time_limit) => act(async () => {
