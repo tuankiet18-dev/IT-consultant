@@ -6,3 +6,4 @@ venv/
 .pytest_cache/
 mvp/out/
 var/
+mvp/var_backup_*/

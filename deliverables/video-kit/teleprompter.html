@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teleprompter · Nordic Flow video</title>
+<style>
+  :root { --bg:#0b1220; --panel:#111a2e; --ink:#f1f5f9; --mute:#94a3b8; --blue:#60a5fa; --green:#34d399; --amber:#fbbf24; --red:#f87171 }
+  * { box-sizing: border-box }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: system-ui, "Segoe UI", Roboto, sans-serif }
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 24px; background: var(--panel); border-bottom: 1px solid #1f2b46 }
+  .bar b { font-size: 18px }
+  .btn { background: #1e293b; color: var(--ink); border: 1px solid #334155; border-radius: 10px; padding: 10px 16px; font-size: 16px; cursor: pointer }
+  .btn:hover { background: #26354f } .btn.pri { background: #2563eb; border-color: #2563eb }
+  .timer { font-variant-numeric: tabular-nums; font-size: 28px; font-weight: 700 }
+  .ok { color: var(--green) } .warn { color: var(--amber) } .bad { color: var(--red) }
+  .tabs { display: flex; gap: 6px; padding: 10px 24px; overflow-x: auto; background: var(--bg); border-bottom: 1px solid #1f2b46 }
+  .tab { flex: none; padding: 8px 12px; border-radius: 8px; border: 1px solid #1f2b46; color: var(--mute); cursor: pointer; font-size: 14px; background: transparent }
+  .tab.on { background: #1e3a8a; color: #fff; border-color: #2563eb }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 24px 80px }
+  .meta { color: var(--mute); font-size: 15px; margin-bottom: 8px }
+  h1 { font-size: 30px; margin: 0 0 18px }
+  .say { font-size: var(--fs, 44px); line-height: 1.45; font-weight: 520; margin: 0 0 .9em }
+  details { background: var(--panel); border: 1px solid #1f2b46; border-radius: 12px; padding: 12px 18px; margin: 0 0 22px; color: #cbd5e1 }
+  summary { cursor: pointer; font-weight: 650; color: var(--blue) }
+  details div { white-space: pre-wrap; font-size: 16px; line-height: 1.55; margin-top: 10px }
+  .help { color: var(--mute); font-size: 14px }
+</style></head><body>
+<div class="bar">
+  <div><b>Nordic Flow · MVP.mp4</b> <span class="help">&nbsp;← → scene · Space start/pause timer · + − text size · R reset · N notes</span></div>
+  <div><span class="timer" id="clock">0:00</span> <span id="pace" class="help"></span></div>
+  <div>
+    <button class="btn" id="prev">◀ Prev</button>
+    <button class="btn pri" id="toggle">Start timer</button>
+    <button class="btn" id="next">Next ▶</button>
+  </div>
+</div>
+<div class="tabs" id="tabs"></div>
+<main>
+  <div class="meta" id="meta"></div>
+  <h1 id="title"></h1>
+  <details id="notes"><summary>On-screen steps for this scene (not read aloud)</summary><div id="notesBody"></div></details>
+  <div id="say"></div>
+</main>
+<script>
+const SCENES = [{"n": 1, "title": "Bài toán", "start": 0, "end": 30, "paras": ["Every week, a planner at a building-materials retailer must decide which supplier and which existing warehouse should serve each customer zone. Today that is done by habit, one leg at a time, so total cost is never seen. Nordic Flow is a planner-approved optimisation service. It calculates the lowest-cost allocation, checks it independently, explains it, and waits for a human to approve. Everything you will see runs locally, on synthetic data."], "notes": ["**Màn hình:** thẻ tiêu đề \"Nordic Flow · NEW AURA · Round 2 MVP\", rồi sơ đồ 3 khối (nhà cung cấp → kho → khách) hoặc trang Data trống."]}, {"n": 2, "title": "MVP đổi gì so với Round 1", "start": 30, "end": 60, "paras": ["Since our Round 1 proposal, five things changed, and here is why. First, we use synthetic data, because Company A's data is not available; every screen says so. Second, we added what-if scenarios, an approval gate and an audit trail, so \"the planner approves and every decision is logged\" is shown, not promised. Third, learning from overrides stays in phase two. Fourth, there is no ERP connection: files in, files out. Fifth, as an optional extension, the engine can also handle transfers between existing warehouses."], "notes": ["**Màn hình:** thẻ chữ 5 gạch đầu dòng, hiện lần lượt (nội dung lấy từ `ROUND1-ALIGNMENT.md`):", "1. Synthetic data, because Company A's data is not available", "2. Added: what-if, approval gate, audit trail", "3. Not built: learning from overrides (phase 2)", "4. No ERP link: files in, files out", "5. Optional extension: transfers between existing warehouses"]}, {"n": 3, "title": "Tải dữ liệu và kiểm tra", "start": 60, "end": 120, "paras": ["A planner starts by uploading this week's files: eight CSV files in one ZIP, as exported from their systems. Before anything is calculated, every file is checked. Here the data is valid: two suppliers, three warehouses, six customer zones, twenty products, 606 pallets of demand.", "What if the data is wrong? This file declares a loop between warehouses. The system blocks the run and says exactly why. It never guesses."], "notes": ["**Màn hình và thao tác:**", "1. Trang **Data** trống. Chỉ vào nhãn **Synthetic data** ở góc trên.", "2. Kéo thả `nordic-flow-pilot-sample.zip` vào khung, bấm **Upload and check**.", "3. Chỉ vào: 2 nhà cung cấp, 3 kho, 6 vùng, 20 SKU, 606 pallet, dòng \"All data checks passed\".", "4. Bấm **Change data**, tải `05_invalid_warehouse_cycle.zip`. Hiện bảng lỗi: *warehouse transfer lanes must form a directed acyclic graph*. Chỉ vào việc nút Calculate plan không xuất hiện.", "5. Tải lại `nordic-flow-pilot-sample.zip`."]}, {"n": 4, "title": "Kết quả", "start": 120, "end": 180, "paras": ["We calculate the plan. The optimiser finds a plan costing 31,316 cost units against 32,698 for the baseline, a saving of 1,382, or 4.2 percent. Two cautions. The data is synthetic, so this is not a forecast. And the baseline is a simple rule that prefers one warehouse per zone; it is not Company A's actual plan. If that baseline could not serve all demand, the system would show no saving at all. The checks passed: an independent verifier, which does not use the solver, re-checked supply, demand, capacity and lanes. The diagram shows where goods move. The ranking prices every full path, leg by leg, so the planner can see why."], "notes": ["**Thao tác:** bấm **Calculate plan**. Dừng ở trang **Results**.", "- Chỉ vào 4 thẻ: Saving **1,382** (4.2%), Optimised **31,316**, Baseline **32,698**, Plan checks **Passed**.", "- Cuộn tới **Allocation overview**: chỉ nét màu (có hàng), nét xám đứt (chưa dùng).", "- Cuộn tới **Complete route cost ranking**: chọn Zone 1, Cement standard; chỉ dòng rẻ nhất (Supplier 1 → Warehouse C → Zone 1, 62 mỗi pallet), bấm một dòng để đường đó sáng lên."]}, {"n": 5, "title": "AI có kiểm chứng", "start": 180, "end": 240, "paras": ["Now the explanation. Our code calculates the numbers. The AI assistant only rewrites them in plain language. Every figure in the text must match the calculated facts, so a made-up number rejects the whole draft. Here is that guard in action: a draft with correct figures is accepted; a draft that invents a figure is rejected. And the text is only a draft. The planner reads it, checks the supporting figures, edits it and approves it. AI helps; a person decides."], "notes": ["**Thao tác:**", "1. Bấm **Review & approve**, rồi **Generate explanation**. Hiện văn bản và thẻ \"AI draft\" (hoặc \"Standard summary\" nếu AI không dùng được).", "2. Mở **Check the supporting figures**, chỉ vào bảng chi phí và chi phí đường đi trước và sau.", "3. Chuyển sang cửa sổ terminal (nội dung sạch, không có key), chạy `python -m nordic_flow demo-guard` (khoảng 15 giây). Chỉ vào dòng **ACCEPTED** và dòng **REJECTED: numbers not in facts**.", "4. Quay lại giao diện, sửa nhẹ một câu trong văn bản, bấm **Approve explanation**."]}, {"n": 6, "title": "Quyết định của planner", "start": 240, "end": 290, "paras": ["Now the planner overrides the machine. A customer contract says Zone 1 must receive its cement from Warehouse B. The planner fixes eight pallets and must give a reason. The system recalculates everything else around that decision as a new version, and shows its price: plus 88 cost units. The original plan is kept."], "notes": ["**Thao tác:** **Adjust plan** → **Change delivery warehouse**. Chọn Zone: **Zone 1**, SKU: **Cement standard**, Serve from: **Warehouse B**, Exactly: **8**. Lý do: *Customer contract names this warehouse*. Bấm **Apply decision and recalculate**. Chỉ vào thanh thông tin: *Original cost 31,316 → current 31,404, +88*. Mở **Manual decisions (1)** để thấy lý do."]}, {"n": 7, "title": "Duyệt, khóa, xuất, nhật ký", "start": 290, "end": 340, "paras": ["The planner approves the plan. From this moment it is locked, and only now can it be exported. Trying to export earlier is refused. The export is a ZIP for the existing ERP, warehouse and transport systems. Nordic Flow executes nothing. The audit trail records every step. Each entry is linked to the one before, so any edit is detectable: tamper-evident, not tamper-proof."], "notes": ["**Thao tác:**", "1. (Tùy chọn, 5 giây) trên một plan nháp chưa duyệt: chỉ ra nút **Export** chưa xuất hiện.", "2. Nhập comment, bấm **Approve plan**. Hiện \"Approved plan\" và nút **Start a new version**.", "3. Bấm **Export approved plan (ZIP)**; mở ZIP cho thấy các file CSV, `comparison.json`, `audit_log.json`.", "4. Mở **Audit trail**: các sự kiện theo thứ tự và thông báo *tamper-evident, not tamper-proof*."]}, {"n": 8, "title": "What-if", "start": 340, "end": 370, "paras": ["The planner can also ask \"what if\". If Warehouse A closes, no feasible plan exists. The system says so, with the likely cause: total capacity is below demand. It never invents a route."], "notes": ["**Thao tác:** **What-if** → Change: **Close a warehouse**, Warehouse: **Warehouse A** → **Add change** → **Run what-if**. Hiện khung đỏ \"No feasible plan exists\" kèm nguyên nhân (sức chứa 684 nhỏ hơn nhu cầu 902)."]}, {"n": 9, "title": "Kết", "start": 370, "end": 410, "paras": ["In short: the core is an optimiser with an independent check, an AI that only explains, and a human who approves. The limits are clear: synthetic data, one planning period, no ERP integration. The Round 1 gates, such as five percent savings and thirty percent less planning time, need real data in a pilot. This MVP proves the mechanism, not the number. Thank you."], "notes": ["**Màn hình:** quay lại trang Results, hoặc thẻ chữ tóm tắt 3 ý: *Optimiser + independent check · AI only explains · A human approves*."]}];
+let cur = 0, running = false, t0 = 0, elapsed = 0, fs = 44;
+const $ = (id) => document.getElementById(id);
+const mmss = (s) => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+function render() {
+  const s = SCENES[cur];
+  $("meta").textContent = `Scene ${s.n} of ${SCENES.length} · planned ${mmss(s.start)} to ${mmss(s.end)}`;
+  $("title").textContent = s.title;
+  $("notesBody").textContent = s.notes.join("\n");
+  $("say").innerHTML = s.paras.map((p) => `<p class="say" style="--fs:${fs}px">${p.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`).join("");
+  document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("on", i === cur));
+  window.scrollTo(0, 0); pace();
+}
+function pace() {
+  const s = SCENES[cur], e = elapsed + (running ? (Date.now() - t0) / 1000 : 0);
+  $("clock").textContent = mmss(e);
+  const diff = e - s.start, el = $("pace");
+  if (!running && elapsed === 0) { el.textContent = ""; $("clock").className = "timer"; return; }
+  el.textContent = diff > 8 ? `${Math.round(diff)} s behind scene start` : diff < -8 ? `${Math.round(-diff)} s ahead of scene start` : "on pace";
+  $("clock").className = "timer " + (e > 420 ? "bad" : diff > 20 ? "warn" : "ok");
+}
+function go(i) { cur = Math.max(0, Math.min(SCENES.length - 1, i)); render(); }
+SCENES.forEach((s, i) => { const b = document.createElement("button"); b.className = "tab"; b.textContent = `${s.n}. ${s.title}`; b.onclick = () => go(i); $("tabs").append(b); });
+function toggle() { if (running) { elapsed += (Date.now() - t0) / 1000; running = false; $("toggle").textContent = "Resume timer"; } else { t0 = Date.now(); running = true; $("toggle").textContent = "Pause timer"; } pace(); }
+$("prev").onclick = () => go(cur - 1); $("next").onclick = () => go(cur + 1); $("toggle").onclick = toggle;
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") go(cur + 1); else if (e.key === "ArrowLeft") go(cur - 1);
+  else if (e.key === " ") { e.preventDefault(); toggle(); }
+  else if (e.key === "+" || e.key === "=") { fs = Math.min(96, fs + 4); render(); } else if (e.key === "-") { fs = Math.max(24, fs - 4); render(); }
+  else if (e.key.toLowerCase() === "r") { running = false; elapsed = 0; $("toggle").textContent = "Start timer"; pace(); }
+  else if (e.key.toLowerCase() === "n") { $("notes").open = !$("notes").open; }
+});
+setInterval(pace, 500); render();
+</script></body></html>

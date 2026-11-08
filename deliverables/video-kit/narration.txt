@@ -1,0 +1,31 @@
+NORDIC FLOW · MVP.mp4 · NARRATION (English)
+633 words. Read at a calm pace; pause during on-screen actions.
+
+[Scene 1 · Bài toán · 0:00-0:30]
+Every week, a planner at a building-materials retailer must decide which supplier and which existing warehouse should serve each customer zone. Today that is done by habit, one leg at a time, so total cost is never seen. Nordic Flow is a planner-approved optimisation service. It calculates the lowest-cost allocation, checks it independently, explains it, and waits for a human to approve. Everything you will see runs locally, on synthetic data.
+
+[Scene 2 · MVP đổi gì so với Round 1 · 0:30-1:00]
+Since our Round 1 proposal, five things changed, and here is why. First, we use synthetic data, because Company A's data is not available; every screen says so. Second, we added what-if scenarios, an approval gate and an audit trail, so "the planner approves and every decision is logged" is shown, not promised. Third, learning from overrides stays in phase two. Fourth, there is no ERP connection: files in, files out. Fifth, as an optional extension, the engine can also handle transfers between existing warehouses.
+
+[Scene 3 · Tải dữ liệu và kiểm tra · 1:00-2:00]
+A planner starts by uploading this week's files: eight CSV files in one ZIP, as exported from their systems. Before anything is calculated, every file is checked. Here the data is valid: two suppliers, three warehouses, six customer zones, twenty products, 606 pallets of demand.
+
+What if the data is wrong? This file declares a loop between warehouses. The system blocks the run and says exactly why. It never guesses.
+
+[Scene 4 · Kết quả · 2:00-3:00]
+We calculate the plan. The optimiser finds a plan costing 31,316 cost units against 32,698 for the baseline, a saving of 1,382, or 4.2 percent. Two cautions. The data is synthetic, so this is not a forecast. And the baseline is a simple rule that prefers one warehouse per zone; it is not Company A's actual plan. If that baseline could not serve all demand, the system would show no saving at all. The checks passed: an independent verifier, which does not use the solver, re-checked supply, demand, capacity and lanes. The diagram shows where goods move. The ranking prices every full path, leg by leg, so the planner can see why.
+
+[Scene 5 · AI có kiểm chứng · 3:00-4:00]
+Now the explanation. Our code calculates the numbers. The AI assistant only rewrites them in plain language. Every figure in the text must match the calculated facts, so a made-up number rejects the whole draft. Here is that guard in action: a draft with correct figures is accepted; a draft that invents a figure is rejected. And the text is only a draft. The planner reads it, checks the supporting figures, edits it and approves it. AI helps; a person decides.
+
+[Scene 6 · Quyết định của planner · 4:00-4:50]
+Now the planner overrides the machine. A customer contract says Zone 1 must receive its cement from Warehouse B. The planner fixes eight pallets and must give a reason. The system recalculates everything else around that decision as a new version, and shows its price: plus 88 cost units. The original plan is kept.
+
+[Scene 7 · Duyệt, khóa, xuất, nhật ký · 4:50-5:40]
+The planner approves the plan. From this moment it is locked, and only now can it be exported. Trying to export earlier is refused. The export is a ZIP for the existing ERP, warehouse and transport systems. Nordic Flow executes nothing. The audit trail records every step. Each entry is linked to the one before, so any edit is detectable: tamper-evident, not tamper-proof.
+
+[Scene 8 · What-if · 5:40-6:10]
+The planner can also ask "what if". If Warehouse A closes, no feasible plan exists. The system says so, with the likely cause: total capacity is below demand. It never invents a route.
+
+[Scene 9 · Kết · 6:10-6:50]
+In short: the core is an optimiser with an independent check, an AI that only explains, and a human who approves. The limits are clear: synthetic data, one planning period, no ERP integration. The Round 1 gates, such as five percent savings and thirty percent less planning time, need real data in a pilot. This MVP proves the mechanism, not the number. Thank you.

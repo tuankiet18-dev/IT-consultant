@@ -2,6 +2,8 @@
 
 Mục tiêu: giám khảo xem xong hiểu **bài toán, cách hệ thống giải, vì sao tin được kết quả, và con người kiểm soát ở đâu**. Đề yêu cầu bắt buộc: chạy app thật, nêu luồng chính, nêu giá trị, và **giải thích MVP đổi gì so với Round 1 và vì sao**.
 
+**Bộ công cụ quay đã sẵn:** thư mục `deliverables/video-kit/` (đọc `README.md` trong đó trước): thẻ hình, dữ liệu demo, lời đọc, phụ đề, màn hình nhắc lời, script khởi động và kiểm tra.
+
 Thời lượng mục tiêu: **6 phút 50 giây** (còn dư 10 giây). Lời đọc 633 từ (khoảng 4,5 đến 5,5 phút nếu đọc chậm), phần còn lại là thao tác trên màn hình và các khoảng lặng.
 
 ## 1. Nên show gì, theo thứ tự ưu tiên

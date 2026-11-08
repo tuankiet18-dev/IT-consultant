@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Video cards</title>
+<style>
+  @font-face { font-family: "Inter"; src: url("../../src/fonts/inter-latin.woff2") format("woff2"); font-weight: 100 900; }
+  :root { --ink:#0f172a; --body:#334155; --mute:#64748b; --blue:#2563eb; --blue-d:#1d4ed8; --blue-l:#eff6ff; --rule:#e2e8f0; --amber:#b45309; --amber-l:#fffbeb; --green:#047857; }
+  * { box-sizing: border-box }
+  html, body { margin: 0; background: #e5e7eb; font-family: "Inter", system-ui, sans-serif; color: var(--body); -webkit-print-color-adjust: exact }
+  .card { width: 1920px; height: 1080px; background: #fff; position: relative; overflow: hidden; margin: 0 auto 24px; padding: 80px 140px }
+  .eyebrow { font-size: 24px; font-weight: 650; letter-spacing: .16em; text-transform: uppercase; color: var(--blue) }
+  h1 { font-size: 88px; line-height: 1.05; letter-spacing: -.03em; color: var(--ink); margin: 20px 0 24px; font-weight: 750 }
+  h2 { font-size: 64px; letter-spacing: -.025em; color: var(--ink); margin: 14px 0 26px; font-weight: 720 }
+  .sub { font-size: 40px; line-height: 1.35; color: var(--body); max-width: 1300px }
+  .foot { position: absolute; left: 140px; right: 140px; bottom: 64px; display: flex; justify-content: space-between; font-size: 24px; color: var(--mute); border-top: 2px solid var(--rule); padding-top: 22px }
+  .tag { display: inline-block; font-size: 26px; font-weight: 650; padding: 8px 22px; border-radius: 99px; background: var(--amber-l); color: var(--amber); border: 2px solid #fcd34d; margin-top: 56px }
+  .logo { width: 96px; height: 96px; border-radius: 22px; background: var(--blue); display: grid; place-items: center; margin-bottom: 40px }
+  .logo svg { width: 56px; height: 56px }
+  /* changes */
+  .row { display: grid; grid-template-columns: 84px 1fr; gap: 32px; align-items: start; padding: 16px 0; border-bottom: 2px solid var(--rule) }
+  .row:last-of-type { border-bottom: 0 }
+  .num { width: 64px; height: 64px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; font-size: 32px; display: grid; place-items: center }
+  .row b { display: block; font-size: 40px; color: var(--ink); letter-spacing: -.01em; line-height: 1.2 }
+  .row span { display: block; font-size: 30px; color: var(--mute); margin-top: 4px }
+  .row .opt { color: var(--amber) }
+  /* closing */
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 24px }
+  .pillar { border: 2px solid var(--rule); border-radius: 28px; padding: 44px 40px; background: #f8fafc }
+  .pillar .k { font-size: 24px; font-weight: 650; letter-spacing: .14em; text-transform: uppercase; color: var(--blue) }
+  .pillar b { display: block; font-size: 46px; color: var(--ink); margin: 14px 0 12px; line-height: 1.12; letter-spacing: -.02em }
+  .pillar span { font-size: 30px; line-height: 1.35 }
+  .limits { margin-top: 44px; font-size: 32px; line-height: 1.5; color: var(--body); border-left: 8px solid #fcd34d; background: var(--amber-l); padding: 26px 36px; border-radius: 0 20px 20px 0 }
+</style></head><body>
+
+<section class="card" id="title">
+  <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg></div>
+  <div class="eyebrow">NEW AURA · IT Consultant Challenge 2026 · Round 2</div>
+  <h1>Nordic Flow</h1>
+  <p class="sub">A planner-approved service that decides which supplier and which existing warehouse should serve each customer zone, at the lowest total cost.</p>
+  <span class="tag">Synthetic data · runs locally</span>
+  <div class="foot"><span>MVP demo</span><span>Planner approves every plan</span></div>
+</section>
+
+<section class="card" id="changes">
+  <div class="eyebrow">Round 1 → Round 2</div>
+  <h2>What changed since Round 1, and why</h2>
+  <div class="row" data-i="1"><div class="num">1</div><div><b>Synthetic data</b><span>Company A's data is not available. Every screen says so.</span></div></div>
+  <div class="row" data-i="2"><div class="num">2</div><div><b>Added: what-if, approval gate, audit trail</b><span>So "the planner approves and every decision is logged" is shown, not promised.</span></div></div>
+  <div class="row" data-i="3"><div class="num">3</div><div><b>Not built: learning from overrides</b><span>It stays in phase two, as planned in Round 1.</span></div></div>
+  <div class="row" data-i="4"><div class="num">4</div><div><b>No ERP connection</b><span>Files in, files out. The planner imports the approved plan by hand.</span></div></div>
+  <div class="row" data-i="5"><div class="num">5</div><div><b>Optional extension: transfers between existing warehouses</b><span class="opt">Beyond the Round 1 pilot. Off unless extra input files are supplied.</span></div></div>
+  <div class="foot"><span>NEW AURA · Nordic Flow</span><span>Round 1 → Round 2 changes</span></div>
+</section>
+
+<section class="card" id="closing">
+  <div class="eyebrow">In short</div>
+  <h2>Code calculates. AI explains. A person approves.</h2>
+  <div class="three">
+    <div class="pillar"><div class="k">Optimiser</div><b>Lowest cost, checked independently</b><span>OR-Tools solves it. A separate verifier re-checks supply, demand, capacity and lanes.</span></div>
+    <div class="pillar"><div class="k">AI assistant</div><b>Explains, never calculates</b><span>Any figure that is not in the calculated facts rejects the draft.</span></div>
+    <div class="pillar"><div class="k">Planner</div><b>Decides and is accountable</b><span>Reasons are required. Approved plans are locked. Every step is in the audit trail.</span></div>
+  </div>
+  <div class="limits"><b>Limits.</b> Synthetic data, one planning period, no ERP integration. The Round 1 gates (5% saving, 30% less planning time) need real data in a pilot. This MVP proves the mechanism, not the number.</div>
+  <div class="foot"><span>Thank you · NEW AURA</span><span>Nordic Flow MVP</span></div>
+</section>
+</body></html>

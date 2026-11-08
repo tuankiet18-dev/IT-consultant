@@ -1,0 +1,333 @@
+1
+00:00:00,500 --> 00:00:04,900
+Every week, a planner at a building-materials
+retailer must decide which
+
+2
+00:00:04,900 --> 00:00:08,900
+supplier and which existing warehouse
+should serve each customer zone.
+
+3
+00:00:08,900 --> 00:00:15,700
+Today that is done by habit, one leg at
+a time, so total cost is never seen.
+
+4
+00:00:15,700 --> 00:00:18,500
+Nordic Flow is a planner-approved
+optimisation service.
+
+5
+00:00:18,500 --> 00:00:22,100
+It calculates the lowest-cost allocation,
+checks it independently, explains
+
+6
+00:00:22,100 --> 00:00:25,300
+it, and waits for a human to approve.
+
+7
+00:00:25,300 --> 00:00:28,900
+Everything you will see runs
+locally, on synthetic data.
+
+8
+00:00:30,500 --> 00:00:35,300
+Since our Round 1 proposal, five
+things changed, and here is why.
+
+9
+00:00:35,300 --> 00:00:40,500
+First, we use synthetic data, because
+Company A's data is not available; every
+
+10
+00:00:40,500 --> 00:00:42,100
+screen says so.
+
+11
+00:00:42,100 --> 00:00:47,300
+Second, we added what-if scenarios, an
+approval gate and an audit trail, so
+
+12
+00:00:47,300 --> 00:00:52,100
+"the planner approves and every decision
+is logged" is shown, not promised.
+
+13
+00:00:52,100 --> 00:00:55,300
+Third, learning from
+overrides stays in phase two.
+
+14
+00:00:55,300 --> 00:00:59,300
+Fourth, there is no ERP
+connection: files in, files out.
+
+15
+00:00:59,300 --> 00:01:04,100
+Fifth, as an optional extension, the
+engine can also handle transfers between
+
+16
+00:01:04,100 --> 00:01:05,700
+existing warehouses.
+
+17
+00:01:06,000 --> 00:01:11,600
+A planner starts by uploading this week's
+files: eight CSV files in one ZIP,
+
+18
+00:01:11,600 --> 00:01:13,600
+as exported from their systems.
+
+19
+00:01:13,600 --> 00:01:16,800
+Before anything is calculated,
+every file is checked.
+
+20
+00:01:16,800 --> 00:01:21,600
+Here the data is valid: two suppliers,
+three warehouses, six customer zones,
+
+21
+00:01:21,600 --> 00:01:24,000
+twenty products, 606 pallets of demand.
+
+22
+00:01:35,500 --> 00:01:37,900
+What if the data is wrong?
+
+23
+00:01:37,900 --> 00:01:40,700
+This file declares a
+loop between warehouses.
+
+24
+00:01:40,700 --> 00:01:44,300
+The system blocks the
+run and says exactly why.
+
+25
+00:01:44,300 --> 00:01:45,900
+It never guesses.
+
+26
+00:02:00,500 --> 00:02:02,100
+We calculate the plan.
+
+27
+00:02:02,100 --> 00:02:07,300
+The optimiser finds a plan costing
+31,316 cost units against 32,698 for the
+
+28
+00:02:07,300 --> 00:02:10,500
+baseline, a saving of
+1,382, or 4.2 percent.
+
+29
+00:02:10,500 --> 00:02:12,100
+Two cautions.
+
+30
+00:02:12,100 --> 00:02:16,100
+The data is synthetic, so
+this is not a forecast.
+
+31
+00:02:16,100 --> 00:02:22,100
+And the baseline is a simple rule that
+prefers one warehouse per zone; it is
+
+32
+00:02:22,100 --> 00:02:24,100
+not Company A's actual plan.
+
+33
+00:02:24,100 --> 00:02:29,700
+If that baseline could not serve all
+demand, the system would show no saving
+
+34
+00:02:29,700 --> 00:02:31,300
+at all.
+
+35
+00:02:31,300 --> 00:02:36,100
+The checks passed: an independent
+verifier, which does not use the solver,
+
+36
+00:02:36,100 --> 00:02:38,500
+re-checked supply, demand,
+capacity and lanes.
+
+37
+00:02:38,500 --> 00:02:40,900
+The diagram shows where goods move.
+
+38
+00:02:40,900 --> 00:02:46,900
+The ranking prices every full path,
+leg by leg, so the planner can see why.
+
+39
+00:03:00,500 --> 00:03:02,100
+Now the explanation.
+
+40
+00:03:02,100 --> 00:03:04,100
+Our code calculates the numbers.
+
+41
+00:03:04,100 --> 00:03:07,700
+The AI assistant only rewrites
+them in plain language.
+
+42
+00:03:07,700 --> 00:03:13,300
+Every figure in the text must match the
+calculated facts, so a made-up number
+
+43
+00:03:13,300 --> 00:03:14,900
+rejects the whole draft.
+
+44
+00:03:14,900 --> 00:03:20,500
+Here is that guard in action: a draft
+with correct figures is accepted; a
+
+45
+00:03:20,500 --> 00:03:23,300
+draft that invents a figure is rejected.
+
+46
+00:03:23,300 --> 00:03:26,100
+And the text is only a draft.
+
+47
+00:03:26,100 --> 00:03:31,300
+The planner reads it, checks the supporting
+figures, edits it and approves it.
+
+48
+00:03:31,300 --> 00:03:33,300
+AI helps; a person decides.
+
+49
+00:04:00,500 --> 00:04:02,900
+Now the planner overrides the machine.
+
+50
+00:04:02,900 --> 00:04:08,100
+A customer contract says Zone 1 must
+receive its cement from Warehouse B.
+
+51
+00:04:08,100 --> 00:04:12,100
+The planner fixes eight
+pallets and must give a reason.
+
+52
+00:04:12,100 --> 00:04:16,900
+The system recalculates everything else
+around that decision as a new version,
+
+53
+00:04:16,900 --> 00:04:20,100
+and shows its price: plus 88 cost units.
+
+54
+00:04:20,100 --> 00:04:22,100
+The original plan is kept.
+
+55
+00:04:50,500 --> 00:04:52,500
+The planner approves the plan.
+
+56
+00:04:52,500 --> 00:04:57,700
+From this moment it is locked,
+and only now can it be exported.
+
+57
+00:04:57,700 --> 00:05:00,100
+Trying to export earlier is refused.
+
+58
+00:05:00,100 --> 00:05:05,300
+The export is a ZIP for the existing
+ERP, warehouse and transport systems.
+
+59
+00:05:05,300 --> 00:05:06,900
+Nordic Flow executes nothing.
+
+60
+00:05:06,900 --> 00:05:09,300
+The audit trail records every step.
+
+61
+00:05:09,300 --> 00:05:14,500
+Each entry is linked to the one
+before, so any edit is detectable:
+
+62
+00:05:14,500 --> 00:05:16,100
+tamper-evident, not tamper-proof.
+
+63
+00:05:40,500 --> 00:05:43,300
+The planner can also ask "what if".
+
+64
+00:05:43,300 --> 00:05:46,500
+If Warehouse A closes,
+no feasible plan exists.
+
+65
+00:05:46,500 --> 00:05:51,700
+The system says so, with the likely
+cause: total capacity is below demand.
+
+66
+00:05:51,700 --> 00:05:53,700
+It never invents a route.
+
+67
+00:06:10,500 --> 00:06:16,500
+In short: the core is an optimiser with
+an independent check, an AI that only
+
+68
+00:06:16,500 --> 00:06:18,900
+explains, and a human who approves.
+
+69
+00:06:18,900 --> 00:06:23,700
+The limits are clear: synthetic data,
+one planning period, no ERP integration.
+
+70
+00:06:23,700 --> 00:06:28,900
+The Round 1 gates, such as five
+percent savings and thirty percent less
+
+71
+00:06:28,900 --> 00:06:32,100
+planning time, need real data in a pilot.
+
+72
+00:06:32,100 --> 00:06:35,300
+This MVP proves the
+mechanism, not the number.
+
+73
+00:06:35,300 --> 00:06:36,900
+Thank you.
