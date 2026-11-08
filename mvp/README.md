@@ -1,6 +1,6 @@
 # Nordic Flow MVP
 
-Nordic Flow allocates goods from suppliers directly to customer zones or through one or more existing warehouses. It minimises transport and handling cost subject to supply, demand, warehouse and route limits. A planner reviews and approves the result.
+Nordic Flow decides which supplier and which existing warehouse should serve each customer zone, at the lowest transport and handling cost subject to supply, demand, warehouse and lane limits. A planner reviews and approves the result. This is the Round 1 pilot scope. Optional extensions, enabled only by extra input files, allow transfers between existing warehouses (`transfer_rates.csv`) and direct supplier-to-customer lanes (`direct_rates.csv`); the pilot data uses neither.
 
 The local app uses FastAPI, SQLite, OR-Tools and a React interface built with Vite. The checked-in `web/` build is served by Python. The current specification is `../docs/MVP-SPEC-v0.1.md`, and the detailed input/API contract is `../docs/round2/01_CONTRACTS_AND_ARCHITECTURE.md`.
 

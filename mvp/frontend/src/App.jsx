@@ -24,9 +24,12 @@ const EDITORS = {
 };
 
 function StatusStrip() {
-  const { run } = useApp();
+  const { run, config } = useApp();
+  const ai = config && config.llm_enabled;
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <Tag tone="warn">Synthetic data</Tag>
+      <span className="hidden sm:inline-flex"><Tag tone={ai ? "good" : "neutral"}>{config == null ? "AI: checking" : ai ? "AI assistant on" : "AI assistant off"}</Tag></span>
       {run && <Tag tone={run.state === "approved" ? "good" : run.state === "rejected" ? "bad" : "info"}>Plan {run.id} · {stateText(run.state)}</Tag>}
     </div>
   );
@@ -91,6 +94,9 @@ export default function App() {
           <div className="font-medium text-slate-800">{scenario ? ({ "sample:demo": "Synthetic demo", "sample:golden": "Worked example", "sample:transshipment": "Warehouse transfer chain", "sample:branching": "Multi-warehouse example" }[scenario.source] || scenario.name) : "No data loaded"}</div>
           <div className="mt-1">{run ? `Plan ${run.id} · ${stateText(run.state)}` : "Load data to begin"}</div>
         </div>
+        <p className="px-5 pb-5 text-xs leading-relaxed text-slate-500">
+          NEW AURA · IT Consultant Challenge 2026, Round 2 MVP. Data is synthetic and costs are in cost units, not a forecast for Company A.
+        </p>
       </aside>
 
       <div className="min-w-0 flex-1 lg:pl-64">

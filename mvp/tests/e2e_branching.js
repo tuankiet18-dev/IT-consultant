@@ -13,6 +13,7 @@ async function main() {
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
     const button = name => page.getByRole('button', { name, exact: true });
     await page.goto(process.env.BASE_URL || 'http://localhost:8000/');
+    await page.getByText('Extended network examples').click();
     await button('Multi-warehouse example').click();
     const available = page.getByRole('img', { name: /^Available routes:/ });
     await available.waitFor();
@@ -69,7 +70,7 @@ async function main() {
     await page.setViewportSize({ width: 1360, height: 1000 });
     if (process.env.SHOTS) await page.screenshot({ path: path.join(process.env.SHOTS, 'branching-results.png'), fullPage: true });
     await page.getByRole('navigation', { name: 'Workflow' }).getByRole('button', { name: 'Review & approve' }).click();
-    await button('Write standard summary').click();
+    await button('Generate explanation').click();
     const text = await page.getByRole('textbox', { name: 'Explanation text' }).inputValue();
     assert.match(text, /Warehouse A to Warehouse D/);
     assert.match(text, /Warehouse B to Warehouse E/);

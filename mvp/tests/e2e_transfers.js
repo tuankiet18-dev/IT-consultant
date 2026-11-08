@@ -14,6 +14,7 @@ async function main() {
     const button = name => page.getByRole('button', { name, exact: true });
     const step = name => page.getByRole('navigation', { name: 'Workflow' }).getByRole('button', { name });
     await page.goto(process.env.BASE_URL || 'http://localhost:8000/');
+    await page.getByText('Extended network examples').click();
     await button('Warehouse transfer chain').click();
     const [calculated] = await Promise.all([
       page.waitForResponse(response => /\/scenarios\/\d+\/runs$/.test(response.url()) && response.request().method() === 'POST'),
@@ -30,7 +31,7 @@ async function main() {
     await page.getByRole('heading', { name: 'Plan details', exact: true }).click();
     await page.getByRole('heading', { name: 'Warehouse transfers' }).waitFor();
     await step('Review & approve').click();
-    await button('Write standard summary').click();
+    await button('Generate explanation').click();
     const text = await page.getByRole('textbox', { name: 'Explanation text' }).inputValue();
     assert.match(text, /Central hub to Regional warehouse/);
     assert.match(text, /Regional warehouse to Local warehouse/);

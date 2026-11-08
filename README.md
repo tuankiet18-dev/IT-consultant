@@ -1,6 +1,6 @@
 # Nordic Flow
 
-Nordic Flow is the NEW AURA team's local MVP for IT Consultant Challenge 2026. It allocates goods from suppliers directly to customers or through one or more existing warehouses, minimises transport and handling cost, and lets a planner review and approve each plan.
+Nordic Flow is the NEW AURA team's local MVP for IT Consultant Challenge 2026. It decides which supplier and which existing warehouse should serve each order at the lowest total cost, and a planner reviews and approves every plan. That is the Round 1 pilot: suppliers, existing warehouses and customer zones. Two optional extensions go beyond the pilot, transfers between existing warehouses and direct supplier-to-customer lanes. Pilot data uses neither. See `docs/round2/ROUND1-ALIGNMENT.md` for how the MVP maps to the Round 1 proposal.
 
 Round 1 material is in `docs/round1/`. The Round 2 deadline is 22:00 GMT+7 on 9 November 2026.
 
@@ -10,6 +10,7 @@ Round 1 material is in `docs/round1/`. The Round 2 deadline is 22:00 GMT+7 on 9 
 - `docs/MVP-SPEC-v0.1.md` is the current specification, updated for multi-warehouse transfers.
 - `docs/round2/01_CONTRACTS_AND_ARCHITECTURE.md` is the canonical input, optimisation and API contract.
 - `docs/round2/AS_BUILT.md` describes the current implementation.
+- `docs/round2/ROUND1-ALIGNMENT.md` maps the Round 1 proposal to what the MVP does, what it adds and what it does not claim.
 - `deliverables/` contains the four submission files and their status in `deliverables/README.md`.
 
 The Markdown specification and contract describe the current implementation, including direct delivery, multi-warehouse routing and the in-app guide. Existing DOCX/PDF files and submission artifacts are draft snapshots awaiting a final refresh after the MVP is agreed.

@@ -61,7 +61,7 @@ export function AuditTrail() {
         {chain && (
           <Note tone={chain.ok ? "ok" : "err"}>
             {chain.ok
-              ? <><ShieldCheck size={14} className="mr-1 inline" aria-hidden="true" />Audit trail verified ({chain.events} events).</>
+              ? <>Audit trail verified ({chain.events} events). Each entry is linked to the one before it, so any edit would be detected. This is tamper-evident, not tamper-proof.</>
               : "Audit verification failed. Review the event history before using this plan."}
           </Note>
         )}

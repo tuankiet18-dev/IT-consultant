@@ -76,11 +76,10 @@ function Explanation({ locked }) {
       <h3 className="text-base font-semibold text-slate-900">Explanation</h3>
       {!e ? (
         <>
-          <p className="hint mt-1">{locked ? "Start a new version to add an explanation." : "Choose a calculated summary or an AI draft. Review the figures and reasoning before approving the text."}</p>
+          <p className="hint mt-1">{locked ? "Start a new version to add an explanation." : `The explanation is built from the calculated numbers.${llmOn ? " The AI assistant rewrites it in plain language, and any figure that is not in the calculated facts is rejected." : ""} Review it before approving.`}</p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <button type="button" className="btn btn-secondary" disabled={busy || locked} onClick={() => explain(false)}>Write standard summary</button>
-            <button type="button" className="btn btn-primary" disabled={busy || locked || !llmOn} title={llmOn ? "" : "AI assistant unavailable"} onClick={() => explain(true)}>
-              <Sparkles size={16} aria-hidden="true" /> Write with AI assistant
+            <button type="button" className="btn btn-primary" disabled={busy || locked} onClick={() => explain(!!llmOn)}>
+              <Sparkles size={16} aria-hidden="true" /> Generate explanation
             </button>
           </div>
         </>
@@ -90,7 +89,11 @@ function Explanation({ locked }) {
             <Tag tone={e.source === "deterministic" ? "info" : "warn"}>{e.source === "deterministic" ? "Standard summary" : "AI draft"}</Tag>
             <Tag tone={e.status === "approved" ? "good" : "neutral"}>{e.status === "approved" ? `Approved by ${e.approved_by}${e.edited ? " (edited)" : ""}` : "Needs review"}</Tag>
           </div>
-          {e.reason && <Note tone="warn">{e.reason}</Note>}
+          {e.reason && e.source === "deterministic" && llmOn && (
+            <Note tone="warn">{/numbers not in facts/.test(e.reason)
+              ? "The AI draft contained a figure that is not in the calculated facts, so it was rejected and the standard summary is shown."
+              : "The AI assistant could not be used this time, so the standard summary is shown."}</Note>
+          )}
           <textarea ref={ref} className="input mt-3 resize-none overflow-hidden px-4 py-3 text-base leading-7" style={{ minHeight: 220 }} value={text} readOnly={locked || e.status === "approved"} onChange={(ev) => setText(ev.target.value)} aria-label="Explanation text" />
           <div className="mt-3 flex flex-wrap gap-3">
             <button type="button" className="btn btn-success" disabled={busy || locked || e.status === "approved"} onClick={() => approveExpl(text)}>Approve explanation</button>

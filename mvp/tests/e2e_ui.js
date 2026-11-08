@@ -32,7 +32,7 @@ async function main() {
     await shot('3-results');
 
     await step('Review & approve').click();
-    await button('Write standard summary').click();
+    await button('Generate explanation').click();
     await page.getByText('Standard summary', { exact: true }).waitFor();
     await shot('5-review');
     await button('Approve explanation').click();

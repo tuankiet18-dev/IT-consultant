@@ -24,9 +24,9 @@ async function main() {
     await page.getByRole('heading', { name: 'User guide', exact: true }).waitFor();
     assert.equal(await page.locator('summary').filter({ hasText: /\.csv/ }).count(), 11);
     await page.locator('summary').filter({ hasText: 'direct_rates.csv' }).click();
-    await page.getByText('Toàn bộ cước chặng xưởng → khách.', { exact: false }).waitFor();
+    await page.getByText('Full freight of the supplier → customer leg.', { exact: false }).waitFor();
     await shot('guide-input');
-    await button('Testcase mẫu').click();
+    await button('Extended test cases').click();
     const examples = [
       ['10_direct_factory_customer.zip', 0, 70],
       ['11_chain_3_warehouses.zip', 3, 130],
@@ -83,7 +83,7 @@ async function main() {
         assert.equal(child.comparison.optimised.total, 70);
         assert.deepEqual(child.route_pins[0].warehouses, []);
         await button('Review & approve').click();
-        await button('Write standard summary').click();
+        await button('Generate explanation').click();
         const text = await page.getByRole('textbox', { name: 'Explanation text' }).inputValue();
         assert.match(text, /direct/i);
         await button('Approve plan').click();

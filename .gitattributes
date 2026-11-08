@@ -1,0 +1,5 @@
+# Keep sample data byte-identical on every machine: tests compare CSV files with the ZIPs built from them.
+*.csv text eol=lf
+*.zip binary
+*.woff2 binary
+*.png binary

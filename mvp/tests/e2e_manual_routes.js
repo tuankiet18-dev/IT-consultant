@@ -16,6 +16,7 @@ async function main() {
     const shots = process.env.SHOTS;
     if (shots) fs.mkdirSync(shots, { recursive: true });
     await page.goto(process.env.BASE_URL || 'http://localhost:8000/');
+    await page.getByText('Extended network examples').click();
     await button('Multi-warehouse example').click();
     const [calculated] = await Promise.all([
       page.waitForResponse(r => /\/scenarios\/\d+\/runs$/.test(r.url()) && r.request().method() === 'POST'),
@@ -73,7 +74,7 @@ async function main() {
     ]);
     assert.equal((await savedAgain.json()).comparison.optimised.total, 114);
     await step('Review & approve').click();
-    await button('Write standard summary').click();
+    await button('Generate explanation').click();
     assert.match(await page.getByRole('textbox', { name: 'Explanation text' }).inputValue(), /manual|reserved/i);
     await button('Approve plan').click();
     await button('Export approved plan (ZIP)').waitFor();

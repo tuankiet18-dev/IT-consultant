@@ -92,10 +92,21 @@ export default function DataView() {
         </summary>
         <div className={s ? "border-t border-slate-100 p-4" : ""}>
           <div className="grid gap-4 md:grid-cols-2">
-            <Choice icon={FlaskConical} title="Synthetic demo" text="Explore a full example with 3 warehouses, 6 zones and 20 products." onClick={() => loadSample("demo")} />
-            <Choice icon={Sparkles} title="Worked example" text="Follow a small allocation with 2 warehouses and 1 product." onClick={() => loadSample("golden")} />
-            <Choice icon={Network} title="Multi-warehouse example" text="Compare 3 receiving warehouses and 3 delivery warehouses across 9 transfer routes." onClick={() => loadSample("branching")} />
-            <Choice icon={Network} title="Warehouse transfer chain" text="Trace goods through 3 warehouses in sequence before customer delivery." onClick={() => loadSample("transshipment")} />
+            <Choice icon={FlaskConical} title="Synthetic demo" text="Pilot scale: 2 suppliers, 3 existing warehouses, 6 customer zones and 20 products." onClick={() => loadSample("demo")} />
+            <Choice icon={Sparkles} title="Worked example" text="A small allocation with 2 warehouses and 1 product, easy to check by hand." onClick={() => loadSample("golden")} />
+            <details className="card md:col-span-2">
+              <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-slate-900">
+                Extended network examples
+                <span className="text-xs font-normal text-slate-500">Optional, beyond the Round 1 pilot</span>
+              </summary>
+              <div className="border-t border-slate-100 p-4">
+                <p className="hint mb-3">The pilot needs only suppliers, existing warehouses and customer zones. These examples add optional transfers between existing warehouses.</p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Choice icon={Network} title="Multi-warehouse example" text="Compare 3 receiving warehouses and 3 delivery warehouses across 9 transfer routes." onClick={() => loadSample("branching")} />
+                  <Choice icon={Network} title="Warehouse transfer chain" text="Trace goods through 3 warehouses in sequence before customer delivery." onClick={() => loadSample("transshipment")} />
+                </div>
+              </div>
+            </details>
             <div className="card card-pad md:col-span-2">
               <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-50 text-brand-700"><FileUp size={18} aria-hidden="true" /></span>
               <div className="mt-2 text-base font-semibold text-slate-900">Upload files</div>
@@ -106,7 +117,7 @@ export default function DataView() {
               <details className="mt-3 text-xs text-slate-500">
                 <summary className="cursor-pointer">Required files</summary>
                 <p className="mt-2 leading-relaxed">suppliers.csv, warehouses.csv, zones.csv, skus.csv, inbound_rates.csv, outbound_rates.csv, supply.csv, demand.csv</p>
-                <p className="mt-2 font-medium text-slate-700">Optional warehouse transfers</p>
+                <p className="mt-2 font-medium text-slate-700">Optional extensions beyond the Round 1 pilot: warehouse transfers and direct delivery</p>
                 <p className="mt-1 leading-relaxed">transfer_rates.csv links warehouses using from_warehouse_id, to_warehouse_id and cost_per_pallet. The optional max_pallets column limits the route across all products. A blank limit allows any quantity within warehouse capacity. Zero closes that route.</p>
                 <p className="mt-2 leading-relaxed">List every warehouse in warehouses.csv. Transfer routes must move forward through an acyclic network. warehouse_skus.csv can restrict which products each warehouse accepts.</p>
                 <p className="mt-2 leading-relaxed">For factory-to-customer delivery without a warehouse, add direct_rates.csv with supplier_id, zone_id, cost_per_pallet and optional max_pallets. See Input format guide for the complete contract.</p>

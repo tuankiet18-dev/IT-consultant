@@ -13,6 +13,7 @@ async function main() {
     const base = process.env.BASE_URL || 'http://localhost:8000';
     const button = name => page.getByRole('button', { name, exact: true });
     await page.goto(base);
+    await page.getByText('Extended network examples').click();
     await button('Multi-warehouse example').click();
     const [calculated] = await Promise.all([
       page.waitForResponse(r => /\/scenarios\/\d+\/runs$/.test(r.url()) && r.request().method() === 'POST'),

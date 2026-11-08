@@ -20,6 +20,7 @@ async function main() {
       }
     };
     await page.goto(base);
+    await page.getByText('Extended network examples').click();
     await button('Multi-warehouse example').click();
     await button('Calculate plan').waitFor();
     assert.equal(await button('Multi-warehouse example').isVisible(), false);
@@ -56,9 +57,9 @@ async function main() {
     assert.equal(await page.getByRole('combobox', { name: 'Warehouse stop 1', exact: true }).count(), 0);
     assert.equal(await page.getByRole('combobox', { name: 'Serve from' }).count(), 0);
     assert.equal(await button('Export approved plan (ZIP)').count(), 0);
-    assert.equal(await button('Write standard summary').isVisible(), true);
-    assert.equal(await button('Write with AI assistant').isVisible(), true);
-    await button('Write standard summary').click();
+    assert.equal(await button('Generate explanation').isVisible(), true);
+    assert.equal(await button('Write with AI assistant').count(), 0);
+    await button('Generate explanation').click();
     const originalText = await page.getByRole('textbox', { name: 'Explanation text' }).inputValue();
     assert.match(originalText, /102/);
     await shot('focused-review');
