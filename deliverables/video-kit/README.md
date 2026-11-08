@@ -10,11 +10,13 @@ Mọi thứ cần để quay video 7 phút nằm trong thư mục này. Đọc f
 | `scripts/preflight.py` | Kiểm tra 20 điều (các con số lời đọc nhắc tới) trước khi quay |
 | `scripts/demo-guard.ps1` | Cảnh 5: terminal sạch chạy "AI bị chặn" |
 | `scripts/reset-data.ps1` | Dừng app và dọn dữ liệu (dùng giữa các lần quay, hoặc để dừng app) |
+| `scripts/make-voiceover.ps1` | Tùy chọn: tạo giọng đọc tiếng Anh (14 file WAV, chạy offline) từ `narration.txt`, dùng khi không ai đọc tiếng Anh |
+| `out/audio/` | Chỗ chứa các file giọng đọc vừa tạo (không đưa vào git, tạo lại bằng lệnh trên) |
 | `data/nordic-flow-pilot-sample.zip` | Cảnh 3: dữ liệu hợp lệ để tải lên |
 | `data/05_invalid_warehouse_cycle.zip` | Cảnh 3: dữ liệu sai (vòng lặp chuyển kho) |
 | `data/baseline-unusable.zip` | Cảnh phụ (tùy chọn): baseline không dùng được, không báo tiết kiệm |
 | `cards/01-title.png` | Cảnh 1: thẻ mở đầu |
-| `cards/02-changes-1of5.png` đến `5of5.png` | Cảnh 2: thẻ "đổi gì so với Round 1", hiện dần từng ý |
+| `cards/02-changes-0of5.png` đến `5of5.png` | Cảnh 2: thẻ "đổi gì so với Round 1", hiện dần từng ý (0of5 = chưa hiện ý nào) |
 | `cards/09-closing.png` | Cảnh 9: thẻ kết |
 | `narration.txt` | Toàn bộ lời đọc tiếng Anh, theo cảnh (để đọc, hoặc dán vào công cụ đọc giọng nói) |
 | `subtitles.srt` | Phụ đề tiếng Anh gần đúng giờ (chỉnh lại theo bản quay thật) |
@@ -57,15 +59,15 @@ Mở `teleprompter.html` (phím `←` `→` đổi cảnh, `Space` bấm giờ, 
 
 | # | Cảnh | Trên màn hình | Dùng file | Dài |
 |---|---|---|---|---|
-| 1 | Bài toán | Thẻ tiêu đề | `cards/01-title.png` (không cần quay, chỉ ghép) | 0:30 |
-| 2 | Đổi gì so với Round 1 | Thẻ chữ hiện dần | `cards/02-changes-1of5.png` đến `5of5.png` (không cần quay) | 0:30 |
-| 3 | Tải dữ liệu, kiểm tra | App: Data | `data/nordic-flow-pilot-sample.zip`, rồi `data/05_invalid_warehouse_cycle.zip`, rồi lại file đầu | 1:00 |
+| 1 | Bài toán | Thẻ tiêu đề | `cards/01-title.png` (không cần quay, chỉ ghép) | 0:32 |
+| 2 | Đổi gì so với Round 1 | Thẻ chữ hiện dần | `cards/02-changes-0of5.png` đến `5of5.png` (không cần quay) | 0:42 |
+| 3 | Tải dữ liệu, kiểm tra | App: Data | `data/nordic-flow-pilot-sample.zip`, rồi `data/05_invalid_warehouse_cycle.zip`, rồi lại file đầu | 0:58 |
 | 4 | Kết quả | App: Results | (dữ liệu đã tải) | 1:00 |
-| 5 | AI có kiểm chứng | App: Review & approve, rồi terminal | `scripts/demo-guard.ps1` (mở terminal MỚI) | 1:00 |
-| 6 | Quyết định planner | App: Adjust plan | Zone 1, Cement standard, Warehouse B, 8 pallet | 0:50 |
-| 7 | Duyệt, khóa, xuất, nhật ký | App | | 0:50 |
-| 8 | What-if | App: What-if | Close a warehouse, Warehouse A | 0:30 |
-| 9 | Kết | Thẻ kết | `cards/09-closing.png` (không cần quay) | 0:40 |
+| 5 | AI có kiểm chứng | App: Review & approve, rồi terminal | `scripts/demo-guard.ps1` (mở terminal MỚI) | 0:53 |
+| 6 | Quyết định planner | App: Adjust plan | Zone 1, Cement standard, Warehouse B, 8 pallet | 0:47 |
+| 7 | Duyệt, khóa, xuất, nhật ký | App | | 0:48 |
+| 8 | What-if | App: What-if | Close a warehouse, Warehouse A | 0:28 |
+| 9 | Kết | Thẻ kết | `cards/09-closing.png` (không cần quay) | 0:32 |
 
 Cảnh 3 đến 8 là một luồng liền mạch, nên **quay theo đúng thứ tự trong cùng một phiên**. Nếu phải quay lại một cảnh giữa chừng, chạy `scripts\reset-data.ps1` rồi `start-recording.ps1` và quay lại từ cảnh 3 (số plan phải bắt đầu từ Plan 1, ra 31.316 rồi 31.404).
 
@@ -77,22 +79,27 @@ Lưu ý khi quay:
 
 ## Bước 4. Ghép video
 
-Công cụ gợi ý: Clipchamp (có sẵn trên Windows 11), DaVinci Resolve (miễn phí) hoặc CapCut. Dòng thời gian:
+Công cụ gợi ý: Clipchamp (có sẵn trên Windows 11), DaVinci Resolve (miễn phí) hoặc CapCut. Dòng thời gian (tổng 6:40, dưới giới hạn 7:00 khoảng 20 giây). Giờ đọc của từng đoạn tính theo giọng đọc tự động `make-voiceover.ps1`; giọng người thật chênh khoảng ±15%, hãy khớp theo tai.
 
-| Thời điểm | Hình | Tiếng |
+| Bắt đầu | Hình | Đoạn lời đọc (file trong `out/audio`) |
 |---|---|---|
-| 0:00 | `01-title.png` | Lời cảnh 1 |
-| 0:30 | `02-changes-1of5.png`, rồi lần lượt `2of5` (khoảng 0:39), `3of5` (0:48), `4of5` (0:53), `5of5` (0:57) | Lời cảnh 2 (khớp theo lời, mỗi ý hiện khi vừa đọc tới) |
-| 1:00 | Clip cảnh 3 | Lời cảnh 3 |
-| 2:00 | Clip cảnh 4 | Lời cảnh 4 |
-| 3:00 | Clip cảnh 5 (app, rồi terminal) | Lời cảnh 5 |
-| 4:00 | Clip cảnh 6 | Lời cảnh 6 |
-| 4:50 | Clip cảnh 7 | Lời cảnh 7 |
-| 5:40 | Clip cảnh 8 | Lời cảnh 8 |
-| 6:10 | `09-closing.png` | Lời cảnh 9 |
+| 0:00 | `01-title.png` | `s1` bắt đầu 0:00.5, dài 31 giây |
+| 0:32 | `02-changes-0of5.png` | `s2` bắt đầu 0:32.5, dài 41 giây |
+| 0:38 | `02-changes-1of5.png` (đọc tới "First") | |
+| 0:46 | `02-changes-2of5.png` ("Second") | |
+| 0:58 | `02-changes-3of5.png` ("Third") | |
+| 1:02 | `02-changes-4of5.png` ("Fourth") | |
+| 1:07 | `02-changes-5of5.png` ("Fifth"), giữ đến 1:14 | |
+| 1:14 | Clip cảnh 3 | `s3a` bắt đầu 1:16 (tải file hợp lệ), `s3b` bắt đầu 1:52 (file lỗi) |
+| 2:12 | Clip cảnh 4 | `s4` bắt đầu 2:16, dài 54 giây |
+| 3:12 | Clip cảnh 5 (app, rồi terminal, rồi app) | `s5a` 3:14 (bấm Generate explanation), `s5b` 3:28 (terminal demo-guard), `s5c` 3:50 (sửa và duyệt giải thích) |
+| 4:05 | Clip cảnh 6 | `s6` bắt đầu 4:08, dài 22 giây |
+| 4:52 | Clip cảnh 7 | `s7a` 4:55 (duyệt, khóa), `s7b` 5:12 (xuất ZIP), `s7c` 5:27 (nhật ký) |
+| 5:40 | Clip cảnh 8 | `s8` bắt đầu 5:43, dài 15 giây |
+| 6:08 | `09-closing.png` | `s9` bắt đầu 6:09, hết 6:38 |
 
-- **Giọng đọc:** tự đọc theo `narration.txt`, hoặc dùng giọng đọc tự động của công cụ dựng (dán từng cảnh).
-- **Phụ đề:** nếu không có giọng tiếng Anh, bắt buộc có phụ đề tiếng Anh. Nhập `subtitles.srt` vào công cụ dựng rồi chỉnh giờ cho khớp bản quay (giờ trong file chỉ gần đúng, tính theo tốc độ đọc 150 từ mỗi phút).
+- **Giọng đọc:** (1) tự đọc theo `narration.txt` hoặc `teleprompter.html`; (2) hoặc chạy `scripts\make-voiceover.ps1` để có 14 file WAV tiếng Anh rồi đặt vào dòng thời gian theo bảng trên (giọng máy, nghe hơi đều nhưng rõ); (3) hoặc dán từng cảnh vào công cụ giọng đọc của phần mềm dựng. Giọng người thật nghe tốt hơn.
+- **Phụ đề:** nếu không có giọng tiếng Anh, bắt buộc có phụ đề tiếng Anh. Nhập `subtitles.srt` vào công cụ dựng. Giờ trong file khớp với giọng đọc tự động ở bảng trên; nếu dùng giọng người thật thì chỉnh lại giờ cho khớp.
 - Có thể tăng tốc đoạn chờ, cắt khoảng lặng dài.
 
 ## Bước 5. Xuất và kiểm tra

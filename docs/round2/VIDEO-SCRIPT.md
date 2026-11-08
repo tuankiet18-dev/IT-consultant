@@ -4,7 +4,7 @@ Mục tiêu: giám khảo xem xong hiểu **bài toán, cách hệ thống giả
 
 **Bộ công cụ quay đã sẵn:** thư mục `deliverables/video-kit/` (đọc `README.md` trong đó trước): thẻ hình, dữ liệu demo, lời đọc, phụ đề, màn hình nhắc lời, script khởi động và kiểm tra.
 
-Thời lượng mục tiêu: **6 phút 50 giây** (còn dư 10 giây). Lời đọc 633 từ (khoảng 4,5 đến 5,5 phút nếu đọc chậm), phần còn lại là thao tác trên màn hình và các khoảng lặng.
+Thời lượng mục tiêu: **6 phút 40 giây** (còn dư 20 giây). Lời đọc 633 từ (khoảng 4,5 đến 5,5 phút nếu đọc chậm), phần còn lại là thao tác trên màn hình và các khoảng lặng.
 
 ## 1. Nên show gì, theo thứ tự ưu tiên
 
@@ -32,12 +32,12 @@ Thời lượng mục tiêu: **6 phút 50 giây** (còn dư 10 giây). Lời đ�
 
 Mỗi cảnh gồm: thời lượng, màn hình, thao tác, lời đọc (tiếng Anh, đã chốt).
 
-### Cảnh 1 · Bài toán (0:00 đến 0:30)
+### Cảnh 1 · Bài toán (0:00 đến 0:32)
 **Màn hình:** thẻ tiêu đề "Nordic Flow · NEW AURA · Round 2 MVP", rồi sơ đồ 3 khối (nhà cung cấp → kho → khách) hoặc trang Data trống.
 
 > Every week, a planner at a building-materials retailer must decide which supplier and which existing warehouse should serve each customer zone. Today that is done by habit, one leg at a time, so total cost is never seen. Nordic Flow is a planner-approved optimisation service. It calculates the lowest-cost allocation, checks it independently, explains it, and waits for a human to approve. Everything you will see runs locally, on synthetic data.
 
-### Cảnh 2 · MVP đổi gì so với Round 1 (0:30 đến 1:00)
+### Cảnh 2 · MVP đổi gì so với Round 1 (0:32 đến 1:14)
 **Màn hình:** thẻ chữ 5 gạch đầu dòng, hiện lần lượt (nội dung lấy từ `ROUND1-ALIGNMENT.md`):
 1. Synthetic data, because Company A's data is not available
 2. Added: what-if, approval gate, audit trail
@@ -47,7 +47,7 @@ Mỗi cảnh gồm: thời lượng, màn hình, thao tác, lời đọc (tiến
 
 > Since our Round 1 proposal, five things changed, and here is why. First, we use synthetic data, because Company A's data is not available; every screen says so. Second, we added what-if scenarios, an approval gate and an audit trail, so "the planner approves and every decision is logged" is shown, not promised. Third, learning from overrides stays in phase two. Fourth, there is no ERP connection: files in, files out. Fifth, as an optional extension, the engine can also handle transfers between existing warehouses.
 
-### Cảnh 3 · Tải dữ liệu và kiểm tra (1:00 đến 2:00)
+### Cảnh 3 · Tải dữ liệu và kiểm tra (1:14 đến 2:12)
 **Màn hình và thao tác:**
 1. Trang **Data** trống. Chỉ vào nhãn **Synthetic data** ở góc trên.
 2. Kéo thả `nordic-flow-pilot-sample.zip` vào khung, bấm **Upload and check**.
@@ -59,7 +59,7 @@ Mỗi cảnh gồm: thời lượng, màn hình, thao tác, lời đọc (tiến
 >
 > What if the data is wrong? This file declares a loop between warehouses. The system blocks the run and says exactly why. It never guesses.
 
-### Cảnh 4 · Kết quả (2:00 đến 3:00)
+### Cảnh 4 · Kết quả (2:12 đến 3:12)
 **Thao tác:** bấm **Calculate plan**. Dừng ở trang **Results**.
 - Chỉ vào 4 thẻ: Saving **1,382** (4.2%), Optimised **31,316**, Baseline **32,698**, Plan checks **Passed**.
 - Cuộn tới **Allocation overview**: chỉ nét màu (có hàng), nét xám đứt (chưa dùng).
@@ -67,7 +67,7 @@ Mỗi cảnh gồm: thời lượng, màn hình, thao tác, lời đọc (tiến
 
 > We calculate the plan. The optimiser finds a plan costing 31,316 cost units against 32,698 for the baseline, a saving of 1,382, or 4.2 percent. Two cautions. The data is synthetic, so this is not a forecast. And the baseline is a simple rule that prefers one warehouse per zone; it is not Company A's actual plan. If that baseline could not serve all demand, the system would show no saving at all. The checks passed: an independent verifier, which does not use the solver, re-checked supply, demand, capacity and lanes. The diagram shows where goods move. The ranking prices every full path, leg by leg, so the planner can see why.
 
-### Cảnh 5 · AI có kiểm chứng (3:00 đến 4:00)
+### Cảnh 5 · AI có kiểm chứng (3:12 đến 4:05)
 **Thao tác:**
 1. Bấm **Review & approve**, rồi **Generate explanation**. Hiện văn bản và thẻ "AI draft" (hoặc "Standard summary" nếu AI không dùng được).
 2. Mở **Check the supporting figures**, chỉ vào bảng chi phí và chi phí đường đi trước và sau.
@@ -76,12 +76,12 @@ Mỗi cảnh gồm: thời lượng, màn hình, thao tác, lời đọc (tiến
 
 > Now the explanation. Our code calculates the numbers. The AI assistant only rewrites them in plain language. Every figure in the text must match the calculated facts, so a made-up number rejects the whole draft. Here is that guard in action: a draft with correct figures is accepted; a draft that invents a figure is rejected. And the text is only a draft. The planner reads it, checks the supporting figures, edits it and approves it. AI helps; a person decides.
 
-### Cảnh 6 · Quyết định của planner (4:00 đến 4:50)
+### Cảnh 6 · Quyết định của planner (4:05 đến 4:52)
 **Thao tác:** **Adjust plan** → **Change delivery warehouse**. Chọn Zone: **Zone 1**, SKU: **Cement standard**, Serve from: **Warehouse B**, Exactly: **8**. Lý do: *Customer contract names this warehouse*. Bấm **Apply decision and recalculate**. Chỉ vào thanh thông tin: *Original cost 31,316 → current 31,404, +88*. Mở **Manual decisions (1)** để thấy lý do.
 
 > Now the planner overrides the machine. A customer contract says Zone 1 must receive its cement from Warehouse B. The planner fixes eight pallets and must give a reason. The system recalculates everything else around that decision as a new version, and shows its price: plus 88 cost units. The original plan is kept.
 
-### Cảnh 7 · Duyệt, khóa, xuất, nhật ký (4:50 đến 5:40)
+### Cảnh 7 · Duyệt, khóa, xuất, nhật ký (4:52 đến 5:40)
 **Thao tác:**
 1. (Tùy chọn, 5 giây) trên một plan nháp chưa duyệt: chỉ ra nút **Export** chưa xuất hiện.
 2. Nhập comment, bấm **Approve plan**. Hiện "Approved plan" và nút **Start a new version**.
@@ -90,12 +90,12 @@ Mỗi cảnh gồm: thời lượng, màn hình, thao tác, lời đọc (tiến
 
 > The planner approves the plan. From this moment it is locked, and only now can it be exported. Trying to export earlier is refused. The export is a ZIP for the existing ERP, warehouse and transport systems. Nordic Flow executes nothing. The audit trail records every step. Each entry is linked to the one before, so any edit is detectable: tamper-evident, not tamper-proof.
 
-### Cảnh 8 · What-if (5:40 đến 6:10)
+### Cảnh 8 · What-if (5:40 đến 6:08)
 **Thao tác:** **What-if** → Change: **Close a warehouse**, Warehouse: **Warehouse A** → **Add change** → **Run what-if**. Hiện khung đỏ "No feasible plan exists" kèm nguyên nhân (sức chứa 684 nhỏ hơn nhu cầu 902).
 
 > The planner can also ask "what if". If Warehouse A closes, no feasible plan exists. The system says so, with the likely cause: total capacity is below demand. It never invents a route.
 
-### Cảnh 9 · Kết (6:10 đến 6:50)
+### Cảnh 9 · Kết (6:08 đến 6:40)
 **Màn hình:** quay lại trang Results, hoặc thẻ chữ tóm tắt 3 ý: *Optimiser + independent check · AI only explains · A human approves*.
 
 > In short: the core is an optimiser with an independent check, an AI that only explains, and a human who approves. The limits are clear: synthetic data, one planning period, no ERP integration. The Round 1 gates, such as five percent savings and thirty percent less planning time, need real data in a pilot. This MVP proves the mechanism, not the number. Thank you.
