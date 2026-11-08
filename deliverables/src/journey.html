@@ -1,71 +1,154 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>User Journey</title><link rel="stylesheet" href="common.css">
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>User Journey</title>
+<link rel="stylesheet" href="common.css">
 <style>
-.strip{display:grid;grid-template-columns:repeat(9,1fr);gap:1.2mm;margin:1mm 0 3mm}
-.st{background:#fff;border:1px solid var(--rule);border-top:3px solid var(--teal);padding:1.3mm 1.8mm;min-height:11mm}
-.st b{display:block;font-family:Caladea,Cambria,serif;font-size:9.5pt;line-height:1.1}.st .n{color:var(--teal);font-weight:700;font-size:8pt}.st span{font-size:7.4pt;color:var(--mute);line-height:1.2;display:block;margin-top:.8mm}
-.shots{display:grid;grid-template-columns:repeat(2,1fr);gap:3mm}
-.shot{background:#fff;border:1px solid var(--rule)}
-.shot .im{height:56mm;overflow:hidden;border-bottom:1px solid var(--rule);background:#fbfaf7}
-.shot img{width:100%;display:block}
-.shot .t{padding:1.6mm 2.2mm;font-size:8.4pt;line-height:1.3;color:#33424b}.shot .t b{font-family:Caladea,Cambria,serif;font-size:9.5pt;color:var(--ink)}
-.who{display:grid;grid-template-columns:1fr 1.3fr 1.3fr;gap:3mm;margin-bottom:1.5mm}
-.who div{background:var(--tint);border:1px solid #c5dcd7;padding:1.4mm 2.6mm;font-size:8.4pt}
-.exc{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-top:3.2mm}
-.exc div{border-left:3px solid var(--amber);background:var(--amber-soft);padding:1.8mm 2.6mm;font-size:8.3pt}
-.exc b{display:block;margin-bottom:.4mm}
-td.g{color:var(--teal);font-weight:700;white-space:nowrap}
+  .who { display: grid; grid-template-columns: 1.15fr 1.5fr 1.2fr; gap: 4mm; margin: 0 0 4mm }
+  .who .card { padding: 2.4mm 3.2mm; font-size: 8.5pt; line-height: 1.38 }
+  .who b { color: var(--ink) }
+  .ribbon { display: flex; align-items: center; gap: 1.6mm; margin: 0 0 4.2mm; flex-wrap: nowrap }
+  .chip { display: inline-flex; align-items: center; gap: 1.6mm; background: var(--blue-l); border: 1px solid var(--blue-m); color: var(--blue-d); border-radius: 99px; padding: .8mm 3mm .8mm 1.2mm; font-size: 8pt; font-weight: 600; white-space: nowrap }
+  .chip i { font-style: normal; width: 5mm; height: 5mm; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font-size: 7.5pt }
+  .chip.dim { background: var(--soft); border-color: var(--rule); color: var(--mute) }
+  .chip.dim i { background: var(--grey) }
+  .arrow { color: var(--grey); font-size: 9pt }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm }
+  .step { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 3mm; display: flex; flex-direction: column; gap: 2mm }
+  .step .hd { display: flex; align-items: center; gap: 2.2mm }
+  .step .num { width: 6.6mm; height: 6.6mm; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; font-size: 9pt; display: grid; place-items: center; flex: none }
+  .step h2 { margin: 0; font-size: 10.6pt }
+  .shot { height: 52mm; overflow: hidden; border: 1px solid var(--rule); border-radius: 6px; background: var(--soft); position: relative }
+  .shot img { position: absolute; top: var(--y, 0); left: var(--x, -29%); width: var(--z, 140%); display: block }
+  .p2 .shot { height: 46mm }
+  .p2 .outcome { margin-top: 3.4mm } .p2 .more { margin-top: 3mm } .p2 .note { margin-top: 3mm }
+  .rows { display: grid; grid-template-columns: 15mm 1fr; gap: 1.1mm 2mm; font-size: 8.2pt; line-height: 1.32 }
+  .rows .l { font-size: 7pt; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--mute); padding-top: .5mm }
+  .rows .g { color: var(--green); font-weight: 600 }
+  .rows .p { color: var(--ink) }
+  .outcome { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; margin-top: 4.5mm }
+  .kpi { background: var(--soft); border: 1px solid var(--rule); border-radius: 8px; padding: 2.4mm 3mm }
+  .kpi .v { font-size: 17pt; font-weight: 700; color: var(--ink); letter-spacing: -.02em; line-height: 1.1 }
+  .kpi .v.g { color: var(--green) } .kpi .v.b { color: var(--blue-d) }
+  .kpi .s { font-size: 7.8pt; color: var(--mute); margin-top: .6mm }
+  .note { margin-top: 3.5mm; border-left: 3px solid var(--amber-m); background: var(--amber-l); border-radius: 0 6px 6px 0; padding: 2mm 3.2mm; font-size: 8.3pt; color: #78350f }
+  .more { margin-top: 3.5mm; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm }
+  .more .card { font-size: 8.3pt; padding: 2.2mm 3mm; line-height: 1.38 }
+  .more b { color: var(--ink) }
 </style></head><body>
 
+<!-- ============================ PAGE 1 ============================ -->
 <div class="page">
-  <h1>User Journey: from raw data to an approved allocation plan</h1>
-  <p class="lead" style="margin-bottom:2mm">One complete end-to-end path through the running MVP, using the synthetic demo scenario.</p>
+  <div class="eyebrow">NEW AURA · Nordic Flow · Round 2</div>
+  <h1>User journey: from loading data to an approved, exported plan</h1>
+  <p class="lead">One complete path through the MVP, recorded on the running application with the synthetic demo scenario. Screens are real; figures are synthetic cost units.</p>
+
   <div class="who">
-    <div><span class="label">Actor</span> <b>Planner</b>, simulated single local user, accountable for the weekly plan.</div>
-    <div><span class="label">Goal</span> Lower verified total cost within supply, capacity and lane limits, and keep the final say.</div>
-    <div><span class="label">Scenario</span> Synthetic demo: 2 suppliers, 3 warehouses, 6 zones, 20 SKUs, 606 pallets a week.</div>
+    <div class="card"><div class="k">Who</div><b>A planner</b> in Company A's Swedish pilot region (simulated), who today allocates goods by habit, one leg at a time.</div>
+    <div class="card"><div class="k">Goal</div>Decide which supplier and which existing warehouse should serve each customer zone <b>at the lowest total cost</b>, keep control of the result, and be able to show why.</div>
+    <div class="card"><div class="k">Scenario</div>2 suppliers, 3 existing warehouses, 6 customer zones, 20 products, 606 pallets in one weekly run.</div>
   </div>
-  <div class="strip">
-    <div class="st"><span class="n">1</span><b>Load data</b></div>
-    <div class="st"><span class="n">2</span><b>Data check</b></div>
-    <div class="st"><span class="n">3</span><b>Run</b></div>
-    <div class="st"><span class="n">4</span><b>Review results</b></div>
-    <div class="st"><span class="n">5</span><b>Inspect plan</b></div>
-    <div class="st"><span class="n">6</span><b>Read explanation</b></div>
-    <div class="st"><span class="n">7</span><b>Change a decision</b></div>
-    <div class="st"><span class="n">8</span><b>Approve</b></div>
-    <div class="st"><span class="n">9</span><b>Export</b></div>
+
+  <div class="ribbon" aria-label="Journey overview">
+    <span class="chip"><i>1</i>Load and check</span><span class="arrow">→</span>
+    <span class="chip"><i>2</i>Calculate</span><span class="arrow">→</span>
+    <span class="chip"><i>3</i>Compare routes</span><span class="arrow">→</span>
+    <span class="chip dim"><i>4</i>Review</span><span class="arrow">→</span>
+    <span class="chip dim"><i>5</i>Decide</span><span class="arrow">→</span>
+    <span class="chip dim"><i>6</i>Approve and export</span>
+    <span class="cap small" style="margin-left:auto;color:var(--mute);font-size:8pt">Steps 1 to 3 on this page, 4 to 6 on page 2</span>
   </div>
-  <div class="shots">
-    <div class="shot"><div class="im" style="height:62mm"><img src="img/data.png"></div><div class="t"><b>Steps 1 and 2: Data.</b> One click loads the demo, or the planner uploads files. Counts and data checks appear before anything is calculated.</div></div>
-    <div class="shot"><div class="im" style="height:62mm"><img src="img/results.png"></div><div class="t"><b>Steps 3 to 5: Results.</b> Baseline 32,698 against optimised 31,316: saving 1,382 (4.2%), solver status and the independent check beside it. 15 decisions differ from the baseline.</div></div>
-    <div class="shot"><div class="im" style="height:55mm"><img src="img/review.png"></div><div class="t"><b>Steps 6 and 7: Review and adjust.</b> After approving the explanation, the planner fixes one decision: Zone 1, Cement standard, Warehouse B, exactly 8 pallets, with a reason.</div></div>
-    <div class="shot"><div class="im" style="height:55mm"><img src="img/approve.png"></div><div class="t"><b>Steps 8 and 9: Approve and audit.</b> The run with that decision (31,404, which is 88 above the free optimum) is approved and locked; export unlocks; each step is logged.</div></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="hd"><span class="num">1</span><h2>Load and check the data</h2></div>
+      <div class="shot"><img style="--y:-3mm" src="img/data.png" alt="Data page after loading the demo"></div>
+      <div class="rows">
+        <span class="l">Planner</span><span class="p">Picks the synthetic demo, or uploads the 8 CSV files or one ZIP.</span>
+        <span class="l">System</span><span>Checks every file before any calculation. Errors block the run, with file, row and message.</span>
+        <span class="l">Result</span><span class="g">A valid scenario: 606 pallets of demand, 954 pallet-equivalents of weekly capacity.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="hd"><span class="num">2</span><h2>Calculate and read the result</h2></div>
+      <div class="shot"><img style="--y:-8mm" src="img/results.png" alt="Results page with KPIs"></div>
+      <div class="rows">
+        <span class="l">Planner</span><span class="p">Selects Calculate plan.</span>
+        <span class="l">System</span><span>Builds the preferred-warehouse baseline, solves for the lowest cost, and re-checks both plans independently.</span>
+        <span class="l">Result</span><span class="g">31,316 against 32,698: a saving of 1,382 (4.2%), shown only because the baseline is feasible and verified.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="hd"><span class="num">3</span><h2>See where goods move and why</h2></div>
+      <div class="shot"><img style="--y:0mm" src="img/ranking.png" alt="Complete route cost ranking"></div>
+      <div class="rows">
+        <span class="l">Planner</span><span class="p">Reads the allocation diagram and the complete route cost ranking for a customer and product.</span>
+        <span class="l">System</span><span>Prices each full path, supplier to warehouse to customer, with freight and handling at every leg.</span>
+        <span class="l">Result</span><span class="g">Evidence for each choice, down to the cost of a single leg. Highlighting never changes the plan.</span>
+      </div>
+    </div>
   </div>
-  <div class="foot"><span>NEW AURA · Nordic Flow MVP · User Journey (1 of 2)</span><span>Screens are captured from the running MVP. Figures are synthetic cost units, not a forecast for Company A.</span></div>
+
+  <div class="foot"><span>NEW AURA · Nordic Flow MVP · User Journey (1 of 2)</span><span>Synthetic data; costs in cost units, not a forecast for Company A</span></div>
 </div>
 
-<div class="page">
-  <h1>The journey in detail, and what protects the planner</h1>
-  <p class="lead">What the planner does, what the system does, and the trust gate at each step. Numbers are from the demo run shown on page 1.</p>
-  <table>
-    <tr><th style="width:4%">#</th><th style="width:19%">Planner does</th><th style="width:30%">System does</th><th style="width:30%">Planner sees</th><th style="width:17%">Trust gate</th></tr>
-    <tr><td>1</td><td>Clicks "Synthetic demo", or uploads 8 CSV files or one ZIP</td><td>Reads the files; ZIPs must be flat, allow-listed names, size-limited, no links</td><td>Name, counts (2 / 3 / 6 / 20), 606 pallets demand, 954 capacity</td><td class="g">Safe import</td></tr>
-    <tr><td>2</td><td>Reads the data checks</td><td>Checks columns, numbers, references, supply, capacity and lanes before any solving</td><td>"Valid", or errors with file and row; run button hidden until fixed</td><td class="g">Bad data blocked</td></tr>
-    <tr><td>3</td><td>Chooses MILP (whole pallets) and runs</td><td>Builds the baseline, solves for the lowest cost, then verifies both plans with code that does not use the solver</td><td>Solver status OPTIMAL in about 0.1 s</td><td class="g">Independent check</td></tr>
-    <tr><td>4</td><td>Reviews the result</td><td>Compares baseline and optimised cost by type; reports warehouse load</td><td>32,698 to 31,316; saving 1,382 (4.2%); Warehouse A 100% to 81%, Warehouse C 85% to 100%</td><td class="g">No saving without a valid baseline</td></tr>
-    <tr><td>5</td><td>Opens the plan and filters changed rows</td><td>Lists which warehouse serves each zone and SKU, baseline next to optimised</td><td>15 of the zone-and-SKU decisions differ, highlighted</td><td class="g">Nothing hidden</td></tr>
-    <tr><td>6</td><td>Generates and reads the explanation, edits it, approves it</td><td>Computes the facts in code. Default: deterministic summary. Optional: AI wording (Groq), numbers checked</td><td>Text tagged "Deterministic summary" or "AI draft", status Draft until approved</td><td class="g">AI never calculates; human approves text</td></tr>
-    <tr><td>7</td><td>Fixes one decision: Zone 1, Cement standard, Warehouse B, 8 pallets, with a reason</td><td>Re-optimises everything else around it and verifies again, as a new run; the first run is untouched</td><td>New total 31,404; "88 cost units more than the unconstrained optimum"</td><td class="g">Reason required; cost of overriding is visible</td></tr>
-    <tr><td>8</td><td>Approves (or rejects with a comment)</td><td>Locks the run and writes the audit event; hash-chained log</td><td>"This run is approved", event list with timestamps</td><td class="g">Locked after decision</td></tr>
-    <tr><td>9</td><td>Exports the approved plan</td><td>Builds a ZIP: inbound and outbound CSV, comparison, planner decisions, audit log</td><td>Download starts; export is refused until approval</td><td class="g">Export only if approved</td></tr>
-  </table>
-  <div class="exc">
-    <div><b>Exception: invalid data</b>A negative rate or missing column is reported with file and row. The run is blocked until the file is corrected.</div>
-    <div><b>Exception: unusable baseline</b>If the baseline rule cannot serve all demand, the saving is shown as "n/a", never as a number. The optimised plan is still valid.</div>
-    <div><b>Exception: impossible decision</b>A planner decision that breaks capacity or lanes is rejected with an explanation, logged, and the current plan stays unchanged.</div>
-    <div><b>Exception: no AI or no network</b>The deterministic summary is used. If AI text contains a number that was not calculated, it is discarded for the deterministic one.</div>
+<!-- ============================ PAGE 2 ============================ -->
+<div class="page p2">
+  <div class="eyebrow">NEW AURA · Nordic Flow · Round 2</div>
+  <h1>The planner stays in control: review, decide, approve</h1>
+  <p class="lead">Steps 4 to 6 of the same journey. A human reads the explanation, can override the machine with a reason, and nothing leaves the system until the plan is approved.</p>
+
+  <div class="ribbon" aria-label="Journey overview">
+    <span class="chip dim"><i>1</i>Load and check</span><span class="arrow">→</span>
+    <span class="chip dim"><i>2</i>Calculate</span><span class="arrow">→</span>
+    <span class="chip dim"><i>3</i>Compare routes</span><span class="arrow">→</span>
+    <span class="chip"><i>4</i>Review</span><span class="arrow">→</span>
+    <span class="chip"><i>5</i>Decide</span><span class="arrow">→</span>
+    <span class="chip"><i>6</i>Approve and export</span>
   </div>
-  <p class="cap" style="margin-top:3mm">What the journey does not cover: real ERP, WMS or TMS connections (files in and out only), login and roles (one simulated planner), measuring planner time saved or on-time delivery (needs real users).</p>
-  <div class="foot"><span>NEW AURA · Nordic Flow MVP · User Journey (2 of 2)</span><span>The what-if tab (close a warehouse, change capacity, scale demand) is an optional side path from step 4.</span></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="hd"><span class="num">4</span><h2>Review the explanation</h2></div>
+      <div class="shot"><img style="--y:-6mm" src="img/review.png" alt="Explanation ready for review"></div>
+      <div class="rows">
+        <span class="l">Planner</span><span class="p">Generates an explanation and opens the supporting figures.</span>
+        <span class="l">System</span><span>Builds the text from calculated numbers. With the optional AI assistant, any figure not in those numbers causes the draft to be rejected.</span>
+        <span class="l">Result</span><span class="g">A draft the planner approves, edits or restarts. AI never calculates.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="hd"><span class="num">5</span><h2>Apply a human decision</h2></div>
+      <div class="shot"><img style="--y:-6mm" src="img/adjust.png" alt="Fixing the delivery warehouse for one product"></div>
+      <div class="rows">
+        <span class="l">Planner</span><span class="p">Fixes 8 pallets of Cement standard for Zone 1 to Warehouse B, with a required reason.</span>
+        <span class="l">System</span><span>Re-optimises everything else around the decision as a new version and keeps the original.</span>
+        <span class="l">Result</span><span class="g">Plan 2 costs 31,404, which is +88 cost units. The price of the decision is visible.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="hd"><span class="num">6</span><h2>Approve, export and audit</h2></div>
+      <div class="shot"><img style="--y:-6mm" src="img/approved.png" alt="Approved plan with export available"></div>
+      <div class="rows">
+        <span class="l">Planner</span><span class="p">Approves the explanation and the plan, then exports the ZIP.</span>
+        <span class="l">System</span><span>Locks the plan, enables export only after approval, and records every step in a hash-linked audit trail.</span>
+        <span class="l">Result</span><span class="g">A ZIP for the existing ERP, WMS and TMS. Nordic Flow executes nothing.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="outcome">
+    <div class="kpi"><div class="v b">31,404</div><div class="s">approved plan cost, in cost units</div></div>
+    <div class="kpi"><div class="v g">1,294</div><div class="s">saving against the baseline (4.0%)</div></div>
+    <div class="kpi"><div class="v">+88</div><div class="s">cost of the planner's own decision</div></div>
+    <div class="kpi"><div class="v">Passed</div><div class="s">independent checks, audit trail verified</div></div>
+  </div>
+
+  <div class="more">
+    <div class="card"><b>What-if.</b> Close a warehouse on a copy of the data. If no plan can serve demand, the system says so and lists likely causes, never inventing a route.</div>
+    <div class="card"><b>Start a new version.</b> Approved and rejected plans are locked. A new draft is calculated, and earlier versions stay in the history.</div>
+    <div class="card"><b>Optional extensions.</b> Transfers between existing warehouses and direct supplier-to-customer lanes switch on only when extra input files are supplied. This journey uses neither.</div>
+  </div>
+  <div class="note">All data is synthetic. The baseline is a rule that prefers one warehouse per zone, not Company A's actual plan, and the saving is not a forecast for Company A.</div>
+
+  <div class="foot"><span>NEW AURA · Nordic Flow MVP · User Journey (2 of 2)</span><span>Screens are from the running application</span></div>
 </div>
 </body></html>

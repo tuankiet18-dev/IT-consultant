@@ -1,16 +1,37 @@
+@font-face { font-family: "Inter"; src: url("fonts/inter-latin.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
 @page { size: A4 landscape; margin: 0 }
-:root{--ink:#1e2b33;--mute:#68757d;--rule:#d8d4cb;--teal:#0f766e;--tint:#e4efec;--amber:#b4540a;--amber-soft:#faeede;--paper:#fbfaf7}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--paper);color:var(--ink);font-family:Carlito,Calibri,Inter,sans-serif;font-size:9.5pt;line-height:1.35}
-.page{width:297mm;height:210mm;padding:9mm 11mm 8mm;page-break-after:always;position:relative;overflow:hidden}
-.page:last-child{page-break-after:auto}
-h1{font-family:Caladea,Cambria,Georgia,serif;font-size:19pt;margin:0 0 1mm;line-height:1.15}
-h2{font-family:Caladea,Cambria,Georgia,serif;font-size:12pt;margin:0 0 1.5mm}
-.lead{color:var(--mute);margin:0 0 3mm;font-size:9.5pt}
-.tag{display:inline-block;padding:0 6px;border:1px solid var(--rule);background:#fff;font-size:8pt;color:var(--mute)}
-.foot{position:absolute;left:11mm;right:11mm;bottom:5mm;display:flex;justify-content:space-between;color:var(--mute);font-size:7.5pt;border-top:1px solid var(--rule);padding-top:1.5mm}
-.cap{font-size:8pt;color:var(--mute)}
-.label{font-size:7.5pt;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);font-weight:700}
-table{border-collapse:collapse;width:100%}
-th{font-size:7.5pt;letter-spacing:.05em;text-transform:uppercase;text-align:left;color:var(--mute);border-bottom:1.6px solid var(--ink);padding:1.2mm 2mm}
-td{border-bottom:1px solid var(--rule);padding:1.3mm 2mm;vertical-align:top;font-size:8.6pt}
+:root {
+  --ink: #0f172a; --body: #334155; --mute: #64748b; --rule: #e2e8f0; --soft: #f8fafc;
+  --blue: #2563eb; --blue-d: #1d4ed8; --blue-l: #eff6ff; --blue-m: #bfdbfe;
+  --amber: #b45309; --amber-l: #fffbeb; --amber-m: #fcd34d;
+  --green: #047857; --green-l: #ecfdf5; --green-m: #a7f3d0;
+  --grey: #94a3b8; --grey-l: #f1f5f9;
+}
+* { box-sizing: border-box }
+html, body { margin: 0; background: #fff; color: var(--body); font-family: "Inter", system-ui, sans-serif; font-size: 9.5pt; line-height: 1.4; -webkit-print-color-adjust: exact; print-color-adjust: exact }
+.page { width: 297mm; height: 210mm; padding: 11mm 13mm 9mm; page-break-after: always; position: relative; overflow: hidden; background: #fff }
+.page:last-child { page-break-after: auto }
+.eyebrow { font-size: 7.5pt; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--blue) }
+h1 { font-size: 20pt; font-weight: 700; letter-spacing: -.02em; color: var(--ink); margin: 1mm 0 1.5mm; line-height: 1.15 }
+h2 { font-size: 11pt; font-weight: 650; color: var(--ink); margin: 0 0 1.5mm; letter-spacing: -.01em }
+.lead { color: var(--mute); margin: 0 0 3mm; font-size: 9.5pt; max-width: 235mm }
+.foot { position: absolute; left: 13mm; right: 13mm; bottom: 5mm; display: flex; justify-content: space-between; color: var(--mute); font-size: 7.5pt; border-top: 1px solid var(--rule); padding-top: 1.6mm }
+.card { background: #fff; border: 1px solid var(--rule); border-radius: 8px; padding: 3mm 3.4mm }
+.card.soft { background: var(--soft) }
+.k { font-size: 7.5pt; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--mute) }
+table { border-collapse: collapse; width: 100% }
+th { font-size: 7.3pt; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; text-align: left; color: var(--mute); background: var(--soft); border-bottom: 1px solid var(--rule); padding: 1.3mm 2mm }
+td { border-bottom: 1px solid var(--rule); padding: 1.35mm 2mm; vertical-align: top; font-size: 8.4pt }
+td.n { width: 7mm; font-weight: 700; color: var(--blue); text-align: center }
+.pill { display: inline-block; border-radius: 99px; padding: 0 6px; font-size: 7.2pt; font-weight: 600; line-height: 1.5 }
+.pill.on { background: var(--blue-l); color: var(--blue-d) }
+.pill.opt { background: var(--amber-l); color: var(--amber) }
+.pill.off { background: var(--grey-l); color: var(--mute) }
+svg { display: block; width: 100% }
+svg text { font-family: "Inter", system-ui, sans-serif; fill: #0f172a }
+svg .m { fill: #64748b }
+svg .b { font-weight: 650 }
+svg .t { font-size: 13px; font-weight: 650 }
+svg .s { font-size: 10.5px }
+svg .xs { font-size: 9.5px }
+svg .tiny { font-size: 8.8px; letter-spacing: .06em; text-transform: uppercase; font-weight: 650; fill: #64748b }

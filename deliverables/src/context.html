@@ -1,144 +1,206 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>System Context Diagram</title><link rel="stylesheet" href="common.css">
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>System Context Diagram</title>
+<link rel="stylesheet" href="common.css">
 <style>
-svg{width:100%;display:block}
-svg text{font-family:Carlito,Calibri,Inter,sans-serif;fill:#1e2b33}
-.b{font-weight:700}.m{fill:#68757d}.s{font-size:11px}.xs{font-size:9.6px}.t{font-size:13px}.h{font-family:Caladea,Cambria,serif;font-size:15px;font-weight:700}
-.cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5mm;margin-top:3mm}
-.cols div{font-size:8.5pt}.cols ul{margin:1mm 0 0;padding-left:4mm}.cols li{margin-bottom:.7mm}
-.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:2mm;margin:2mm 0 3mm}
-.steps div{background:#fff;border:1px solid var(--rule);border-top:3px solid var(--teal);padding:1.4mm 2mm;font-size:8pt;line-height:1.25}
-.steps b{color:var(--teal)}
-td.g{color:var(--teal);font-weight:700;white-space:nowrap}
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin-top: 3.5mm }
+  .cards .card { font-size: 8.6pt; line-height: 1.38 }
+  .cards ul { margin: 1mm 0 0; padding-left: 4mm }
+  .cards li { margin-bottom: .6mm }
+  .two { display: grid; grid-template-columns: 2.35fr 1fr; gap: 5mm; align-items: start }
+  .gate { display: grid; grid-template-columns: 7mm 1fr; gap: 2.2mm; padding: 1.5mm 0; border-bottom: 1px solid var(--rule) }
+  .gate:last-child { border-bottom: 0 }
+  .gate .g { width: 6.4mm; height: 6.4mm; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; font-size: 7.6pt; display: grid; place-items: center }
+  .gate b { color: var(--ink); font-size: 8.8pt }
+  .gate span { display: block; font-size: 8.3pt; color: var(--body); line-height: 1.35 }
+  .reg td { font-size: 7.9pt; padding: .95mm 2mm; line-height: 1.32 } .reg td:nth-child(2) { font-weight: 600; color: var(--ink) }
+  .small { font-size: 8pt; color: var(--mute) }
 </style></head><body>
 
+<!-- ============================ PAGE 1 ============================ -->
 <div class="page">
-  <h1>System context: Nordic Flow MVP and everything around it</h1>
-  <p class="lead">What is inside the system boundary, what is outside, and every connection between them. Solid lines are implemented and demonstrated; the dashed box is future integration and is not connected.</p>
-  <svg viewBox="0 0 1000 440" xmlns="http://www.w3.org/2000/svg">
+  <div class="eyebrow">NEW AURA · Nordic Flow · Round 2</div>
+  <h1>System context: what is inside Nordic Flow and what is around it</h1>
+  <p class="lead">Nordic Flow proposes a goods-allocation plan; a planner approves it. Nordic Flow is the circle; every external person, service and file set is a rectangle; each arrow is a labelled data flow, as it works in the MVP. Numbers refer to the register on page 2.</p>
+
+  <svg viewBox="0 0 1100 580" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="System context diagram">
     <defs>
-      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0f766e"/></marker>
-      <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b4540a"/></marker>
-      <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8a949a"/></marker>
+      <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1e3a8a"/></marker>
+      <marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b45309"/></marker>
+      <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker>
+      <style>
+        .lbl { font-size: 11.5px; fill: #1e293b; paint-order: stroke; stroke: #fff; stroke-width: 5px; stroke-linejoin: round }
+        .lbl.a { fill: #92400e } .lbl.g { fill: #475569 }
+        .en { font-size: 14px; font-weight: 700; fill: #0f172a } .es { font-size: 10.5px; fill: #475569 }
+      </style>
     </defs>
-    <!-- system boundary -->
-    <rect x="320" y="30" width="330" height="385" fill="#e4efec" stroke="#0f766e" stroke-width="2"/>
-    <text x="335" y="55" class="h">Nordic Flow MVP</text>
-    <text x="335" y="71" class="s m">runs locally: one Python process, one SQLite file</text>
-    <g>
-      <rect x="338" y="88" width="294" height="56" fill="#fff" stroke="#c5dcd7"/><text x="348" y="108" class="t b">Web UI (browser)</text><text x="348" y="125" class="s m">HTML + JavaScript, six screens; no calculations</text>
-      <rect x="338" y="162" width="294" height="56" fill="#fff" stroke="#c5dcd7"/><text x="348" y="182" class="t b">API (FastAPI)</text><text x="348" y="199" class="s m">validates, orchestrates, returns JSON</text>
-      <rect x="338" y="236" width="294" height="64" fill="#fff" stroke="#c5dcd7"/><text x="348" y="256" class="t b">Optimisation core (OR-Tools)</text><text x="348" y="273" class="s m">baseline, LP/MILP solver, independent plan checker,</text><text x="348" y="287" class="s m">cost report, diagnosis, what-if, explanation facts</text>
-      <rect x="338" y="318" width="294" height="64" fill="#fff" stroke="#c5dcd7"/><text x="348" y="338" class="t b">SQLite store</text><text x="348" y="355" class="s m">scenarios, runs, explanations, hash-chained audit log</text><text x="348" y="369" class="s m">approved runs are locked</text>
-      <path d="M485 144v18M485 218v18M485 300v18" stroke="#0f766e" stroke-width="1.6" marker-end="url(#a)"/>
+
+    <!-- data flows (drawn first, entities on top) -->
+    <g fill="none" stroke-width="2">
+      <path d="M510 84C506 130 508 175 511 213" stroke="#1e3a8a" marker-end="url(#mb)"/>
+      <path d="M589 213C593 175 592 130 590 86" stroke="#1e3a8a" marker-end="url(#mb)"/>
+      <path d="M240 150C340 150 420 190 452 262" stroke="#1e3a8a" marker-end="url(#mb)"/>
+      <path d="M453 382C430 450 340 500 242 500" stroke="#1e3a8a" marker-end="url(#mb)"/>
+      <path d="M647 262C730 240 800 208 868 194" stroke="#b45309" marker-end="url(#ma)"/>
+      <path d="M868 132C790 138 700 170 632 240" stroke="#b45309" marker-end="url(#ma)"/>
+      <path d="M135 270V194" stroke="#64748b" stroke-dasharray="6 5" marker-end="url(#mg)"/>
+      <path d="M135 468V372" stroke="#64748b" stroke-dasharray="6 5" marker-end="url(#mg)"/>
     </g>
 
-    <!-- Input files -->
-    <rect x="10" y="30" width="175" height="95" fill="#fff" stroke="#1e2b33"/>
-    <text x="20" y="52" class="t b">Input data files</text><text x="20" y="69" class="s m">8 CSV files, or one ZIP of them:</text><text x="20" y="83" class="s m">suppliers, warehouses, zones, SKUs,</text><text x="20" y="97" class="s m">inbound and outbound rates,</text><text x="20" y="111" class="s m">supply, demand (synthetic demo data)</text>
-    <path d="M185 78H320" stroke="#0f766e" stroke-width="2" marker-end="url(#a)"/>
-    <text x="192" y="70" class="xs b">upload (HTTP)</text>
+    <!-- the system -->
+    <circle cx="550" cy="322" r="112" fill="#2563eb" stroke="#1e3a8a" stroke-width="2.5"/>
+    <text x="550" y="314" text-anchor="middle" style="font-size:25px;font-weight:700;fill:#fff">Nordic Flow</text>
+    <text x="550" y="342" text-anchor="middle" style="font-size:25px;font-weight:700;fill:#fff">MVP</text>
+    <text x="550" y="372" text-anchor="middle" style="font-size:11px;fill:#dbeafe">web UI · API · optimiser</text>
+    <text x="550" y="388" text-anchor="middle" style="font-size:11px;fill:#dbeafe">SQLite store · audit trail</text>
 
-    <!-- Planner -->
-    <rect x="10" y="165" width="140" height="110" fill="#fff" stroke="#1e2b33"/>
-    <circle cx="80" cy="198" r="11" fill="none" stroke="#1e2b33" stroke-width="1.6"/><path d="M58 230c0-14 10-20 22-20s22 6 22 20" fill="none" stroke="#1e2b33" stroke-width="1.6"/>
-    <text x="80" y="252" class="t b" text-anchor="middle">Planner</text><text x="80" y="266" class="xs m" text-anchor="middle">simulated single user</text>
-    <path d="M150 200H320" stroke="#0f766e" stroke-width="2" marker-end="url(#a)"/>
-    <text x="158" y="190" class="xs b">browser actions on localhost:</text><text x="158" y="214" class="xs m">load, run, adjust, approve</text>
-    <path d="M320 242H150" stroke="#0f766e" stroke-width="2" marker-end="url(#a)"/>
-    <text x="158" y="236" class="xs b">results, plan, explanation,</text><text x="158" y="258" class="xs m">audit log, approval status</text>
+    <!-- external entities -->
+    <rect x="455" y="20" width="190" height="64" fill="#e0e7ff" stroke="#1e1b4b" stroke-width="2"/>
+    <text x="550" y="48" text-anchor="middle" class="en">Planner</text>
+    <text x="550" y="66" text-anchor="middle" class="es">single local user</text>
 
-    <!-- Export -->
-    <rect x="10" y="320" width="175" height="95" fill="#fff" stroke="#1e2b33"/>
-    <text x="20" y="342" class="t b">Approved plan export</text><text x="20" y="359" class="s m">ZIP with inbound and outbound</text><text x="20" y="373" class="s m">allocation CSV, comparison,</text><text x="20" y="387" class="s m">planner decisions, audit log</text><text x="20" y="403" class="xs b" fill="#0f766e">only after the planner approves</text>
-    <path d="M320 365H185" stroke="#0f766e" stroke-width="2" marker-end="url(#a)"/>
-    <text x="192" y="357" class="xs b">download (HTTP)</text>
+    <rect x="30" y="120" width="210" height="72" fill="#fce7e7" stroke="#1e1b4b" stroke-width="2"/>
+    <text x="135" y="149" text-anchor="middle" class="en">Input data files</text>
+    <text x="135" y="168" text-anchor="middle" class="es">CSV files or one ZIP</text>
 
-    <!-- Groq -->
-    <rect x="810" y="30" width="180" height="95" fill="#faeede" stroke="#b4540a" stroke-width="1.6"/>
-    <text x="820" y="52" class="t b">Groq API</text><text x="820" y="68" class="s m">external LLM service</text><text x="820" y="85" class="s">optional: only phrases the</text><text x="820" y="99" class="s">explanation; never calculates</text><text x="820" y="114" class="xs b" fill="#b4540a">off unless planner clicks it</text>
-    <path d="M650 62H810" stroke="#b4540a" stroke-width="1.8" marker-end="url(#o)"/>
-    <text x="657" y="52" class="xs b" fill="#b4540a">HTTPS: fact pack only</text><text x="657" y="76" class="xs m">computed numbers and names</text>
-    <path d="M810 106H650" stroke="#b4540a" stroke-width="1.8" marker-end="url(#o)"/>
-    <text x="657" y="100" class="xs b" fill="#b4540a">draft text back</text><text x="657" y="120" class="xs m">numbers checked, stays a draft</text>
-    <text x="657" y="140" class="xs m">key from environment variable</text>
+    <rect x="30" y="270" width="210" height="100" fill="#f1f5f9" stroke="#64748b" stroke-width="2" stroke-dasharray="7 5"/>
+    <text x="135" y="304" text-anchor="middle" class="en" style="fill:#334155">Company A systems</text>
+    <text x="135" y="322" text-anchor="middle" class="es">ERP · WMS · TMS</text>
+    <rect x="65" y="336" width="140" height="20" rx="10" fill="#cbd5e1"/>
+    <text x="135" y="350" text-anchor="middle" style="font-size:10px;font-weight:700;fill:#334155">NOT CONNECTED</text>
 
-    <!-- ERP future -->
-    <rect x="810" y="290" width="180" height="120" fill="#f4f1ea" stroke="#8a949a" stroke-width="1.6" stroke-dasharray="6 4"/>
-    <text x="820" y="312" class="t b m">Company A ERP, WMS, TMS</text><text x="820" y="329" class="s m">NOT connected in this MVP</text><text x="820" y="346" class="s m">Today: planner exports the</text><text x="820" y="360" class="s m">data as CSV and imports the</text><text x="820" y="374" class="s m">approved plan by hand.</text><text x="820" y="396" class="xs b m">Future integration, Round 1 plan</text>
-    <path d="M810 322H650" stroke="#8a949a" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#g)"/>
-    <text x="657" y="312" class="xs m">future: orders, rates, stock</text>
-    <path d="M650 372H810" stroke="#8a949a" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#g)"/>
-    <text x="657" y="364" class="xs m">future: approved plan</text><text x="657" y="388" class="xs m">for execution (not live)</text>
+    <rect x="30" y="468" width="210" height="72" fill="#fce7e7" stroke="#1e1b4b" stroke-width="2"/>
+    <text x="135" y="497" text-anchor="middle" class="en">Approved plan export</text>
+    <text x="135" y="516" text-anchor="middle" class="es">ZIP of CSV and JSON files</text>
+
+    <rect x="870" y="120" width="200" height="84" fill="#fffbeb" stroke="#b45309" stroke-width="2"/>
+    <text x="970" y="150" text-anchor="middle" class="en">Groq API</text>
+    <text x="970" y="168" text-anchor="middle" class="es">external LLM service</text>
+    <text x="970" y="184" text-anchor="middle" class="es" style="font-weight:700;fill:#92400e">optional, opt-in per request</text>
+
+    <!-- data flow labels -->
+    <text x="498" y="126" text-anchor="end" class="lbl">load, calculate, adjust,</text>
+    <text x="498" y="141" text-anchor="end" class="lbl">approve or reject</text>
+    <text x="602" y="126" class="lbl">results, route ranking,</text>
+    <text x="602" y="141" class="lbl">explanation, audit trail</text>
+
+    <text x="262" y="196" class="lbl">8 required CSV files or one ZIP</text>
+    <text x="262" y="211" class="lbl" style="font-size:10.5px">(+ up to 3 optional lane files)</text>
+
+    <text x="296" y="462" class="lbl">approved plan ZIP</text>
+    <text x="296" y="477" class="lbl" style="font-size:10.5px">(only after approval)</text>
+
+    <text x="708" y="276" class="lbl a">fact pack: calculated</text>
+    <text x="708" y="291" class="lbl a">numbers and names only</text>
+    <text x="858" y="100" text-anchor="end" class="lbl a">draft explanation text</text>
+    <text x="858" y="115" text-anchor="end" class="lbl a" style="font-size:10.5px">(figures checked, stays a draft)</text>
+
+    <text x="150" y="226" class="lbl g">orders, rates, supply,</text>
+    <text x="150" y="241" class="lbl g">capacities, exported by hand</text>
+    <text x="150" y="412" class="lbl g">imported by hand;</text>
+    <text x="150" y="427" class="lbl g">nothing written back</text>
+
+    <!-- numbered badges, matching the register on page 2 -->
+    <g style="font-size:10.5px;font-weight:700;text-anchor:middle">
+      <circle cx="135" cy="232" r="9" fill="#64748b"/><text x="135" y="235.7" style="fill:#fff">1</text>
+      <circle cx="324" cy="161" r="9" fill="#1e3a8a"/><text x="324" y="164.7" style="fill:#fff">2</text>
+      <circle cx="507" cy="160" r="9" fill="#1e3a8a"/><text x="507" y="163.7" style="fill:#fff">3</text>
+      <circle cx="592" cy="160" r="9" fill="#1e3a8a"/><text x="592" y="163.7" style="fill:#fff">3</text>
+      <circle cx="782" cy="224" r="9" fill="#b45309"/><text x="782" y="227.7" style="fill:#fff">4</text>
+      <circle cx="722" cy="188" r="9" fill="#b45309"/><text x="722" y="191.7" style="fill:#fff">5</text>
+      <circle cx="402" cy="446" r="9" fill="#1e3a8a"/><text x="402" y="449.7" style="fill:#fff">6</text>
+      <circle cx="135" cy="420" r="9" fill="#64748b"/><text x="135" y="423.7" style="fill:#fff">7</text>
+    </g>
 
     <!-- legend -->
-    <g transform="translate(335,425)"><path d="M0 0h26" stroke="#0f766e" stroke-width="2" marker-end="url(#a)"/><text x="34" y="3" class="xs">implemented</text>
-      <path d="M110 0h26" stroke="#b4540a" stroke-width="2" marker-end="url(#o)"/><text x="144" y="3" class="xs">optional external call</text>
-      <path d="M255 0h26" stroke="#8a949a" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#g)"/><text x="289" y="3" class="xs">future, not connected</text></g>
+    <rect x="800" y="300" width="280" height="250" rx="8" fill="#fff" stroke="#e2e8f0"/>
+    <text x="816" y="324" style="font-size:9.5px;font-weight:700;letter-spacing:.08em;fill:#64748b">HOW TO READ THIS DIAGRAM</text>
+    <circle cx="830" cy="348" r="11" fill="#2563eb" stroke="#1e3a8a" stroke-width="1.5"/><text x="852" y="352" style="font-size:11px">the system: Nordic Flow MVP</text>
+    <rect x="818" y="368" width="24" height="16" fill="#e0e7ff" stroke="#1e1b4b" stroke-width="1.5"/><text x="852" y="381" style="font-size:11px">external person or service</text>
+    <rect x="818" y="392" width="24" height="16" fill="#fce7e7" stroke="#1e1b4b" stroke-width="1.5"/><text x="852" y="405" style="font-size:11px">files that enter or leave the system</text>
+    <path d="M816 428h30" stroke="#1e3a8a" stroke-width="2" fill="none" marker-end="url(#mb)"/><text x="852" y="432" style="font-size:11px">data flow, implemented (labelled)</text>
+    <path d="M816 450h30" stroke="#b45309" stroke-width="2" fill="none" marker-end="url(#ma)"/><text x="852" y="454" style="font-size:11px">optional call to an external service</text>
+    <path d="M816 472h30" stroke="#64748b" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#mg)"/><text x="852" y="476" style="font-size:11px">manual step, not integrated</text>
+    <text x="816" y="500" style="font-size:10.5px;fill:#64748b">Numbered circles match the register on page 2.</text>
+    <text x="816" y="516" style="font-size:10.5px;fill:#64748b">All data is synthetic. Nordic Flow proposes plans;</text>
+    <text x="816" y="531" style="font-size:10.5px;fill:#64748b">nothing is executed or written back.</text>
   </svg>
-  <div class="cols">
-    <div><span class="label">Inside the boundary</span><ul><li>Web UI, API, optimisation core, SQLite store</li><li>All calculation, verification and approval rules</li><li>The audit log and run history</li></ul></div>
-    <div><span class="label">Outside the boundary</span><ul><li>The planner and their browser</li><li>Input files and the exported plan</li><li>Groq (optional), Company A ERP, WMS and TMS (future)</li></ul></div>
-    <div><span class="label">Facts about this MVP</span><ul><li>No live link to any Company A system: CSV in, CSV out</li><li>Nordic Flow proposes; nothing is executed or written back</li><li>Data is synthetic; no login (one simulated planner)</li></ul></div>
-  </div>
-  <div class="foot"><span>NEW AURA · Nordic Flow MVP · System Context Diagram (1 of 2)</span><span>Reflects the running application as of this submission.</span></div>
+
+  <div class="card soft" style="margin-top:2mm;font-size:8.6pt;display:flex;gap:6mm;flex-wrap:wrap"><span><b style="color:var(--ink)">Not in this MVP:</b> live integration with ERP, WMS or TMS</span><span>automatic execution or write-back</span><span>login and user roles</span><span>Groq runs only when a key is set and the planner asks for it</span></div>
+  <div class="foot"><span>NEW AURA · Nordic Flow MVP · System Context Diagram (1 of 2)</span><span>Reflects the running application at submission</span></div>
 </div>
 
+<!-- ============================ PAGE 2 ============================ -->
 <div class="page">
-  <h1>Inside the system: components, data flow and trust gates</h1>
-  <p class="lead">How the parts connect when a planner runs and approves a plan. The optimisation core has no web or database code; the API layer has no calculation logic.</p>
-  <svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg">
-    <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0f766e"/></marker>
-    <marker id="o2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b4540a"/></marker></defs>
-    <!-- browser -->
-    <rect x="5" y="20" width="170" height="200" fill="#fff" stroke="#1e2b33"/><text x="15" y="42" class="t b">Browser</text><text x="15" y="58" class="s m">web/index.html, app.js, style.css</text>
-    <g class="s"><text x="15" y="82">1 Data</text><text x="15" y="100">2 Results</text><text x="15" y="118">3 Plan</text><text x="15" y="136">4 Review and adjust</text><text x="15" y="154">5 Approve and audit</text><text x="15" y="172">6 What-if</text></g>
-    <text x="15" y="200" class="xs m">shows numbers from the API only</text>
-    <path d="M175 110H215" stroke="#0f766e" stroke-width="2" marker-end="url(#a2)"/><path d="M215 140H175" stroke="#0f766e" stroke-width="2" marker-end="url(#a2)"/>
-    <text x="178" y="102" class="xs b">HTTP</text><text x="178" y="156" class="xs b">JSON</text>
-    <!-- api -->
-    <rect x="215" y="20" width="235" height="95" fill="#e4efec" stroke="#0f766e" stroke-width="1.6"/><text x="225" y="42" class="t b">API layer</text><text x="225" y="58" class="s m">api/main.py, FastAPI routes under /api</text><text x="225" y="76" class="s">scenarios, runs, overrides, what-if,</text><text x="225" y="90" class="s">explanation, decision, export, audit</text><text x="225" y="107" class="xs m">errors returned as JSON, no stack traces</text>
-    <rect x="215" y="125" width="235" height="95" fill="#e4efec" stroke="#0f766e" stroke-width="1.6"/><text x="225" y="147" class="t b">Use cases</text><text x="225" y="163" class="s m">api/service.py</text><text x="225" y="181" class="s">validate, run, pin and re-solve,</text><text x="225" y="195" class="s">approve and lock, export,</text><text x="225" y="209" class="s">write audit events</text>
-    <path d="M332 115v10" stroke="#0f766e" stroke-width="2" marker-end="url(#a2)"/>
-    <!-- core -->
-    <rect x="500" y="20" width="305" height="200" fill="#fff" stroke="#0f766e" stroke-width="1.6"/><text x="510" y="42" class="t b">Optimisation core: nordic_flow/</text><text x="510" y="58" class="s m">pure Python; no web, no database</text>
-    <g class="s">
-      <rect x="510" y="68" width="88" height="26" fill="#e4efec"/><text x="518" y="85">io, validation</text>
-      <rect x="606" y="68" width="88" height="26" fill="#e4efec"/><text x="614" y="85">baseline</text>
-      <rect x="702" y="68" width="95" height="26" fill="#0f766e"/><text x="710" y="85" style="fill:#fff" class="b">optimiser</text>
-      <rect x="510" y="102" width="88" height="26" fill="#e4efec"/><text x="518" y="119">verify</text>
-      <rect x="606" y="102" width="88" height="26" fill="#e4efec"/><text x="614" y="119">report</text>
-      <rect x="702" y="102" width="95" height="26" fill="#e4efec"/><text x="710" y="119">diagnosis</text>
-      <rect x="510" y="136" width="88" height="26" fill="#e4efec"/><text x="518" y="153">what-if</text>
-      <rect x="606" y="136" width="88" height="26" fill="#e4efec"/><text x="614" y="153">explain</text>
-      <rect x="702" y="136" width="95" height="26" fill="#e4efec"/><text x="710" y="153">SKU mapping</text>
-      <rect x="606" y="170" width="88" height="26" fill="#faeede" stroke="#b4540a"/><text x="614" y="187">llm client</text>
-    </g>
-    <text x="510" y="190" class="xs m">optimiser: OR-Tools,</text><text x="510" y="203" class="xs m">GLOP (LP), SCIP (MILP)</text>
-    <path d="M450 172H500" stroke="#0f766e" stroke-width="2" marker-end="url(#a2)"/><text x="452" y="164" class="xs b">calls</text>
-    <!-- groq -->
-    <rect x="860" y="20" width="135" height="85" fill="#faeede" stroke="#b4540a" stroke-width="1.6"/><text x="870" y="42" class="t b">Groq API</text><text x="870" y="58" class="s m">external, optional</text><text x="870" y="76" class="s">opt-in per request</text><text x="870" y="90" class="xs m">key from env variable</text>
-    <path d="M694 183H830V70H860" fill="none" stroke="#b4540a" stroke-width="1.8" marker-end="url(#o2)"/><text x="840" y="132" class="xs b" fill="#b4540a">HTTPS: fact pack only</text><text x="840" y="145" class="xs m">computed numbers and names,</text><text x="840" y="158" class="xs m">when the planner opts in</text>
-    <!-- sqlite -->
-    <rect x="215" y="245" width="590" height="48" fill="#fff" stroke="#1e2b33"/><text x="225" y="265" class="t b">SQLite (one local file)</text><text x="225" y="282" class="s m">scenarios, runs (baseline, optimised, checks, state), explanations, audit events with hash chain</text>
-    <path d="M332 220v25" stroke="#0f766e" stroke-width="2" marker-end="url(#a2)"/><text x="338" y="236" class="xs b">SQL</text>
-  </svg>
-  <h2 style="margin-top:2mm">One run, step by step</h2>
-  <div class="steps">
-    <div><b>1 Validate.</b> Files parsed, checked by file and row. Errors stop here.</div>
-    <div><b>2 Baseline.</b> Preferred-warehouse rule builds the comparison plan.</div>
-    <div><b>3 Optimise.</b> LP or MILP finds the lowest-cost plan; status recorded.</div>
-    <div><b>4 Verify.</b> Separate checker re-tests both plans against every rule.</div>
-    <div><b>5 Compare.</b> Cost by type, load per warehouse; saving only if baseline valid.</div>
-    <div><b>6 Store.</b> Run and audit event saved; planner reviews and decides.</div>
+  <div class="eyebrow">NEW AURA · Nordic Flow · Round 2</div>
+  <h1>Interactions, trust gates and the life of a plan</h1>
+  <p class="lead">Every connection from page 1, what moves across it and how, followed by the checks that stand between a calculation and an exported plan.</p>
+
+  <div class="two">
+    <div>
+      <h2>Interaction register</h2>
+      <table class="reg">
+        <thead><tr><th>#</th><th>From → To</th><th>What moves</th><th>How</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="n">1</td><td>Company A systems → Input files</td><td>Orders, rates, supply and capacities, exported by the planner</td><td>Manual CSV export</td><td><span class="pill off">Manual</span></td></tr>
+          <tr><td class="n">2</td><td>Input files → Web UI → API</td><td>8 required CSVs or one ZIP, plus optional lane files; validated before any calculation, errors block the run</td><td>HTTP upload, ZIP limits</td><td><span class="pill on">Implemented</span></td></tr>
+          <tr><td class="n">3</td><td>Planner ↔ Web UI</td><td>Load, calculate, review, add a manual route or delivery decision, approve or reject; results, route ranking and audit shown</td><td>Browser, localhost:8000</td><td><span class="pill on">Implemented</span></td></tr>
+          <tr><td class="n">4</td><td>Core → Groq API</td><td>Fact pack of numbers and names our code calculated (and product names for the optional SKU matcher). No files or keys</td><td>HTTPS JSON, opt-in, key in environment</td><td><span class="pill opt">Optional</span></td></tr>
+          <tr><td class="n">5</td><td>Groq API → Core</td><td>Draft explanation; figures are checked against the facts, otherwise it is rejected and a standard summary is used</td><td>HTTPS response, stays a draft</td><td><span class="pill opt">Optional</span></td></tr>
+          <tr><td class="n">6</td><td>API → Approved plan export</td><td>ZIP of allocations, comparison, planner decisions, manual routes and audit log</td><td>HTTP download, only after approval</td><td><span class="pill on">Implemented</span></td></tr>
+          <tr><td class="n">7</td><td>Export → Company A systems</td><td>Planner imports the approved plan; Nordic Flow writes nothing back</td><td>Manual import</td><td><span class="pill off">Manual</span></td></tr>
+        </tbody>
+      </table>
+      <p class="small" style="margin:1.6mm 0 0">Inside Nordic Flow: Web UI → API (JSON over HTTP); API → optimisation core (Python calls) and → SQLite (SQL). The core has no web or database code.</p>
+    </div>
+
+    <div>
+      <h2>Trust gates</h2>
+      <div class="card soft" style="padding: 1mm 3.2mm">
+        <div class="gate"><div class="g">1</div><div><b>Data validation</b><span>Eight CSV checks with row-level messages; any error blocks the run.</span></div></div>
+        <div class="gate"><div class="g">2</div><div><b>Independent verifier</b><span>Re-checks demand, supply, capacity and lanes without using the solver.</span></div></div>
+        <div class="gate"><div class="g">3</div><div><b>Honest saving</b><span>Shown only against a verified feasible baseline; otherwise the UI says unusable.</span></div></div>
+        <div class="gate"><div class="g">4</div><div><b>AI guardrail</b><span>The model only rewrites computed facts; a figure not in the facts rejects the text.</span></div></div>
+        <div class="gate"><div class="g">5</div><div><b>Approval gate</b><span>No export before a planner approves; approved and rejected plans are locked.</span></div></div>
+        <div class="gate"><div class="g">6</div><div><b>Audit trail</b><span>Append-only events, each hash-linked to the previous one: tamper-evident.</span></div></div>
+      </div>
+    </div>
   </div>
-  <table>
-    <tr><th style="width:21%">Trust gate</th><th style="width:48%">What it does</th><th style="width:31%">Where it lives</th></tr>
-    <tr><td class="g">Independent verifier</td><td>Re-checks supply, demand, capacity, lanes and balance; a plan that leaves demand unmet is invalid</td><td>nordic_flow/verify.py</td></tr>
-    <tr><td class="g">No saving on an unusable baseline</td><td>If the baseline cannot serve all demand, saving is null and shown as "n/a"</td><td>api/service.py, nordic_flow/report.py</td></tr>
-    <tr><td class="g">AI cannot calculate</td><td>Facts come from code; LLM only phrases them, text with unknown numbers is discarded, output stays a draft until approved</td><td>nordic_flow/explain.py</td></tr>
-    <tr><td class="g">Approval lock and export gate</td><td>An approved or rejected run cannot change; export works only for approved runs</td><td>api/service.py</td></tr>
-    <tr><td class="g">Tamper-evident audit</td><td>Each event stores a hash of the previous one, so edits are detectable (not tamper-proof)</td><td>api/audit.py</td></tr>
-  </table>
-  <div class="foot"><span>NEW AURA · Nordic Flow MVP · System Context Diagram (2 of 2)</span><span>Only components present in the running MVP are drawn as connected.</span></div>
+
+  <h2 style="margin-top:3mm">Life of a plan</h2>
+  <svg viewBox="0 0 1050 146" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plan lifecycle">
+    <defs><marker id="lb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2563eb"/></marker></defs>
+    <rect x="8" y="26" width="190" height="56" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="103" y="50" text-anchor="middle" class="t">Draft plan</text>
+    <text x="103" y="67" text-anchor="middle" class="xs m">calculated and verified</text>
+
+    <rect x="300" y="6" width="210" height="44" rx="8" fill="#ecfdf5" stroke="#047857" stroke-width="1.5"/>
+    <text x="405" y="26" text-anchor="middle" class="t" style="fill:#047857">Approved, locked</text>
+    <text x="405" y="42" text-anchor="middle" class="xs m">export becomes available</text>
+    <rect x="300" y="62" width="210" height="44" rx="8" fill="#fef2f2" stroke="#b91c1c" stroke-width="1.5"/>
+    <text x="405" y="82" text-anchor="middle" class="t" style="fill:#b91c1c">Rejected, locked</text>
+    <text x="405" y="98" text-anchor="middle" class="xs m">reason is required</text>
+
+    <path d="M198 46C240 46 258 28 300 28" fill="none" stroke="#2563eb" stroke-width="1.7" marker-end="url(#lb)"/>
+    <text x="250" y="21" text-anchor="middle" class="xs">approve</text>
+    <path d="M198 62C240 62 258 84 300 84" fill="none" stroke="#2563eb" stroke-width="1.7" marker-end="url(#lb)"/>
+    <text x="250" y="106" text-anchor="middle" class="xs">reject</text>
+
+    <rect x="610" y="26" width="220" height="56" rx="8" fill="#fff" stroke="#0f172a" stroke-width="1.4"/>
+    <text x="720" y="50" text-anchor="middle" class="t">New version</text>
+    <text x="720" y="67" text-anchor="middle" class="xs m">recalculated from the data, as a draft</text>
+    <path d="M510 28C560 28 570 44 610 44" fill="none" stroke="#2563eb" stroke-width="1.7" marker-end="url(#lb)"/>
+    <path d="M510 84C560 84 570 64 610 64" fill="none" stroke="#2563eb" stroke-width="1.7" marker-end="url(#lb)"/>
+    <text x="560" y="14" text-anchor="middle" class="xs m">start a new version</text>
+
+    <path d="M830 54H880" stroke="#2563eb" stroke-width="1.7" marker-end="url(#lb)"/>
+    <rect x="880" y="26" width="162" height="56" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="961" y="50" text-anchor="middle" class="t">Draft again</text>
+    <text x="961" y="67" text-anchor="middle" class="xs m">old versions stay in history</text>
+
+    <path d="M103 82V126H961V82" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="532" y="141" text-anchor="middle" class="xs m" style="font-size:9.5px">a planner decision on a draft also creates a new draft version; every step is written to the audit trail</text>
+  </svg>
+
+  <div class="foot"><span>NEW AURA · Nordic Flow MVP · System Context Diagram (2 of 2)</span><span>Synthetic data only; no live link to any Company A system</span></div>
 </div>
 </body></html>
