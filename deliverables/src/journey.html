@@ -18,6 +18,7 @@
   .step h2 { margin: 0; font-size: 10.6pt }
   .shot { height: 52mm; overflow: hidden; border: 1px solid var(--rule); border-radius: 6px; background: var(--soft); position: relative }
   .shot img { position: absolute; top: var(--y, 0); left: var(--x, -29%); width: var(--z, 140%); display: block }
+  .page:not(.p2) .shot { height: 60mm }
   .p2 .shot { height: 46mm }
   .p2 .outcome { margin-top: 3.4mm } .p2 .more { margin-top: 3mm } .p2 .note { margin-top: 3mm }
   .rows { display: grid; grid-template-columns: 15mm 1fr; gap: 1.1mm 2mm; font-size: 8.2pt; line-height: 1.32 }
@@ -69,7 +70,7 @@
     </div>
     <div class="step">
       <div class="hd"><span class="num">2</span><h2>Calculate and read the result</h2></div>
-      <div class="shot"><img style="--y:-8mm" src="img/results.png" alt="Results page with KPIs"></div>
+      <div class="shot"><img style="--y:-1mm" src="img/results.png" alt="Results page with KPIs"></div>
       <div class="rows">
         <span class="l">Planner</span><span class="p">Selects Calculate plan.</span>
         <span class="l">System</span><span>Builds the preferred-warehouse baseline, solves for the lowest cost, and re-checks both plans independently.</span>
