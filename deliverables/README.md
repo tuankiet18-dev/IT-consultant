@@ -4,7 +4,7 @@ Send by email to EB.VN@netcompany.com, subject "Round 2 – NEW AURA", **before 
 
 | File (final name) | Requirement | Owner | Status |
 |---|---|---|---|
-| `MVP.mp4` | Max 7 minutes, English narration or subtitles, explain changes since Round 1 | Nhật Anh | Being recorded. Everything needed is in `video-kit/` (start with its README). Not committed to git (large) |
+| `MVP.mp4` | Max 7 minutes, English narration or subtitles, explain changes since Round 1 | Nhật Anh | Done (5:44): screen recording + burned-in English subtitles + English voice-over (neural voice `en-US-EmmaNeural`, via edge-tts). Rebuild: `python video-kit/scripts/build-video.py --edge en-US-EmmaNeural --out deliverables/MVP.mp4` (needs the raw recording in `mvp/out/raw/` and `pip install edge-tts`; without `--edge` it uses the offline Windows voice) |
 | `User Journey.pdf` | Max 2 pages, at least one complete end-to-end journey | | Rebuilt 8 Nov from the final UI (2 pages); rebuild if the UI changes |
 | `System Context Diagram.pdf` | Max 2 pages, all external entities and interactions labelled, matches the real MVP | | Rebuilt 8 Nov as a context diagram: system circle, external rectangles, labelled data flows (2 pages) |
 | `AI Journal.pdf` | Organiser template, saved as PDF (max 5 tasks, 150-word strategy) | | Draft in docs/round2/AI-Journal-DRAFT.docx; team must fill the real times (yellow), then run `export-ai-journal.ps1` |
